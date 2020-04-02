@@ -1,0 +1,16 @@
+{
+    "Database": "database.sql",
+    "BackupDB": true,
+    "Botmasters": [
+        "Discord user IDS",
+        "Go here WITH QUOTES"
+    ],
+    "Prefix": "~",
+    "Token": "Bot token goes here",
+    "CommandsOnEdit": true,
+    "LogFile": "bot.log",
+    "LogMessages": true,
+    "LogEdits": true,
+    "LogDeletes": true,
+    "LogCommands": true
+}
