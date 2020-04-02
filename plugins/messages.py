@@ -8,7 +8,7 @@ from discord import HTTPException
 from discord.ext import commands
 from discord.ext.commands import Context
 
-VERSION = "2.0b1"
+VERSION = "2.1b1"
 
 # Get the config file to grab the command prefix
 prefix = None
@@ -72,13 +72,30 @@ class Messages(commands.Cog):
     @msg_op_or_level(5)
     async def crosspost(self, ctx: Context, message: Message, target: TextChannel):
         """Cross-post a message to another channel."""
+        # Avoid posting to the same channel
+        if message.channel == target:
+            await ctx.send("Target must be a different channel.")
+            return
+
+        # Image only messages
+        content = message.content
+
+        if len(content) <= 1:
+            content = "-"
+
         embed = Embed(
             title=f"X-Post from #{ctx.channel.name}",
             url=message.jump_url,
             color=0xffffff
         )
         embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-        embed.add_field(name="Posted:", value=message.content)
+        embed.add_field(name="Posted:", value=content)
+
+        if len(message.attachments) > 0:
+            embed.set_image(url=message.attachments[0].url)
+        elif message.content.endswith(("jpg", "jpeg", "png", "gif", "bmp")):
+            items = message.content.split(" ")
+            embed.set_image(url=items[len(items) - 1])
 
         try:
             await target.send(embed=embed)
@@ -90,13 +107,29 @@ class Messages(commands.Cog):
     @msg_op_or_level(5)
     async def move(self, ctx: Context, message: Message, target: TextChannel):
         """Move a message to a different channel."""
+        # Avoid posting to the same channel
+        if message.channel == target:
+            await ctx.send("Target must be a different channel.")
+
+        # Image only messages
+        content = message.content
+
+        if len(content) <= 1:
+            content = "-"
+
         embed = Embed(
             title=f"Moved message from #{ctx.channel.name}",
             url=message.jump_url,
             color=0xffffff
         )
         embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-        embed.add_field(name="Posted:", value=message.content)
+        embed.add_field(name="Posted:", value=content)
+
+        if len(message.attachments) > 0:
+            embed.set_image(url=message.attachments[0].url)
+        elif message.content.endswith(("jpg", "jpeg", "png", "gif", "bmp")):
+            items = message.content.split(" ")
+            embed.set_image(url=items[len(items) - 1])
 
         try:
             await target.send(embed=embed)
