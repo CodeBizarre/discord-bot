@@ -36,6 +36,12 @@ plugins [load | unload]:
 
     unload <Name>:
         Unload the plugin with the given Name (Do not include the .py extension)
+
+    enable <Name>:
+        Enable the plugin with the given Name on your server (Name will be the same as it displays in the loaded plugins list)
+
+    disable <Name>:
+        Disable the plugin with the given Name on your server (Name will be the same as it displays in the loaded plugins list)
 ```
 ### Account plugin commands
 ```
