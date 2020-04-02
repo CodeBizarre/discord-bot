@@ -2,7 +2,7 @@
 
 Coding standards:
   - 90 char line length limits
-  - Double-quote for strings (Even single character strings), single quote for chars
+  - Double-quote for strings (Even single character strings)
   - Double-hash section header comments
   - No punctuation for single line comments
   - Punctuation in multi-line hash comments and all doctstring comments
