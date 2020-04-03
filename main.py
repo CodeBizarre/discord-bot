@@ -473,7 +473,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
                 bot.load_extension(f"plugins.{name}")
                 instance.plugins.append(name)
                 update_db(db, instance.plugins, "plugins")
-                await ctx.send(f"Plugin {name}.py loaded.")
+                await ctx.send(f"Plugin {name}.py successfully loaded.")
             except Exception as e:
                 exc = f"{type(e).__name__}, {e}"
                 await ctx.send(f"Error loading {name}.py:\n```py\n{exc}\n```")
@@ -488,10 +488,32 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             try:
                 bot.unload_extension(f"plugins.{name}")
                 instance.plugins.remove(name)
+                update_db(db, instance.plugins, "plugins")
                 await ctx.send(f"Plugin {name}.py successfully unloaded.")
             except Exception as e:
                 exc = f"{type(e).__name__}, {e}"
                 await ctx.send(f"Error unloading {name}.py:\n```py\n{exc}\n```")
+
+    @cmd_plugins.command(name="reload")
+    @is_botmaster()
+    async def cmd_plugins_reload(ctx: Context, name: str):
+        """Reload a plugin (cog). Do not include .py extension."""
+        if name not in instance.plugins:
+            await ctx.send(f"Plugin {name}.py is not loaded.")
+        else:
+            try:
+                bot.unload_extension(f"plugins.{name}")
+                instance.plugins.remove(name)
+                update_db(db, instance.plugins, "plugins")
+                await ctx.send(f"Plugin {name}.py successfully unloaded.")
+                bot.load_extension(f"plugins.{name}")
+                instance.plugins.append(name)
+                update_db(db, instance.plugins, "plugins")
+                await ctx.send(f"Plugin {name}.py successfully loaded.")
+            except Exception as e:
+                exc = f"{type(e).__name__}, {e}"
+                await ctx.send(f"Error unloading {name}.py:\n```py\n{exc}\n```")
+
 
     @cmd_plugins.command(name="enable")
     @level(10)

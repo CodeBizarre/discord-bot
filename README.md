@@ -37,6 +37,9 @@ plugins [load | unload]:
     unload <Name>:
         Unload the plugin with the given Name (Do not include the .py extension)
 
+    reload <Name>:
+        Shorthand for running `plugins unload` followed by `plugins load`
+
     enable <Name>:
         Enable the plugin with the given Name on your server (Name will be the same as it displays in the loaded plugins list)
 
