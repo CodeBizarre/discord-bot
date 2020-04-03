@@ -72,7 +72,7 @@ class Roles(commands.Cog):
                 if self.app_info is None:
                     self.app_info = await self.bot.application_info()
 
-                embed = Embed(title="Available roles:", color=0x00ffff)
+                embed = Embed(title="Available roles:", color=0xffffff)
                 embed.set_author(
                     name=self.bot.user.name,
                     icon_url=self.app_info.icon_url
