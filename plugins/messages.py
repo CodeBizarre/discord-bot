@@ -8,7 +8,7 @@ from discord import HTTPException
 from discord.ext import commands
 from discord.ext.commands import Context
 
-VERSION = "2.1b1"
+VERSION = "2.1b2"
 
 # Get the config file to grab the command prefix
 prefix = None
@@ -64,7 +64,7 @@ class Messages(commands.Cog):
 
     Allows cross-posting and moving of messages.
     """
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.name = "messages"
 
