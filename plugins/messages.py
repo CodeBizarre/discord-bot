@@ -21,7 +21,7 @@ except Exception as error:
 
 def msg_op_or_level(required=10):
     """See if the user is the OP of the message, or high enough level otherwise."""
-    async def check(ctx: Context):
+    async def predicate(ctx: Context):
         uid = str(ctx.author.id)
         loop = ctx.bot.loop
 
@@ -57,7 +57,7 @@ def msg_op_or_level(required=10):
             else:
                 return user_level >= required
 
-    return commands.check(check)
+    return commands.check(predicate)
 
 class Messages(commands.Cog):
     """Message management plugin.
