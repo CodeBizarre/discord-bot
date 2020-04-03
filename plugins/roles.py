@@ -66,7 +66,7 @@ class Roles(commands.Cog):
         in the current server.
         """
         if ctx.invoked_subcommand is None:
-            sid = str(ctx.message.guild.id)
+            sid = str(ctx.guild.id)
 
             if sid in db and len(db[sid]) > 0:
                 if self.app_info is None:
@@ -97,7 +97,7 @@ class Roles(commands.Cog):
     @commands.guild_only()
     async def role_get(self, ctx: Context, *, role_name: str):
         """Get a role."""
-        sid = str(ctx.message.guild.id)
+        sid = str(ctx.guild.id)
 
         if sid not in db:
             await ctx.send("This server has no assignable roles.")
@@ -114,7 +114,7 @@ class Roles(commands.Cog):
     @commands.guild_only()
     async def role_lose(self, ctx: Context, *, role_name: str):
         """Lose a role."""
-        sid = str(ctx.message.guild.id)
+        sid = str(ctx.guild.id)
 
         if sid not in db:
             await ctx.send("This server has no assignable roles.")
@@ -132,7 +132,7 @@ class Roles(commands.Cog):
     @is_level(10)
     async def role_add(self, ctx: Context, role_get: Role, *, description: str):
         """Add/update an assignable role to the server."""
-        sid = str(ctx.message.guild.id)
+        sid = str(ctx.guild.id)
         rid = str(role_get.id)
         name = role_get.name
 
@@ -155,7 +155,7 @@ class Roles(commands.Cog):
     @is_level(10)
     async def role_remove(self, ctx: Context, *, role_get: Role):
         """Remove an assignable role from the server."""
-        sid = str(ctx.message.guild.id)
+        sid = str(ctx.guild.id)
 
         if sid not in db:
             await ctx.send("There are no assignable roles on this server.")

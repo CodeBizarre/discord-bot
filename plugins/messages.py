@@ -22,7 +22,7 @@ except Exception as error:
 def msg_op_or_level(required=10):
     """See if the user is the OP of the message, or high enough level otherwise."""
     async def check(ctx: Context):
-        uid = str(ctx.message.author.id)
+        uid = str(ctx.author.id)
         loop = ctx.bot.loop
 
         if ctx.invoked_with == "help":
@@ -50,7 +50,7 @@ def msg_op_or_level(required=10):
             return True
         else:
             try:
-                user_level = get_account(ctx.guild, ctx.message.author)
+                user_level = get_account(ctx.guild, ctx.author)
             except KeyError as e:
                 await ctx.send(f"KeyError: {e}")
                 return False

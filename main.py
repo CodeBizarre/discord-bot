@@ -151,19 +151,19 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     # Botmaster required local check
     def is_botmaster():
         async def predicate(ctx: Context):
-            return str(ctx.message.author.id) in instance.botmasters
+            return str(ctx.author.id) in instance.botmasters
         return commands.check(predicate)
 
     # Global blacklist check
     @bot.check
     def allowed(ctx: Context):
-        return str(ctx.message.author.id) not in instance.blacklist
+        return str(ctx.author.id) not in instance.blacklist
 
     # Local account level check
     def level(required=0):
         async def predicate(ctx: Context):
-            uid = str(ctx.message.author.id)
-            sid = str(ctx.message.guild.id)
+            uid = str(ctx.author.id)
+            sid = str(ctx.guild.id)
 
             if sid not in instance.accounts or uid not in instance.accounts[sid]:
                 return False
@@ -175,7 +175,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     # Global plugin enabled check
     @bot.check
     def plugin_enabled(ctx: Context):
-        sid = str(ctx.message.guild.id)
+        sid = str(ctx.guild.id)
 
         # Not a plugin
         if ctx.cog == None:
@@ -259,8 +259,8 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         if instance.log_commands:
             timestamp = pretty_datetime(datetime.now(), display="TIME")
             command = ctx.message.content
-            author = ctx.message.author
-            location = f"[{ctx.message.guild}] - #{ctx.message.channel}"
+            author = ctx.author
+            location = f"[{ctx.guild}] - #{ctx.message.channel}"
             header = f"-{timestamp}- [COMMAND] `{command}`"
             log.info(f"{header} by `{author}` in `{location}`")
 
@@ -280,7 +280,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @bot.command(name="ping")
     async def cmd_ping(ctx: Context):
         """Ping/pong test."""
-        await ctx.send(f"Pong {ctx.message.author.mention}")
+        await ctx.send(f"Pong {ctx.author.mention}")
 
     @bot.command(name="info")
     async def cmd_info(ctx: Context):
@@ -349,8 +349,8 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             Running the command without arguments will display your current account level.
         """
         if ctx.invoked_subcommand is None:
-            uid = str(ctx.message.author.id)
-            sid = str(ctx.message.guild.id)
+            uid = str(ctx.author.id)
+            sid = str(ctx.guild.id)
 
             if sid not in instance.accounts:
                 await ctx.send(
@@ -368,7 +368,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def account_search(ctx: Context, target: Member):
         """Look up a member's account."""
         uid = str(target.id)
-        sid = str(ctx.message.guild.id)
+        sid = str(ctx.guild.id)
 
         if sid in instance.accounts and uid in instance.accounts[sid]:
             await ctx.send(f"{target.name} is level {instance.accounts[sid][uid]}.")
@@ -381,7 +381,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def account_add(ctx: Context, target: Member, level: int):
         """Add an account."""
         uid = str(target.id)
-        sid = str(ctx.message.guild.id)
+        sid = str(ctx.guild.id)
 
         if sid not in instance.accounts:
             instance.accounts[sid] = {}
@@ -399,7 +399,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def account_remove(ctx: Context, target: Member):
         """Remove an account."""
         uid = str(target.id)
-        sid = str(ctx.message.guild.id)
+        sid = str(ctx.guild.id)
 
         if sid not in instance.accounts:
             await ctx.send("No accounts on this server.")
@@ -418,7 +418,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def account_update(ctx: Context, target: Member, level: int):
         """Change an account's level."""
         uid = str(target.id)
-        sid = str(ctx.message.guild.id)
+        sid = str(ctx.guild.id)
 
         if sid not in instance.accounts:
             await ctx.send("No accounts on this server.")
@@ -435,8 +435,8 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     async def account_admin(ctx: Context):
         """Set yourself as an administrator of the server to create accounts."""
-        uid = str(ctx.message.author.id)
-        sid = str(ctx.message.guild.id)
+        uid = str(ctx.author.id)
+        sid = str(ctx.guild.id)
 
         if sid not in instance.accounts:
             instance.accounts[sid] = {}
@@ -497,7 +497,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @level(10)
     async def cmd_plugins_enable(ctx: Context, name: str):
         """Enable a loaded plugin (cog) on your server."""
-        sid = str(ctx.message.guild.id)
+        sid = str(ctx.guild.id)
 
         if name not in instance.plugins:
             # There is a distinction between server-loaded and bot-loaded plugins
@@ -513,7 +513,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @level(10)
     async def cmd_plugins_disable(ctx: Context, name: str):
         """Disable a loaded plugin (cog) on your server."""
-        sid = str(ctx.message.guild.id)
+        sid = str(ctx.guild.id)
 
         if name not in instance.plugins:
             await ctx.send(f"No plugin {name} is loaded.")
@@ -563,8 +563,8 @@ def get_account(server: Guild, member: Member) -> int:
 # Exportable version of account level check
 def is_level(required=0):
     async def predicate(ctx: Context):
-        uid = str(ctx.message.author.id)
-        sid = str(ctx.message.guild.id)
+        uid = str(ctx.author.id)
+        sid = str(ctx.guild.id)
 
         db_dict = get_db_dict(f"db/{inst.database}", "discord-bot", "accounts")
 
