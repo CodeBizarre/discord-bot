@@ -476,7 +476,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
                 await ctx.send(f"Plugin {name}.py loaded.")
             except Exception as e:
                 exc = f"{type(e).__name__}, {e}"
-                await ctx.send(f"Error loaded {name}.py:\n```py\n{exc}\n```")
+                await ctx.send(f"Error loading {name}.py:\n```py\n{exc}\n```")
 
     @cmd_plugins.command(name="unload")
     @is_botmaster()
@@ -491,7 +491,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
                 await ctx.send(f"Plugin {name}.py successfully unloaded.")
             except Exception as e:
                 exc = f"{type(e).__name__}, {e}"
-                await ctx.send(f"Error loaded {name}.py:\n```py\n{exc}\n```")
+                await ctx.send(f"Error unloading {name}.py:\n```py\n{exc}\n```")
 
     @cmd_plugins.command(name="enable")
     @level(10)
