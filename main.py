@@ -11,7 +11,7 @@ from discord import Guild, Message, User, Member, Embed
 from discord.ext import commands
 from discord.ext.commands import Context
 
-VERSION = "2.0.0b1"
+VERSION = "2.0.0b2"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape and generate a default config if it doesn't exist
@@ -121,7 +121,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         except IOError as e:
             log.error(
                 f"""
-                Unable to create file db/backups/{instance.database}-timestamp.sql:\n
+                Unable to create file db/backups/{instance.database}-{timestamp}.sql:\n
                 {e}
                 """
             )
@@ -183,13 +183,9 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
         try:
             result = instance.servers[sid][ctx.cog.name]
+            return result
         except KeyError:
-            result = None
-        finally:
-            if result is not None:
-                return result
-            else:
-                return True
+            return True
 
     ## EVENTS
     @bot.event
@@ -563,6 +559,19 @@ def get_account(server: Guild, member: Member) -> int:
         raise KeyError("User does not have an account for this server.")
     else:
         return db_dict[sid][uid]
+
+# Exportable version of account level check
+def is_level(required=0):
+    async def predicate(ctx: Context):
+        uid = str(ctx.message.author.id)
+        sid = str(ctx.message.guild.id)
+
+        if sid not in inst.accounts or uid not in inst.accounts[sid]:
+            return False
+        else:
+            return inst.accounts[sid][uid] >= required
+
+        return commands.check(predicate)
 
 def main():
     bot = initialize(inst)
