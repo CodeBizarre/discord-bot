@@ -566,12 +566,14 @@ def is_level(required=0):
         uid = str(ctx.message.author.id)
         sid = str(ctx.message.guild.id)
 
-        if sid not in inst.accounts or uid not in inst.accounts[sid]:
+        db_dict = get_db_dict(f"db/{inst.database}", "discord-bot", "accounts")
+
+        if sid not in db_dict or uid not in db_dict[sid]:
             return False
         else:
-            return inst.accounts[sid][uid] >= required
+            return db_dict[sid][uid] >= required
 
-        return commands.check(predicate)
+    return commands.check(predicate)
 
 def main():
     bot = initialize(inst)

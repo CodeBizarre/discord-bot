@@ -57,6 +57,23 @@ def update_db(sql_db: SqliteDict, dict_db: str, base_key: str):
         print(e)
         exit()
 
+def get_db_dict(file: str, table: str, base_key: str) -> dict:
+    """Return a dictionary from an SQLite database without keeping it open."""
+    database = SqliteDict(
+        filename=file,
+        tablename=table,
+        encode=json.dumps,
+        decode=json.loads
+    )
+
+    if base_key not in database:
+        database.close()
+        raise KeyError("Base key does not exist in database.")
+    else:
+        db_dict = database[base_key]
+        database.close()
+        return db_dict
+
 def load_plugins(bot: commands.Bot, logger: Logger, plugins: list):
     """Load available cogs."""
     for p in os.listdir("plugins"):
