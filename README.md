@@ -58,7 +58,7 @@ accounts [search | add | remove | update | genesis]:
         Create a new account for the chosen user with the chosen level on the current server
 
     remove <Member>:
-        Aliases: delete, destroy
+        Aliases = delete, destroy
         Remove the account of the chosen user on the current server
 
     update <Member> <Level>:
@@ -85,4 +85,20 @@ xkcd [random | number]:
 inspirobot:
     Aliases = ib, inspire
     Generates a new inspirational quote
+```
+### Roles plugin commands
+```
+role [get | lose | add | remove]:
+    Aliases = roles
+    Invoke without arguments to display list of assignable roles
+
+    get <Name>:
+        Aliases = g
+        Get the role <Name> from the assignable roles list
+    lose <Name>:
+        Aliases = l
+        Lose the role <Name> from the assignable roles list
+    add <Role> <Description>:
+        Aliases = a
+        Add a Role with the Description to the assignable roles list, note that the bot cannot assign a role higher than its own highest role even with the administrator permission.
 ```
