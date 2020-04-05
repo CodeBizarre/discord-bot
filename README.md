@@ -5,14 +5,14 @@ Coding standards:
   - Double-quote for strings (Even single character strings)
   - Double-hash section header comments
   - No punctuation for single line comments
-  - Punctuation in multi-line hash comments and all doctstring comments
+  - Punctuation in multi-line hash comments and all docstring comments
   - Imports in order of lowest to highest level, with a line break between stdlib and 3rd party
 
 Filesystem standards:
   - Config files in JSON stored in /config
   - Database files stored in /db and backed up in /db/backup
-  - All databases must use UnQLite, SQL is a bannable offense
-  - All base plugins (cogs) must go in the root folder
+  - All databases must use SQLite using SqliteDict and use .sql extension
+  - All base extension cogs must go in the root folder
   - All addon plugins (cogs) must go in the /plugins folder
   - Any official plugin must add requirements to the requirements.txt file
     - All official plugins must only use resources provided in direct code or through pip
