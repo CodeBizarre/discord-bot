@@ -7,7 +7,7 @@ import json
 
 from logging import Logger
 from sqlitedict import SqliteDict
-from datetime import datetime
+from datetime import datetime, timedelta
 from discord.ext import commands
 
 def pretty_datetime(dt: datetime, display: str = "FULL") -> str:
@@ -20,6 +20,26 @@ def pretty_datetime(dt: datetime, display: str = "FULL") -> str:
         return f"{dt.year}-{dt.month}-{dt.day}-{dt.hour}-{dt.minute}"
     else:
         return f"Unknown/incorrect display argument for pretty_datetime(): {display}"
+
+# TODO: Improve this?
+def pretty_timedelta(td: timedelta):
+    """Format timedeltas for messages."""
+    years    = td.days // 365
+    rem_days = td.days % 365
+    months   = rem_days // 30
+    rem_days = rem_days % 30
+    weeks    = rem_days // 7
+    rem_days = rem_days % 7
+    days     = rem_days
+    hours    = td.seconds // 3600
+    rem_secs = td.seconds % 3600
+    minutes  = rem_secs // 60
+    rem_secs = rem_secs % 60
+    seconds  = rem_secs
+
+    days_join = f"{years} year(s) {months} month(s) {weeks} week(s) {days} day(s)"
+    secs_join = f"{hours} hour(s) {minutes} minute(s) {seconds} second(s)"
+    return f"{days_join} {secs_join}"
 
 def get_logger(file_name) -> Logger:
     """Get an instance of Logger and set up log files."""
