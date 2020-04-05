@@ -433,6 +433,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
     @cmd_account.command(name="genesis")
     @commands.guild_only()
+    @commands.has_permissions(administrator=True)
     async def account_admin(ctx: Context):
         """Set yourself as an administrator of the server to create accounts."""
         uid = str(ctx.author.id)
