@@ -174,7 +174,11 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     # Global check for if the plugin is enabled on the current server
     @bot.check
     def plugin_enabled(ctx: Context):
-        sid = str(ctx.guild.id)
+        try:
+            sid = str(ctx.guild.id)
+        # Assume all plugins are available in a direct message
+        except AttributeError:
+            return True
 
         # Not a plugin
         if ctx.cog == None:
