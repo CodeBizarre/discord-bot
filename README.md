@@ -105,3 +105,58 @@ role [get | lose | add | remove]:
         Aliases = a
         Add a Role with the Description to the assignable roles list, note that the bot cannot assign a role higher than its own highest role even with the administrator permission.
 ```
+### Admin plugin commands
+Note: For commands requiring length and span arguments, span will be the unit of time where length is the amount of those units.
+Valid Span(s) are: second, seconds, minute, minutes, hour, hours, day, days, week, weeks, month, months, year, years
+```
+admin [log | role]:
+    Invoke without arguments to display current server settings
+
+    log <Enabled> [Channel]:
+        Set whether to-channel logging is Enabled and set the log channel. If no channel is set the current channel will be used
+
+    role <Role>:
+        Set the mute role that the mute/unmute commands will use
+
+    warn <Target> <Length> <Span> [Reason]:
+        Warn Target for Length Span(s) for Reason
+
+    warns <Member>
+        List the currently active warnings for Member
+
+    mute <Target> <Length> <Span> [Reason]:
+        Mute Target for Length Span(s) for Reason
+
+    unmute <Target>:
+        Unmute Target early
+
+    kick <Target> [Reason]:
+        Kick Target from the server for Reason
+
+    softban <Target> <Purge> [Reason]:
+        Softban (Ban then unban) Target from the server and delete their messages for Purge days for Reason
+
+    tempban <Target> <Length> <Span> [Reason]:
+        Temporarily ban Target for Length Span(s) for Reason
+
+    ban <Target> <Purge> [Reason]:
+        Ban Target from the server and delete their messages for Purge days for Reason
+
+    purge [self | bot | all | member | role]:
+        Purge messages
+
+        self <Count>:
+            purge messages from yourself within the last Count messages
+
+        bot <Count>:
+            purge messages from the bot within the last Count messages
+
+        all <Count>:
+            purge all of the last <Count> messages
+
+        member <Target> <Count>:
+            purge messages from Target within the last Count messages
+
+        role <Role> <Count>:
+            purge messages from Role within the last Count messages
+```
