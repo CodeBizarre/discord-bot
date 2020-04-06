@@ -96,7 +96,7 @@ async def tempban_check(bot: commands.Bot):
         for uid in tempban_db[sid]:
             info = tempban_db[sid][uid]
 
-            if float(info["expires"]) >= ts:
+            if ts >= float(info["expires"]):
                 guild = bot.get_guild(int(sid))
                 await guild.unban(bot.get_user(uid))
                 del tempban_db[sid][uid]
@@ -128,24 +128,27 @@ async def mute_check(bot: commands.Bot):
         if len(mute_db[sid]) <= 0:
             continue
 
-        for i, uid in mute_db[sid].items():
-            if ts >= float(uid["expires"]):
-                # FIXME: This is probably broken in some way?
-                # The break statements mean that a mute could get stuck
-                # Oh well it's 6am I'll fix it later
-                guild = bot.get_guild(int(sid))
-                try:
-                    role = guild.get_role(int(db[sid]["mute_role"]))
-                except KeyError:
-                    break
-                target = guild.get_member(int(i))
-                if role in target.roles:
-                    await target.remove_roles(role, reason="Auto mute remove.")
-                    await target.send(f"You have been unmuted in {guild.name}.")
-                else:
-                    break
+    for uid, info in mute_db[sid].items():
+        if ts >= float(info["expires"]):
+            guild = bot.get_guild(int(sid))
+
+            try:
+                role = guild.get_role(int(db[sid]["mute_role"]))
+            except KeyError:
                 del mute_db[sid][uid]
-                update_db(sql_db, mute_db, "mutes")
+                break
+
+            target = guild.get_member(int(uid))
+
+            if role in target.roles:
+                await target.remove_roles(role, reason="Auto mute remove.")
+                await target.send(f"You have been unmuted in {guild.name}.")
+            else:
+                del mute_db[sid][uid]
+                break
+
+            del mute_db[sid][uid]
+            update_db(sql_db, mute_db, "mutes")
 
 # TODO: Messages along with log_to_channel (emoji update?)
 class Admin(commands.Cog):
@@ -322,7 +325,6 @@ class Admin(commands.Cog):
         target: Member,
         length: int,
         span: str,
-        purge: int = 1,
         *, reason: str = None):
         """Temporarily ban a member from the server."""
         sid = str(ctx.guild.id)
@@ -342,7 +344,7 @@ class Admin(commands.Cog):
                 reason
             )
         )
-        await target.ban(reason=reason, delete_message_days=purge)
+        await target.ban(reason=reason, delete_message_days=0)
         tempban_db[sid][target.id] = {
             "issued_by": str(ctx.author.id),
             "reason": reason,
