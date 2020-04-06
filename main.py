@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.1.1b1"
+VERSION = "2.1.2b1"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -27,6 +27,7 @@ try:
             "Prefix": "~",
             "Token": "Bot token goes here",
             "CommandsOnEdit": True,
+            "DeleteCommands": False,
             "LogFile": "bot.log",
             "LogMessages": True,
             "LogEdits": True,
@@ -64,6 +65,7 @@ class DiscordBot:
                 self.config_prefix  = config["Prefix"]
                 self.config_token   = config["Token"]
                 self.cmd_on_edit    = config["CommandsOnEdit"]
+                self.delete_cmds    = config["DeleteCommands"]
                 self.log_file       = config["LogFile"]
                 self.log_messages   = config["LogMessages"]
                 self.log_edits      = config["LogEdits"]
@@ -155,7 +157,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
     # Global check for if the user is blacklisted
     @bot.check
-    def allowed(ctx: Context):
+    async def allowed(ctx: Context):
         return str(ctx.author.id) not in instance.blacklist
 
     # Local check for the user's bot account level
@@ -173,7 +175,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
     # Global check for if the plugin is enabled on the current server
     @bot.check
-    def plugin_enabled(ctx: Context):
+    async def plugin_enabled(ctx: Context):
         try:
             sid = str(ctx.guild.id)
         # Assume all plugins are available in a direct message
@@ -190,6 +192,17 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         except KeyError:
             # Plugin will default to enabled if not set by a server admin
             return True
+
+    # Global check used in a hacky way to delete command invokes if the config says so
+    @bot.check
+    async def delete_invokes(ctx: Context):
+        if instance.delete_cmds:
+            try:
+                await ctx.message.delete(delay=2)
+            except Exception as e:
+                log.warning(f"Unable to delete command message:\n    - {e}")
+
+        return True
 
     ## EVENTS
     @bot.event
