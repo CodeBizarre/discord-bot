@@ -104,6 +104,7 @@ async def tempban_check(bot: commands.Bot):
 
                 del tempban_db[sid][uid]
                 update_db(sql_db, tempban_db, "temp_bans")
+                print(f"[ADMIN][TEMPBAN][REMOVE] {target.id} in <{guild.name}>")
 
 # Coroutine to run in a background thread to check if warns are expired
 async def warn_check():
@@ -124,6 +125,7 @@ async def warn_check():
                 if ts >= float(w["expires"]):
                     del warn_db[sid][uid][i]
                     update_db(sql_db, warn_db, "warns")
+                    print(f"[ADMIN][WARN][REMOVE] {target.id} in <{guild.name}>")
 
 # Coroutine to run in a background thread to check if mutes are expired
 async def mute_check(bot: commands.Bot):
@@ -163,6 +165,7 @@ async def mute_check(bot: commands.Bot):
 
             del mute_db[sid][uid]
             update_db(sql_db, mute_db, "mutes")
+            print(f"[ADMIN][MUTE][REMOVE] {target.id} in <{guild.name}>")
 
 # TODO: Messages along with log_to_channel (emoji update?)
 class Admin(commands.Cog):
