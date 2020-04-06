@@ -1,12 +1,13 @@
 import asyncio
-import xkcd
-# Uncomment the following line to fly
-#import antigravity
 
+import xkcd
 from discord.ext import commands
 from discord.ext.commands import Context
 
-VERSION = "1.0b2"
+# Uncomment the following line to fly
+#import antigravity
+
+VERSION = "1.0b3"
 
 class XKCD(commands.Cog):
     """A plugin to retrieve XKCD comics."""

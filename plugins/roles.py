@@ -7,15 +7,17 @@ from sqlitedict import SqliteDict
 from discord import Role, Member, Embed
 from discord.ext import commands
 from discord.ext.commands import Context
+
 from main import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "1.0.0b1"
+VERSION = "1.0b2"
 
 # Get the database set up
 db_file = "db/roles.sql"
 backup = True
 
+# Check config and make any required backup
 try:
     with open("config/config.json") as cfg:
         backup = json.load(cfg)["BackupDB"]
@@ -27,12 +29,8 @@ if os.path.exists(db_file) and backup:
     try:
         shutil.copyfile(db_file, f"db/backups/roles-{timestamp}.sql")
     except IOError as e:
-        print(
-            f"""
-            Unable to create file db/backups/roles-{timestamp}.sql:\n
-            {e}
-            """
-        )
+        error_file = f"db/backups/roles-{timestamp}.sql"
+        log.error(f"Unable to create file {error_file}\n    - {e}")
 
 sql_db = SqliteDict(
     filename=db_file,
@@ -68,22 +66,18 @@ class Roles(commands.Cog):
         if ctx.invoked_subcommand is None:
             sid = str(ctx.guild.id)
 
+            # Get the app info for the embed author
             if sid in db and len(db[sid]) > 0:
                 if self.app_info is None:
                     self.app_info = await self.bot.application_info()
 
                 embed = Embed(title="Available roles:", color=0xffffff)
-                embed.set_author(
-                    name=self.bot.user.name,
-                    icon_url=self.app_info.icon_url
-                )
 
-                for r, d in db[sid].items():
-                    embed.add_field(
-                        name=r,
-                        value=d["description"],
-                        inline=True
-                    )
+                embed.set_author(name=self.bot.user.name, icon_url=self.app_info.icon_url)
+
+                # Add an entry for every assignable role
+                for name, info in db[sid].items():
+                    embed.add_field(name=name, value=info["description"])
 
                 embed.set_footer(
                     text="For more information use the `help roles` command."
@@ -107,6 +101,7 @@ class Roles(commands.Cog):
             await ctx.send("That is not an assignable role on this server.")
         else:
             role = ctx.guild.get_role(int(db[sid][role_name]["id"]))
+
             await ctx.author.add_roles(role, reason="Self-assign")
             await ctx.send("Role added!")
 
@@ -124,6 +119,7 @@ class Roles(commands.Cog):
             await ctx.send("That is not an assignable role on this server.")
         else:
             role = ctx.guild.get_role(int(db[sid][role_name]["id"]))
+
             await ctx.author.remove_roles(role, reason="Self-remove")
             await ctx.send("Role removed!")
 
@@ -144,9 +140,11 @@ class Roles(commands.Cog):
                 "id": rid,
                 "description": description
             }
+
             db[sid][name] = role_info
-            update_db(sql_db, db, "servers")
+
             await ctx.send(f"Added {name} to assignable roles.")
+            update_db(sql_db, db, "servers")
         except Exception as e:
             await ctx.send(f"Error adding role: {e}")
 
@@ -166,8 +164,9 @@ class Roles(commands.Cog):
         else:
             try:
                 del db[sid][role_get.name]
-                update_db(sql_db, db, "servers")
+
                 await ctx.send(f"Removed {role_get.name} from assignable roles.")
+                update_db(sql_db, db, "servers")
             except Exception as e:
                 await ctx.send(f"Error removing role: {e}")
 

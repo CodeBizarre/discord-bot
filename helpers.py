@@ -21,9 +21,9 @@ def pretty_datetime(dt: datetime, display: str = "FULL") -> str:
     else:
         return f"Unknown/incorrect display argument for pretty_datetime(): {display}"
 
-# TODO: Improve this?
 def pretty_timedelta(td: timedelta):
     """Format timedeltas for messages."""
+    # Expand the timedelta's days and seconds to a full scale
     years    = td.days // 365
     rem_days = td.days % 365
     months   = rem_days // 30
@@ -37,9 +37,29 @@ def pretty_timedelta(td: timedelta):
     rem_secs = rem_secs % 60
     seconds  = rem_secs
 
-    days_join = f"{years} year(s) {months} month(s) {weeks} week(s) {days} day(s)"
-    secs_join = f"{hours} hour(s) {minutes} minute(s) {seconds} second(s)"
-    return f"{days_join} {secs_join}"
+    final = {
+        "year": years,
+        "month": months,
+        "week": weeks,
+        "day": days,
+        "hour": hours,
+        "minute": minutes,
+        "second": seconds
+    }
+
+    result = ""
+
+    # Add the scale to the result if it's greater than 0
+    for key, value in final.items():
+        if value <= 0:
+            continue
+
+        if value > 1:
+            key += "s"
+
+        result += f"{value} {key} "
+
+    return result
 
 def get_logger(file_name) -> Logger:
     """Get an instance of Logger and set up log files."""

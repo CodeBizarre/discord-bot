@@ -4,19 +4,21 @@ import os
 import shutil
 import json
 
-from helpers import *
 from datetime import datetime
 from sqlitedict import SqliteDict
 from discord import Guild, Message, User, Member, Embed
 from discord.ext import commands
 from discord.ext.commands import Context
 
-VERSION = "2.0.0b2"
+from helpers import *
+
+VERSION = "2.1.0b1"
 
 ## FILESYSTEM
-# Get the filesystem in ship-shape and generate a default config if it doesn't exist
+# Get the filesystem in ship-shape
 try:
-    if not os.path.exists("config"):
+    # Generate a default config if it doesn't exist
+    if not os.path.exists("config") or not os.path.exists("config/config.json"):
         os.makedirs("config")
         default_config = {
             "Database": "database.sql",
@@ -48,11 +50,12 @@ except IOError as e:
 
 ## CLASSES
 class DiscordBot:
+    """Data class to hold bot and config information."""
     def __init__(self, description):
+        # Discord library initializations
         self.description = description
         self.bot = None
         self.app_info = None
-        # Grab the configuration file
         try:
             with open("config/config.json") as cfg:
                 config = json.load(cfg)
@@ -97,11 +100,14 @@ class DiscordBot:
 ## INITIALIZATION
 # This is hacky and bad, but that's this whole bot at this point
 # I've learned a lot through making this and would do it quite differently next time
-inst = DiscordBot("Extensible bot using Discord.py and cogs.")
+inst = DiscordBot("Extensible bot using Discord.py's cogs.")
 
 def initialize(instance: DiscordBot) -> commands.Bot:
     """Get the bot, database, and logger ready"""
+    # Logger
     log = get_logger(instance.log_file)
+
+    # Discord.py's commands.ext Bot
     bot = commands.Bot(
         commands.when_mentioned_or(instance.config_prefix),
         description=instance.description
@@ -114,17 +120,10 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     if os.path.exists(db_file) and instance.backup_db:
         timestamp = f"{pretty_datetime(datetime.now(), display='FILE')}"
         try:
-            shutil.copyfile(
-                db_file,
-                f"db/backups/{instance.database}-{timestamp}.sql"
-            )
+            shutil.copyfile(db_file, f"db/backups/{instance.database}-{timestamp}.sql")
         except IOError as e:
-            log.error(
-                f"""
-                Unable to create file db/backups/{instance.database}-{timestamp}.sql:\n
-                {e}
-                """
-            )
+            error_file = f"db/backups/{instance.database}-{timestamp}.sql"
+            log.error(f"Unable to create file {error_file}\n    - {e}")
 
     db = SqliteDict(
         filename=f"db/{instance.database}",
@@ -148,23 +147,23 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     instance.accounts = db["accounts"]
 
     ## CHECKS
-    # Botmaster required local check
+    # Local check for if the user is a botmaster
     def is_botmaster():
         async def predicate(ctx: Context):
             return str(ctx.author.id) in instance.botmasters
         return commands.check(predicate)
 
-    # Global blacklist check
+    # Global check for if the user is blacklisted
     @bot.check
     def allowed(ctx: Context):
         return str(ctx.author.id) not in instance.blacklist
 
-    # Local account level check
+    # Local check for the user's bot account level
     def level(required=0):
         async def predicate(ctx: Context):
             uid = str(ctx.author.id)
             sid = str(ctx.guild.id)
-
+            # User doesn't have an account
             if sid not in instance.accounts or uid not in instance.accounts[sid]:
                 return False
             else:
@@ -172,7 +171,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
         return commands.check(predicate)
 
-    # Global plugin enabled check
+    # Global check for if the plugin is enabled on the current server
     @bot.check
     def plugin_enabled(ctx: Context):
         sid = str(ctx.guild.id)
@@ -185,20 +184,25 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             result = instance.servers[sid][ctx.cog.name]
             return result
         except KeyError:
+            # Plugin will default to enabled if not set by a server admin
             return True
 
     ## EVENTS
     @bot.event
     async def on_ready():
+        # If this is the first launch (Not a reconnection from disconnect)
         if instance.first_launch:
+            # Load all available plugins
             load_plugins(bot, log, instance.plugins)
+            # Set the DiscordBot instance's application info
             instance.app_info = await bot.application_info()
+
             instance.first_launch = False
 
         # Print mission control to the console
         log.info("\n".join(instance.mission_control()))
 
-        # Register servers
+        # Register the servers that the bot has joined
         for server in bot.guilds:
             sid = str(server.id)
             if sid not in instance.servers:
@@ -209,7 +213,9 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @bot.event
     async def on_guild_join(guild: Guild):
         sid = str(guild.id)
+
         log.info(f"[JOIN] {guild.name}")
+
         if sid not in instance.servers:
             instance.servers[sid] = {}
             update_db(db, instance.servers, "servers")
@@ -217,18 +223,23 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @bot.event
     async def on_guild_remove(guild: Guild):
         sid = str(guild.id)
+
         log.info(f"[LEAVE] {guild.name}")
+
         if sid in instance.servers:
             instance.servers.pop(sid)
             update_db(db, instance.servers, "servers")
 
     @bot.event
     async def on_message(msg: Message):
+        # Log messages to the console/log file if enabled
         if instance.log_messages:
             timestamp = pretty_datetime(datetime.now(), display="TIME")
             message = f"[{msg.guild} - #{msg.channel}] <{msg.author}>: {msg.content}"
+
             log.info(f"-{timestamp}- {message}")
 
+        # Process the commands from the message afterwards
         await bot.process_commands(msg)
 
     @bot.event
@@ -236,36 +247,46 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         # Embeds cause message edit events even if the user didn't edit them
         if former.content == latter.content and former.embeds != latter.embeds:
             return
-
+        # Log the edit to the console/log file if enabled
         if instance.log_edits:
             timestamp = pretty_datetime(datetime.now(), display="TIME")
+
             log.info(f"-{timestamp}- [EDIT] [{former.guild}] #{former.channel}")
             log.info(f"[BEFORE] <{former.author}>: {former.content}")
             log.info(f"[AFTER] <{latter.author}>: {latter.content}")
 
+        # Process the commands from the message afterwards if enabled
         if instance.cmd_on_edit:
             await bot.process_commands(latter)
 
     @bot.event
     async def on_message_delete(msg: Message):
+        # Log the delete to the console/log file if enabled
         if instance.log_deletes:
             timestamp = pretty_datetime(datetime.now(), display="TIME")
+
             header = f"-{timestamp}- [DELETE] "
             content = f"[{msg.guild}] #{msg.channel} <{msg.author}>: {msg.content}"
+
             log.info(f"{header} {content}")
 
     @bot.event
     async def on_command(ctx: Context):
+        # Log the command to the console/log file if enabled
         if instance.log_commands:
             timestamp = pretty_datetime(datetime.now(), display="TIME")
+
             command = ctx.message.content
             author = ctx.author
+
             location = f"[{ctx.guild}] - #{ctx.message.channel}"
             header = f"-{timestamp}- [COMMAND] `{command}`"
+
             log.info(f"{header} by `{author}` in `{location}`")
 
     @bot.event
     async def on_command_error(ctx: Context, error):
+        # Just send the error to the command's channel
         await ctx.send(f"Error: {error}")
 
     ## COMMANDS
@@ -286,55 +307,50 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def cmd_info(ctx: Context):
         """Show the bot's mission control."""
         embed = Embed(title="Status", color=0xffffff)
-        embed.add_field(
-            name="Time",
-            value=pretty_datetime(datetime.now(), "FULL"),
-            inline=True
-        )
-        embed.add_field(
-            name="Version",
-            value=VERSION,
-            inline=True
-        )
+
+        embed.add_field(name="Time", value=pretty_datetime(datetime.now(), "FULL"))
+        embed.add_field(name="Version", value=VERSION)
+
         embed.add_field(
             name="User",
             value=f"{instance.bot.user} ({instance.bot.user.id})",
             inline=False
         )
-        embed.add_field(
-            name="Plugins",
-            value=f"[{', '.join(instance.plugins)}]",
-            inline=True
-        )
-        embed.add_field(
-            name="Servers",
-            value=str(len(instance.servers)),
-            inline=True
-        )
+
+        embed.add_field(name="Plugins", value=f"[{', '.join(instance.plugins)}]")
+        embed.add_field(name="Servers", value=str(len(instance.servers)))
+
+        # Just in case something happened initializing the app info
         if instance.app_info is not None:
             embed.set_author(
                 name=instance.app_info.name,
                 icon_url=instance.app_info.icon_url
             )
+
         embed.set_footer(text="https://github.com/Aurexine/DiscordBot")
+
         await ctx.send(embed=embed)
 
     @bot.command(name="blacklist", aliases=["bl", "block"])
     @is_botmaster()
-    async def cmd_blacklist(ctx: Context, target: User, doom = True):
+    async def cmd_blacklist(ctx: Context, target: User, blacklist = True):
         """Add or remove a user to/from the blacklist."""
         uid = str(target.id)
 
         if uid in instance.blacklist:
-            if doom:
+            # Trying to blacklist a user who is already blacklisted
+            if blacklist:
                 await ctx.send(f"{target.name} is already blacklisted.")
+            # Remove a user from the blacklist
             else:
                 instance.blacklist.remove(uid)
                 await ctx.send(f"{target.name} removed from blacklist.")
         else:
-            if doom:
+            # Add a user to the blacklist
+            if blacklist:
                 instance.blacklist.append(uid)
                 await ctx.send(f"{target.name} added to blacklist.")
+            # Trying to remove a user who is not blacklisted
             else:
                 await ctx.send(f"{target.name} is not blacklisted.")
 
@@ -346,22 +362,21 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def cmd_account(ctx: Context):
         """Add/remove/update accounts.
 
-            Running the command without arguments will display your current account level.
+        Running the command without arguments will display your current account level.
         """
         if ctx.invoked_subcommand is None:
             uid = str(ctx.author.id)
             sid = str(ctx.guild.id)
 
             if sid not in instance.accounts:
-                await ctx.send(
-                    "Server has no accounts. Take ownership with `accs genesis`."
-                )
+                # Server hasn't been set up
+                await ctx.send("Server has no accounts.")
+                await ctx.send_help("account genesis")
             elif uid not in instance.accounts[sid]:
+                # User has no account
                 await ctx.send("You do not have an account for this server.")
             else:
-                await ctx.send(
-                    f"Your server account level is: {instance.accounts[sid][uid]}."
-                )
+                await ctx.send(f"Your account level is: {instance.accounts[sid][uid]}.")
 
     @cmd_account.command(name="search", aliases=["lookup", "find"])
     @commands.guild_only()
@@ -384,10 +399,13 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         sid = str(ctx.guild.id)
 
         if sid not in instance.accounts:
-            instance.accounts[sid] = {}
+            # Server hasn't been set up
+            await ctx.send("Server has no accounts.")
+            return
 
         if uid not in instance.accounts[sid]:
             instance.accounts[sid][uid] = level
+
             await ctx.send("Account created.")
             update_db(db, instance.accounts, "accounts")
         else:
@@ -402,15 +420,16 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         sid = str(ctx.guild.id)
 
         if sid not in instance.accounts:
-            await ctx.send("No accounts on this server.")
+            await ctx.send("Server has no accounts.")
             return
         elif uid not in instance.accounts[sid]:
             await ctx.send("User has no account for this server.")
             return
         else:
             instance.accounts[sid].pop(uid)
-            update_db(db, instance.accounts, "accounts")
+
             await ctx.send("Account removed.")
+            update_db(db, instance.accounts, "accounts")
 
     @cmd_account.command(name="update", aliases=["change", "modify"])
     @commands.guild_only()
@@ -421,13 +440,14 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         sid = str(ctx.guild.id)
 
         if sid not in instance.accounts:
-            await ctx.send("No accounts on this server.")
+            await ctx.send("Server has no accounts.")
             return
         elif uid not in instance.accounts[sid]:
             await ctx.send("User has no account for this server.")
             return
         else:
             instance.accounts[sid][uid] = level
+
             update_db(db, instance.accounts, "accounts")
             await ctx.send("Account updated.")
 
@@ -444,6 +464,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
         if uid not in instance.accounts[sid]:
             instance.accounts[sid][uid] = 10
+
             await ctx.send("Admin account created.")
             update_db(db, instance.accounts, "accounts")
         else:
@@ -473,6 +494,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             try:
                 bot.load_extension(f"plugins.{name}")
                 instance.plugins.append(name)
+
                 update_db(db, instance.plugins, "plugins")
                 await ctx.send(f"Plugin {name}.py successfully loaded.")
             except Exception as e:
@@ -489,6 +511,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             try:
                 bot.unload_extension(f"plugins.{name}")
                 instance.plugins.remove(name)
+
                 update_db(db, instance.plugins, "plugins")
                 await ctx.send(f"Plugin {name}.py successfully unloaded.")
             except Exception as e:
@@ -505,10 +528,13 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             try:
                 bot.unload_extension(f"plugins.{name}")
                 instance.plugins.remove(name)
+
                 update_db(db, instance.plugins, "plugins")
                 await ctx.send(f"Plugin {name}.py successfully unloaded.")
+
                 bot.load_extension(f"plugins.{name}")
                 instance.plugins.append(name)
+
                 update_db(db, instance.plugins, "plugins")
                 await ctx.send(f"Plugin {name}.py successfully loaded.")
             except Exception as e:
@@ -529,6 +555,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             return
         else:
             instance.servers[sid][name] = True
+
             update_db(db, instance.servers, "servers")
             await ctx.send(f"Plugin {name} enabled on your server.")
 
@@ -543,6 +570,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             return
         else:
             instance.servers[sid][name] = False
+
             update_db(db, instance.servers, "servers")
             await ctx.send(f"Plugin {name} disabled on your server.")
 
@@ -556,11 +584,12 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 def get_account(server: Guild, member: Member) -> int:
     """Return the account level for a given user.
 
-    Useful for export to cogs.
+    Intended for export to cogs.
     """
     uid = str(member.id)
     sid = str(server.id)
 
+    # Get a temporary instance of the main database
     database = SqliteDict(
         filename=f"db/{inst.database}",
         tablename="discord-bot",
