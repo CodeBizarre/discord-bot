@@ -310,7 +310,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @bot.command(name="info")
     async def cmd_info(ctx: Context):
         """Show the bot's mission control."""
-        embed = Embed(title="Status", color=0xffffff)
+        embed = Embed(title="Status", color=0x7289DA)
 
         embed.add_field(name="Time", value=pretty_datetime(datetime.now(), "FULL"))
         embed.add_field(name="Version", value=VERSION)

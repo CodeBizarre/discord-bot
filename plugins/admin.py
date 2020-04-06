@@ -251,7 +251,7 @@ class Admin(commands.Cog):
                 mute_role = "Not set up"
 
             # Post them as en embed
-            embed = Embed(title="Admin Info", color=0xffffff)
+            embed = Embed(title="Admin Info", color=0x7289DA)
             embed.add_field(name="Log", value=log_status, inline=True)
             embed.add_field(name="Mute Role", value=mute_role, inline=True)
             embed.set_footer(text=pretty_datetime(datetime.now()))

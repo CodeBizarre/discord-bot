@@ -94,7 +94,7 @@ class Messages(commands.Cog):
         embed = Embed(
             title=f"X-Post from #{ctx.channel.name}",
             url=message.jump_url,
-            color=0xffffff
+            color=0x7289DA
         )
         embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
         embed.add_field(name="Posted:", value=content)
@@ -132,7 +132,7 @@ class Messages(commands.Cog):
         embed = Embed(
             title=f"Moved message from #{ctx.channel.name}",
             url=message.jump_url,
-            color=0xffffff
+            color=0x7289DA
         )
         embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
         embed.add_field(name="Posted:", value=content)
