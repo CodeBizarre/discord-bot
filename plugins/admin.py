@@ -178,12 +178,24 @@ class Admin(commands.Cog):
     async def log_to_channel(self, ctx: Context, target: Member, info: str = None):
         sid = str(ctx.guild.id)
         channel = None
+        enabled = True
         action = ctx.message.content
 
         if sid in db:
-            channel = ctx.guild.get_channel(int(db[sid]["log_channel"]))
+            try:
+                channel = ctx.guild.get_channel(int(db[sid]["log_channel"]))
+            except KeyError:
+                channel = None
+            try:
+                enabled = db[sid]["log"]
+            except KeyError:
+                enabled = False
         else:
             channel = ctx.channel
+            enabled = False
+
+        if not enabled:
+            return
 
         if info is None:
             info = "No extra information"
