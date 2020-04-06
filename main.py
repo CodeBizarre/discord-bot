@@ -99,6 +99,17 @@ class DiscordBot:
             lines.append(f"[------------------------STATUS------------------------]")
             return lines
 
+# Function to build an account level embed
+async def account_embed(member: Member, level: int) -> Embed:
+    tag = f"{member.name}#{member.discriminator}"
+
+    embed = Embed(title=f"{tag}'s Account", color=0x7289DA)
+    embed.set_thumbnail(url=str(member.avatar_url))
+
+    embed.add_field(name="Level", value=str(level), inline=False)
+
+    return embed
+
 ## INITIALIZATION
 # This is hacky and bad, but that's this whole bot at this point
 # I've learned a lot through making this and would do it quite differently next time
@@ -393,7 +404,10 @@ def initialize(instance: DiscordBot) -> commands.Bot:
                 # User has no account
                 await ctx.send("You do not have an account for this server.")
             else:
-                await ctx.send(f"Your account level is: {instance.accounts[sid][uid]}.")
+                # Send an embed with account information
+                embed = await account_embed(ctx.author, instance.accounts[sid][uid])
+
+                await ctx.send(embed=embed)
 
     @cmd_account.command(name="search", aliases=["lookup", "find"])
     @commands.guild_only()
@@ -403,7 +417,8 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         sid = str(ctx.guild.id)
 
         if sid in instance.accounts and uid in instance.accounts[sid]:
-            await ctx.send(f"{target.name} is level {instance.accounts[sid][uid]}.")
+            embed = await account_embed(target, instance.accounts[sid][uid])
+            await ctx.send(embed=embed)
         else:
             await ctx.send("User has no account for this server.")
 
@@ -495,7 +510,11 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         Running the command without arguments will list loaded plugins.
         """
         if ctx.invoked_subcommand is None:
-            await ctx.send(f"Loaded plugins: {', '.join(instance.plugins)}")
+            embed = Embed(title="Loaded Plugins", color=0x7289DA)
+            for i in range(len(instance.plugins)):
+                embed.add_field(name=str(i + 1), value=instance.plugins[i])
+
+            await ctx.send(embed=embed)
 
     @cmd_plugins.command(name="load")
     @is_botmaster()

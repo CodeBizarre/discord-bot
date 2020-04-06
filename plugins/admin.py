@@ -167,7 +167,25 @@ async def mute_check(bot: commands.Bot):
             update_db(sql_db, mute_db, "mutes")
             print(f"[ADMIN][MUTE][REMOVE] {target.id} in <{guild.name}>")
 
-# TODO: Messages along with log_to_channel (emoji update?)
+async def embed_builder(action: str, member: Member, reason: str,
+    td: timedelta = None) -> Embed:
+    embed = Embed(title=action, color=0xff0000)
+
+    embed.add_field(name="From", value=member.guild.name)
+    embed.add_field(name="Reason", value=reason, inline=False)
+
+    try:
+        embed.set_author(icon_url=member.guild.icon)
+    except Exception:
+        pass
+
+    if td is not None:
+        embed.add_field(name="Expires In", value=pretty_timedelta(td), inline=False)
+
+    embed.set_footer(text=pretty_datetime(datetime.now()))
+
+    return embed
+
 class Admin(commands.Cog):
     """General purpose administration plugin.
 
@@ -284,7 +302,11 @@ class Admin(commands.Cog):
 
         update_db(sql_db, db, "admin")
 
-        await ctx.send(f"Log setting: {enabled}\nlog channel: {channel.mention}")
+        embed = Embed(title="Log Settings", color=0xff0000)
+        embed.add_field(name="Enabled", value=str(enabled))
+        embed.add_field(name="Log Channel", value=channel.mention)
+
+        await ctx.send(embed=embed)
 
     @admin.command(name="role")
     @commands.guild_only()
@@ -308,12 +330,9 @@ class Admin(commands.Cog):
     @is_level(6)
     async def kick(self, ctx: Context, target: Member, *, reason: str = None):
         """Kick <Target> (Member) from the server for [Reason]."""
-        await target.send(
-            "You have been kicked from {0} for {1}\nYou may rejoin.".format(
-                ctx.guild.name,
-                reason
-            )
-        )
+        embed = await embed_builder("Kicked", target, reason)
+
+        await target.send(embed=embed)
 
         await target.kick(reason=reason)
         await self.log_to_channel(ctx, target, reason)
@@ -325,12 +344,9 @@ class Admin(commands.Cog):
         """Softban (kick and purge messages) <Target> (Member) from the server for
         [Reason] and remove all of their messages from the past [Purge] days.
         """
-        await target.send(
-            "You have been softbanned from {0} for {1}\nYou may rejoin.".format(
-                ctx.guild.name,
-                reason
-            )
-        )
+        embed = await embed_builder("Kicked", target, reason)
+
+        await target.send(embed=embed)
 
         await target.ban(reason=f"Softbanned: {reason}", delete_message_days=purge)
         await target.unban(reason="Softban removal")
@@ -344,12 +360,9 @@ class Admin(commands.Cog):
         """Ban <Target> (Member) from the server for [Reason] and remove all of their
         messages from the past [Purge] days.
         """
-        await target.send(
-            "You have been permanently banned from {0} for {1}".format(
-                ctx.guild.name,
-                reason
-            )
-        )
+        embed = await embed_builder("Permanently Banned", target, reason)
+
+        await target.send(embed=embed)
 
         await target.ban(reason=reason, delete_message_days=purge)
 
@@ -372,15 +385,10 @@ class Admin(commands.Cog):
         now = datetime.now(tz=timezone.utc)
         future = await time_parser(span, length, now)
         length = future - now
-        readable_time = pretty_timedelta(length)
 
-        await target.send(
-            "You have been temporarily banned for {0} from {1} for {2}".format(
-                readable_time,
-                ctx.guild.name,
-                reason
-            )
-        )
+        embed = await embed_builder("Temporarily Banned", target, reason, length)
+
+        await target.send(embed=embed)
 
         await target.ban(reason=reason, delete_message_days=0)
 
@@ -465,15 +473,10 @@ class Admin(commands.Cog):
         now = datetime.now(tz=timezone.utc)
         future = await time_parser(span, length, now)
         length = future - now
-        readable_time = pretty_timedelta(length)
 
-        await target.send(
-            "You have been warned for {0} in {1}. This warning will epxire in {2}".format(
-                reason,
-                ctx.guild.name,
-                readable_time
-            )
-        )
+        embed = await embed_builder("Warned", target, reason, length)
+
+        await target.send(embed=embed)
         await target.send(f"This is warning #{warn_count}.")
         await ctx.send(f"Warning {warn_count} issued to {target.name} for {reason}")
 
@@ -572,13 +575,9 @@ class Admin(commands.Cog):
         length = future - now
         readable_time = pretty_timedelta(length)
 
-        await target.send(
-            "You have been muted for {0} in {1} for {2}".format(
-                reason,
-                ctx.guild.name,
-                readable_time
-            )
-        )
+        embed = await embed_builder("Muted", target, reason, length)
+
+        await target.send(embed=embed)
         await ctx.send(f"{target.name} muted for {reason}, expires in {readable_time}")
 
         # Set the user to the muted role
