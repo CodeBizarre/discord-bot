@@ -7,7 +7,7 @@ from discord.ext.commands import Context
 # Uncomment the following line to fly
 #import antigravity
 
-VERSION = "1.0b3"
+VERSION = "1.1b1"
 
 class XKCD(commands.Cog):
     """A plugin to retrieve XKCD comics."""
@@ -58,13 +58,13 @@ class XKCD(commands.Cog):
 
     @xkcd.command(name="number")
     async def xkcd_number(self, ctx: Context, number: int):
-        """Get a specific xkcd comic."""
+        """Get xkcd comic <Number>."""
         comic = await self.get_comic("number", number)
         await ctx.send(comic)
 
     @xkcd.command(name="import")
     async def xkcd_import(self, ctx: Context, module: str):
-        """Relevant, because Python."""
+        """Try antigravity!"""
         # TODO: Other modules for funsies
         if module == "antigravity":
             comic = await self.get_comic("number", 353)

@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.1.0b1"
+VERSION = "2.1.1b1"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -100,7 +100,7 @@ class DiscordBot:
 ## INITIALIZATION
 # This is hacky and bad, but that's this whole bot at this point
 # I've learned a lot through making this and would do it quite differently next time
-inst = DiscordBot("Extensible bot using Discord.py's cogs.")
+inst = DiscordBot("Extensible bot using Discord.py's Cogs.")
 
 def initialize(instance: DiscordBot) -> commands.Bot:
     """Get the bot, database, and logger ready"""
@@ -338,7 +338,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @bot.command(name="blacklist", aliases=["bl", "block"])
     @is_botmaster()
     async def cmd_blacklist(ctx: Context, target: User, blacklist = True):
-        """Add or remove a user to/from the blacklist."""
+        """Set <Target> (User)'s blacklist status to <Blacklist>."""
         uid = str(target.id)
 
         if uid in instance.blacklist:
@@ -385,7 +385,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_account.command(name="search", aliases=["lookup", "find"])
     @commands.guild_only()
     async def account_search(ctx: Context, target: Member):
-        """Look up a member's account."""
+        """Look up <Target> (Member)'s account."""
         uid = str(target.id)
         sid = str(ctx.guild.id)
 
@@ -398,7 +398,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @level(10)
     async def account_add(ctx: Context, target: Member, level: int):
-        """Add an account."""
+        """Add an account for <Target> (Member) at <Level>."""
         uid = str(target.id)
         sid = str(ctx.guild.id)
 
@@ -419,7 +419,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @level(10)
     async def account_remove(ctx: Context, target: Member):
-        """Remove an account."""
+        """Remove <Target> (Member)'s account from the server."""
         uid = str(target.id)
         sid = str(ctx.guild.id)
 
@@ -439,7 +439,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @level(10)
     async def account_update(ctx: Context, target: Member, level: int):
-        """Change an account's level."""
+        """Change <Target> (Member)'s account level to <Level>."""
         uid = str(target.id)
         sid = str(ctx.guild.id)
 
@@ -487,7 +487,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="load")
     @is_botmaster()
     async def cmd_plugins_load(ctx: Context, name: str):
-        """Load a plugin (cog). Do not include .py extension."""
+        """Load plugin (Cog) <Name>. Do not include file extension."""
         if name in instance.plugins:
             await ctx.send(f"Plugin {name}.py already loaded.")
             return
@@ -508,7 +508,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="unload")
     @is_botmaster()
     async def cmd_plugins_unload(ctx: Context, name: str):
-        """Unload a plugin (cog). Do not include .py extension."""
+        """Unload plugin (Cog) <Name>. Do not include file extension."""
         if name not in instance.plugins:
             await ctx.send(f"Plugin {name}.py is not loaded.")
         else:
@@ -525,7 +525,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="reload")
     @is_botmaster()
     async def cmd_plugins_reload(ctx: Context, name: str):
-        """Reload a plugin (cog). Do not include .py extension."""
+        """Reload plugin (Cog) <Name>. Do not include file extension."""
         if name not in instance.plugins:
             await ctx.send(f"Plugin {name}.py is not loaded.")
         else:
@@ -549,7 +549,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="enable")
     @level(10)
     async def cmd_plugins_enable(ctx: Context, name: str):
-        """Enable a loaded plugin (cog) on your server."""
+        """Enable a loaded plugin (Cog) <Name> on your server."""
         sid = str(ctx.guild.id)
 
         if name not in instance.plugins:
@@ -566,7 +566,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="disable")
     @level(10)
     async def cmd_plugins_disable(ctx: Context, name: str):
-        """Disable a loaded plugin (cog) on your server."""
+        """Disable a loaded plugin (Cog) <Name> on your server."""
         sid = str(ctx.guild.id)
 
         if name not in instance.plugins:
@@ -588,7 +588,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 def get_account(server: Guild, member: Member) -> int:
     """Return the account level for a given user.
 
-    Intended for export to cogs.
+    Intended for export to Cogs.
     """
     uid = str(member.id)
     sid = str(server.id)

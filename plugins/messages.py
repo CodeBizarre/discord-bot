@@ -9,7 +9,7 @@ from discord.ext.commands import Context
 from main import get_account
 from helpers import pretty_datetime
 
-VERSION = "2.1b3"
+VERSION = "2.2b1"
 
 # Get the config file to grab the command prefix
 prefix = None
@@ -77,7 +77,7 @@ class Messages(commands.Cog):
     @commands.command(aliases=["xpost", "x-post"])
     @msg_op_or_level(5)
     async def crosspost(self, ctx: Context, message: Message, target: TextChannel):
-        """Cross-post a message to another channel."""
+        """Cross-post a <Message> (Message) to another <Target> (TextChannel)."""
         # Avoid posting to the same channel
         if message.channel == target:
             await ctx.send("Target must be a different channel.")
@@ -116,7 +116,7 @@ class Messages(commands.Cog):
     @commands.command(aliases=["mv", "->"])
     @msg_op_or_level(5)
     async def move(self, ctx: Context, message: Message, target: TextChannel):
-        """Move a message to a different channel."""
+        """Move a <Message> (Message) to a different <Target> (TextChannel)."""
         # Avoid posting to the same channel
         if message.channel == target:
             await ctx.send("Target must be a different channel.")

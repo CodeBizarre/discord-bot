@@ -11,7 +11,7 @@ from discord.ext.commands import Context
 from main import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "1.0b2"
+VERSION = "1.1b1"
 
 # Get the database set up
 db_file = "db/roles.sql"
@@ -90,7 +90,7 @@ class Roles(commands.Cog):
     @role.command(name="get", aliases=["g"])
     @commands.guild_only()
     async def role_get(self, ctx: Context, *, role_name: str):
-        """Get a role."""
+        """Add the <Role Name> to yourself."""
         sid = str(ctx.guild.id)
 
         if sid not in db:
@@ -108,7 +108,7 @@ class Roles(commands.Cog):
     @role.command(name="lose", aliases=["l"])
     @commands.guild_only()
     async def role_lose(self, ctx: Context, *, role_name: str):
-        """Lose a role."""
+        """Remove the <Role Name> from yourself."""
         sid = str(ctx.guild.id)
 
         if sid not in db:
@@ -127,7 +127,7 @@ class Roles(commands.Cog):
     @commands.guild_only()
     @is_level(10)
     async def role_add(self, ctx: Context, role_get: Role, *, description: str):
-        """Add/update an assignable role to the server."""
+        """Add/update the assignable roles list with <Role Get> (Role) <Description>"""
         sid = str(ctx.guild.id)
         rid = str(role_get.id)
         name = role_get.name
@@ -152,7 +152,7 @@ class Roles(commands.Cog):
     @commands.guild_only()
     @is_level(10)
     async def role_remove(self, ctx: Context, *, role_get: Role):
-        """Remove an assignable role from the server."""
+        """Remove the role <Role Get> (Role) from the assignable roles list."""
         sid = str(ctx.guild.id)
 
         if sid not in db:
