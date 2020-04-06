@@ -506,6 +506,13 @@ class Admin(commands.Cog):
         """Mute a user."""
         sid = str(ctx.guild.id)
         uid = str(target.id)
+        mute_role = None
+
+        try:
+            mute_role = ctx.guild.get_role(int(db[sid]["mute_role"]))
+        except KeyError:
+            await ctx.send("Server has no mute role set.")
+            return
 
         if sid not in mute_db:
             mute_db[sid] = {}
@@ -532,6 +539,8 @@ class Admin(commands.Cog):
 
         mute_db[sid][uid] = mute
 
+        await target.add_roles(mute_role)
+
         update_db(sql_db, mute_db, "mutes")
         await self.log_to_channel(ctx, target, reason)
 
@@ -542,6 +551,13 @@ class Admin(commands.Cog):
         """Unmute a user early."""
         sid = str(ctx.guild.id)
         uid = str(target.id)
+        mute_role = None
+
+        try:
+            mute_role = ctx.guild.get_role(int(db[sid]["mute_role"]))
+        except KeyError:
+            await ctx.send("This server has no mute role set.")
+            return
 
         if sid not in mute_db:
             await ctx.send("This server has no mutes.")
@@ -554,6 +570,7 @@ class Admin(commands.Cog):
         await target.send(f"You have been unmuted in {ctx.guild.name}.")
         await ctx.send(f"Unmuted {target.name}.")
 
+        await target.remove_roles(mute_role)
         del mute_db[sid][uid]
 
         update_db(sql_db, mute_db, "mutes")
