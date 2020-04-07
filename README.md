@@ -152,9 +152,10 @@ admin [log | role]:
         Level 4 required
         Warn Target for Length Span(s) for Reason
 
-    warns <Member>
-        Level 4 required
-        List the currently active warnings for Member
+    warns [Member]
+        Invoke without arguments to view your own warnings
+        Level 4 required to view Member's warns
+        If Member is provided, display their warns
 
     mute <Target> <Length> <Span> [Reason]:
         Level 4 required
