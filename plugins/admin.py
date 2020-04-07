@@ -9,7 +9,7 @@ from discord import Member, Role, TextChannel, Embed
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from main import is_level
+from main import is_level, get_account
 from helpers import update_db, pretty_datetime, pretty_timedelta
 
 VERSION = "2.1b1"
@@ -517,16 +517,25 @@ class Admin(commands.Cog):
         update_db(sql_db, warn_db, "warns")
         await self.log_to_channel(ctx, target, reason)
 
-    # TODO: Make it so a user can view their own warns
     @commands.command()
     @commands.guild_only()
-    @is_level(4)
-    async def warns(self, ctx: Context, member: Member):
-        """List all active warns of <Member> (Member).
-        Level 4 required
+    async def warns(self, ctx: Context, member: Member = None):
+        """List all active warns of yourself or [Member] (Member).
+        Invoke without argument to view your own warns.
+        Level 4 required to view other Members' warns
         """
         sid = str(ctx.guild.id)
+
+        if member is None:
+            member = ctx.author
+
         uid = str(member.id)
+
+        if member is not ctx.author:
+            level = get_account(ctx.guild, ctx.author)
+            if level < 4:
+                await ctx.send(":anger: Must be level 4 to view other users' warns.")
+                return
 
         if sid not in warn_db:
             await ctx.send(":anger: Server has no warns.")
