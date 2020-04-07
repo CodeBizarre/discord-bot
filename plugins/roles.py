@@ -127,7 +127,9 @@ class Roles(commands.Cog):
     @commands.guild_only()
     @is_level(10)
     async def role_add(self, ctx: Context, role_get: Role, *, description: str):
-        """Add/update the assignable roles list with <Role Get> (Role) <Description>"""
+        """Add/update the assignable roles list with <Role Get> (Role) <Description>
+        Level 10 required
+        """
         sid = str(ctx.guild.id)
         rid = str(role_get.id)
         name = role_get.name
@@ -152,7 +154,9 @@ class Roles(commands.Cog):
     @commands.guild_only()
     @is_level(10)
     async def role_remove(self, ctx: Context, *, role_get: Role):
-        """Remove the role <Role Get> (Role) from the assignable roles list."""
+        """Remove the role <Role Get> (Role) from the assignable roles list.
+        Level 10 required
+        """
         sid = str(ctx.guild.id)
 
         if sid not in db:

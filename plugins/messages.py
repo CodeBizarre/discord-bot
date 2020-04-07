@@ -77,7 +77,9 @@ class Messages(commands.Cog):
     @commands.command(aliases=["xpost", "x-post"])
     @msg_op_or_level(5)
     async def crosspost(self, ctx: Context, message: Message, target: TextChannel):
-        """Cross-post a <Message> (Message) to another <Target> (TextChannel)."""
+        """Cross-post a <Message> (Message) to another <Target> (TextChannel).
+        Must be <Message> OP or level 5
+        """
         # Avoid posting to the same channel
         if message.channel == target:
             await ctx.send("Target must be a different channel.")
@@ -116,7 +118,9 @@ class Messages(commands.Cog):
     @commands.command(aliases=["mv", "->"])
     @msg_op_or_level(5)
     async def move(self, ctx: Context, message: Message, target: TextChannel):
-        """Move a <Message> (Message) to a different <Target> (TextChannel)."""
+        """Move a <Message> (Message) to a different <Target> (TextChannel).
+        Must be <Message> OP or level 5
+        """
         # Avoid posting to the same channel
         if message.channel == target:
             await ctx.send("Target must be a different channel.")

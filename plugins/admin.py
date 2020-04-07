@@ -253,6 +253,7 @@ class Admin(commands.Cog):
         """Base command for server administrators.
 
         Run without arguments to view current server settings.
+        MUST HAVE SERVER ADMINISTRATOR PERMISSION
         """
         if ctx.invoked_subcommand is None:
             sid = str(ctx.guild.id)
@@ -283,7 +284,9 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def admin_log(self, ctx: Context, enabled: bool, channel: TextChannel = None):
-        """Set to-channel logging to <Channel> (TextChannel) to <Enabled>."""
+        """Set to-channel logging to <Channel> (TextChannel) to <Enabled>.
+        MUST HAVE SERVER ADMINISTRATOR PERMISSION
+        """
         sid = str(ctx.guild.id)
 
         # Initialize the server in the database if required
@@ -312,7 +315,9 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def admin_role(self, ctx: Context, role: Role):
-        """Set the mute <Role> (Role) for the server."""
+        """Set the mute <Role> (Role) for the server.
+        MUST HAVE SERVER ADMINISTRATOR PERMISSION
+        """
         sid = str(ctx.guild.id)
 
         # Initialize the server in the database if required
@@ -329,7 +334,9 @@ class Admin(commands.Cog):
     @commands.command()
     @is_level(6)
     async def kick(self, ctx: Context, target: Member, *, reason: str = None):
-        """Kick <Target> (Member) from the server for [Reason]."""
+        """Kick <Target> (Member) from the server for [Reason].
+        Level 6 required
+        """
         embed = await embed_builder("Kicked", target, reason)
 
         await target.send(embed=embed)
@@ -343,6 +350,7 @@ class Admin(commands.Cog):
         *, reason: str = None):
         """Softban (kick and purge messages) <Target> (Member) from the server for
         [Reason] and remove all of their messages from the past [Purge] days.
+        Level 7 required
         """
         embed = await embed_builder("Kicked", target, reason)
 
@@ -359,6 +367,7 @@ class Admin(commands.Cog):
         *, reason: str = None):
         """Ban <Target> (Member) from the server for [Reason] and remove all of their
         messages from the past [Purge] days.
+        Level 8 required
         """
         embed = await embed_builder("Permanently Banned", target, reason)
 
@@ -374,6 +383,7 @@ class Admin(commands.Cog):
         *, reason: str = None):
         """Temporarily ban <Target> (Member) from the server for [Reason] lasting
         <Length> <Span>(s) (Example: 10 days, plural and non-plural spans accepted).
+        Level 8 required
         """
         sid = str(ctx.guild.id)
 
@@ -420,7 +430,9 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(5)
     async def purge_bot(self, ctx: Context, count: int = 10):
-        """Purge messages sent by the bot in the last <Count> messages."""
+        """Purge messages sent by the bot in the last <Count> messages.
+        Level 5 required
+        """
         await ctx.channel.purge(limit=count, check=lambda m: m.author.id == ctx.bot.id)
         await self.log_to_channel(ctx, ctx.author)
 
@@ -428,7 +440,9 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(5)
     async def purge_all(self, ctx: Context, count: int = 10):
-        """Purge all of the last <Count> messages."""
+        """Purge all of the last <Count> messages.
+        Level 5 required
+        """
         await ctx.channel.purge(limit=count)
         await self.log_to_channel(ctx, ctx.author)
 
@@ -436,7 +450,9 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(5)
     async def purge_member(self, ctx: Context, member: Member, count: int = 10):
-        """Purge messages from <Member> (Member) in the last <Count> messages."""
+        """Purge messages from <Member> (Member) in the last <Count> messages.
+        Level 5 required
+        """
         await ctx.channel.purge(limit=count, check=lambda m: m.author == member)
         await self.log_to_channel(ctx, member)
 
@@ -444,7 +460,9 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(5)
     async def purge_group(self, ctx: Context, role: Role, count: int = 10):
-        """Purge messages from <Role> (Role) in the last <Count> messages."""
+        """Purge messages from <Role> (Role) in the last <Count> messages.
+        Level 5 required
+        """
         await ctx.channel.purge(limit=count, check=lambda m: role in m.author.roles)
         await self.log_to_channel(ctx, ctx.author)
 
@@ -455,6 +473,7 @@ class Admin(commands.Cog):
         *, reason: str):
         """Warn <Target> (Member) for [Reason] and set it to expire in <Length> <Span>(s).
         (Example: 10 days, plural and non-plural spans accepted).
+        Level 4 required
         """
         sid = str(ctx.guild.id)
         uid = str(target.id)
@@ -499,7 +518,9 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(4)
     async def warns(self, ctx: Context, member: Member):
-        """List all active warns of <Member> (Member)."""
+        """List all active warns of <Member> (Member).
+        Level 4 required
+        """
         sid = str(ctx.guild.id)
         uid = str(member.id)
 
@@ -553,6 +574,7 @@ class Admin(commands.Cog):
         *, reason: str):
         """Set <Target> (Member) to the mute role for [Reason] expiring in
         <Length> <Span>(s). (Example: 10 days, plural and non-plural spans accepted).
+        Level 4 required
         """
         sid = str(ctx.guild.id)
         uid = str(target.id)
@@ -599,7 +621,9 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(4)
     async def unmute(self, ctx: Context, target: Member):
-        """Unmute <Target> (Member) early."""
+        """Unmute <Target> (Member) early.
+        Level 4 required
+        """
         sid = str(ctx.guild.id)
         uid = str(target.id)
         mute_role = None
