@@ -125,7 +125,7 @@ async def warn_check():
                 if ts >= float(w["expires"]):
                     del warn_db[sid][uid][i]
                     update_db(sql_db, warn_db, "warns")
-                    print(f"[ADMIN][WARN][REMOVE] {target.id} in <{guild.name}>")
+                    print(f"[ADMIN][WARN][REMOVE] {uid}.{i} in <{guild.name}>")
 
 # Coroutine to run in a background thread to check if mutes are expired
 async def mute_check(bot: commands.Bot):
