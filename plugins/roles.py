@@ -102,6 +102,10 @@ class Roles(commands.Cog):
         else:
             role = ctx.guild.get_role(int(db[sid][role_name]["id"]))
 
+            if role in ctx.author.roles:
+                await ctx.send(":anger: You already have that role.")
+                return
+
             await ctx.author.add_roles(role, reason="Self-assign")
             await ctx.send(":white_check_mark: Role added!")
 
@@ -119,6 +123,10 @@ class Roles(commands.Cog):
             await ctx.send(":anger: That is not an assignable role on this server.")
         else:
             role = ctx.guild.get_role(int(db[sid][role_name]["id"]))
+
+            if role not in ctx.author.roles:
+                await ctx.send(":anger: You don't have that role.")
+                return
 
             await ctx.author.remove_roles(role, reason="Self-remove")
             await ctx.send(":white_check_mark: Role removed!")
