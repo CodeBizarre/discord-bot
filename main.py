@@ -315,7 +315,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @bot.event
     async def on_command_error(ctx: Context, error):
         # Just send the error to the command's channel
-        await ctx.send(f"Error: {error}")
+        await ctx.send(f":anger: Error: {error}")
 
     ## COMMANDS
     # Basic
@@ -325,13 +325,13 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         """Shut the bot down compeletely.
         Botmaster required.
         """
-        await ctx.send("Shutting down.")
+        await ctx.send(":desktop: Shutting down.")
         await bot.logout()
 
     @bot.command(name="ping")
     async def cmd_ping(ctx: Context):
         """Ping/pong test."""
-        await ctx.send(f"Pong {ctx.author.mention}")
+        await ctx.send(f":ping_pong: Pong {ctx.author.mention}")
 
     @bot.command(name="info")
     async def cmd_info(ctx: Context):
@@ -372,19 +372,21 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         if uid in instance.blacklist:
             # Trying to blacklist a user who is already blacklisted
             if blacklist:
-                await ctx.send(f"{target.name} is already blacklisted.")
+                await ctx.send(f":anger: {target.name} is already blacklisted.")
             # Remove a user from the blacklist
             else:
                 instance.blacklist.remove(uid)
-                await ctx.send(f"{target.name} removed from blacklist.")
+                await ctx.send(
+                    f":white_check_mark: {target.name} removed from blacklist."
+                )
         else:
             # Add a user to the blacklist
             if blacklist:
                 instance.blacklist.append(uid)
-                await ctx.send(f"{target.name} added to blacklist.")
+                await ctx.send(f":white_check_mark: {target.name} added to blacklist.")
             # Trying to remove a user who is not blacklisted
             else:
-                await ctx.send(f"{target.name} is not blacklisted.")
+                await ctx.send(f":anger: {target.name} is not blacklisted.")
 
         update_db(db, instance.blacklist, "blacklist")
 
@@ -402,11 +404,11 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
             if sid not in instance.accounts:
                 # Server hasn't been set up
-                await ctx.send("Server has no accounts.")
+                await ctx.send(":anger: Server has no accounts.")
                 await ctx.send_help("account genesis")
             elif uid not in instance.accounts[sid]:
                 # User has no account
-                await ctx.send("You do not have an account for this server.")
+                await ctx.send(":anger: You do not have an account for this server.")
             else:
                 # Send an embed with account information
                 embed = await account_embed(ctx.author, instance.accounts[sid][uid])
@@ -424,7 +426,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             embed = await account_embed(target, instance.accounts[sid][uid])
             await ctx.send(embed=embed)
         else:
-            await ctx.send("User has no account for this server.")
+            await ctx.send(":anger: User has no account for this server.")
 
     @cmd_account.command(name="add", aliases=["create", "new"])
     @commands.guild_only()
@@ -438,16 +440,16 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
         if sid not in instance.accounts:
             # Server hasn't been set up
-            await ctx.send("Server has no accounts.")
+            await ctx.send(":anger: Server has no accounts.")
             return
 
         if uid not in instance.accounts[sid]:
             instance.accounts[sid][uid] = level
 
-            await ctx.send("Account created.")
+            await ctx.send(":white_check_mark: Account created.")
             update_db(db, instance.accounts, "accounts")
         else:
-            await ctx.send("User already has an account for this server.")
+            await ctx.send(":anger: User already has an account for this server.")
 
     @cmd_account.command(name="remove", aliases=["delete", "destroy"])
     @commands.guild_only()
@@ -460,15 +462,15 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         sid = str(ctx.guild.id)
 
         if sid not in instance.accounts:
-            await ctx.send("Server has no accounts.")
+            await ctx.send(":anger: Server has no accounts.")
             return
         elif uid not in instance.accounts[sid]:
-            await ctx.send("User has no account for this server.")
+            await ctx.send(":anger: User has no account for this server.")
             return
         else:
             instance.accounts[sid].pop(uid)
 
-            await ctx.send("Account removed.")
+            await ctx.send(":white_check_mark: Account removed.")
             update_db(db, instance.accounts, "accounts")
 
     @cmd_account.command(name="update", aliases=["change", "modify"])
@@ -482,16 +484,16 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         sid = str(ctx.guild.id)
 
         if sid not in instance.accounts:
-            await ctx.send("Server has no accounts.")
+            await ctx.send(":anger: Server has no accounts.")
             return
         elif uid not in instance.accounts[sid]:
-            await ctx.send("User has no account for this server.")
+            await ctx.send(":anger User has no account for this server.")
             return
         else:
             instance.accounts[sid][uid] = level
 
             update_db(db, instance.accounts, "accounts")
-            await ctx.send("Account updated.")
+            await ctx.send(":white_check_mark: Account updated.")
 
     @cmd_account.command(name="genesis")
     @commands.guild_only()
@@ -509,10 +511,10 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         if uid not in instance.accounts[sid]:
             instance.accounts[sid][uid] = 10
 
-            await ctx.send("Admin account created.")
+            await ctx.send(":white_check_mark: Admin account created.")
             update_db(db, instance.accounts, "accounts")
         else:
-            await ctx.send("You already have an account.")
+            await ctx.send(":anger: You already have an account.")
 
     # Plugins
     @bot.group(name="plugins", aliases=["pl", "cogs"])
@@ -535,21 +537,23 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         Botmaster required.
         """
         if name in instance.plugins:
-            await ctx.send(f"Plugin {name}.py already loaded.")
+            await ctx.send(f":anger: Plugin {name}.py already loaded.")
             return
 
         if not os.path.isfile(f"plugins/{name}.py"):
-            await ctx.send(f"Cannot find plugins/{name}.py")
+            await ctx.send(f":anger: Cannot find plugins/{name}.py")
         else:
             try:
                 bot.load_extension(f"plugins.{name}")
                 instance.plugins.append(name)
 
                 update_db(db, instance.plugins, "plugins")
-                await ctx.send(f"Plugin {name}.py successfully loaded.")
+                await ctx.send(
+                    f":white_check_mark: Plugin {name}.py successfully loaded."
+                )
             except Exception as e:
                 exc = f"{type(e).__name__}, {e}"
-                await ctx.send(f"Error loading {name}.py:\n```py\n{exc}\n```")
+                await ctx.send(f":anger: Error loading {name}.py:\n```py\n{exc}\n```")
 
     @cmd_plugins.command(name="unload")
     @is_botmaster()
@@ -558,40 +562,46 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         Botmaster required.
         """
         if name not in instance.plugins:
-            await ctx.send(f"Plugin {name}.py is not loaded.")
+            await ctx.send(f":anger: Plugin {name}.py is not loaded.")
         else:
             try:
                 bot.unload_extension(f"plugins.{name}")
                 instance.plugins.remove(name)
 
                 update_db(db, instance.plugins, "plugins")
-                await ctx.send(f"Plugin {name}.py successfully unloaded.")
+                await ctx.send(
+                    f":white_check_mark: Plugin {name}.py successfully unloaded."
+                )
             except Exception as e:
                 exc = f"{type(e).__name__}, {e}"
-                await ctx.send(f"Error unloading {name}.py:\n```py\n{exc}\n```")
+                await ctx.send(f":anger: Error unloading {name}.py:\n```py\n{exc}\n```")
 
     @cmd_plugins.command(name="reload")
     @is_botmaster()
     async def cmd_plugins_reload(ctx: Context, name: str):
         """Reload plugin (Cog) <Name>. Do not include file extension."""
         if name not in instance.plugins:
-            await ctx.send(f"Plugin {name}.py is not loaded.")
+            await ctx.send(f":anger: Plugin {name}.py is not loaded.")
         else:
             try:
                 bot.unload_extension(f"plugins.{name}")
                 instance.plugins.remove(name)
 
                 update_db(db, instance.plugins, "plugins")
-                await ctx.send(f"Plugin {name}.py successfully unloaded.")
+                await ctx.send(
+                    f":white_check_mark: Plugin {name}.py successfully unloaded."
+                )
 
                 bot.load_extension(f"plugins.{name}")
                 instance.plugins.append(name)
 
                 update_db(db, instance.plugins, "plugins")
-                await ctx.send(f"Plugin {name}.py successfully loaded.")
+                await ctx.send(f":white_check_mark: Plugin {name}.py successfully loaded.")
             except Exception as e:
                 exc = f"{type(e).__name__}, {e}"
-                await ctx.send(f"Error unloading {name}.py:\n```py\n{exc}\n```")
+                await ctx.send(
+                    f":anger: Error reloading {name}.py:\n```py\n{exc}\n```"
+                )
 
 
     @cmd_plugins.command(name="enable")
@@ -605,13 +615,13 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         if name not in instance.plugins:
             # There is a distinction between server-loaded and bot-loaded plugins
             # therefore I do not include the .py extension here purposefully
-            await ctx.send(f"No plugin {name} is loaded.")
+            await ctx.send(f":anger: No plugin {name} is loaded.")
             return
         else:
             instance.servers[sid][name] = True
 
             update_db(db, instance.servers, "servers")
-            await ctx.send(f"Plugin {name} enabled on your server.")
+            await ctx.send(f":white_check_mark: Plugin {name} enabled on your server.")
 
     @cmd_plugins.command(name="disable")
     @level(10)
@@ -622,13 +632,13 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         sid = str(ctx.guild.id)
 
         if name not in instance.plugins:
-            await ctx.send(f"No plugin {name} is loaded.")
+            await ctx.send(f":anger: No plugin {name} is loaded.")
             return
         else:
             instance.servers[sid][name] = False
 
             update_db(db, instance.servers, "servers")
-            await ctx.send(f"Plugin {name} disabled on your server.")
+            await ctx.send(f":white_check_mark: Plugin {name} disabled on your server.")
 
     # Ensure there is at least one botmaster present before starting the bot
     if instance.botmasters is None:

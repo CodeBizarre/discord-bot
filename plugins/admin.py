@@ -158,7 +158,9 @@ async def mute_check(bot: commands.Bot):
 
             if role in target.roles:
                 await target.remove_roles(role, reason="Auto mute remove.")
-                await target.send(f"You have been unmuted in {guild.name}.")
+                await target.send(
+                    f":speaking_head: Your mute in {guild.name} has expired."
+                )
             else:
                 del mute_db[sid][uid]
                 break
@@ -329,7 +331,7 @@ class Admin(commands.Cog):
 
         update_db(sql_db, db, "admin")
 
-        await ctx.send(f"Mute role set to: {role.name}.")
+        await ctx.send(f":white_check_mark: Mute role set to: {role.name}.")
 
     @commands.command()
     @is_level(6)
@@ -496,8 +498,10 @@ class Admin(commands.Cog):
         embed = await embed_builder("Warned", target, reason, length)
 
         await target.send(embed=embed)
-        await target.send(f"This is warning #{warn_count}.")
-        await ctx.send(f"Warning {warn_count} issued to {target.name} for {reason}")
+        await target.send(f":warning: This is warning #{warn_count}.")
+        await ctx.send(
+            f":warning: Warning {warn_count} issued to {target.name} for {reason}"
+        )
 
         # Add the warn to the database
         if uid not in warn_db[sid]:
@@ -525,11 +529,11 @@ class Admin(commands.Cog):
         uid = str(member.id)
 
         if sid not in warn_db:
-            await ctx.send("Server has no warns.")
+            await ctx.send(":anger: Server has no warns.")
             return
 
         if uid not in warn_db[sid]:
-            await ctx.send("Member has no warns.")
+            await ctx.send(":anger: Member has no warns.")
             return
 
         embed = Embed(
@@ -584,7 +588,7 @@ class Admin(commands.Cog):
         try:
             mute_role = ctx.guild.get_role(int(db[sid]["mute_role"]))
         except KeyError:
-            await ctx.send("Server has no mute role set.")
+            await ctx.send(":anger: Server has no mute role set.")
             return
 
         # Initialize the server in the mute database if required
@@ -595,12 +599,14 @@ class Admin(commands.Cog):
         now = datetime.now(tz=timezone.utc)
         future = await time_parser(span, length, now)
         length = future - now
-        readable_time = pretty_timedelta(length)
+        time = pretty_timedelta(length)
 
         embed = await embed_builder("Muted", target, reason, length)
 
         await target.send(embed=embed)
-        await ctx.send(f"{target.name} muted for {reason}, expires in {readable_time}")
+        await ctx.send(
+            f":white_check_mark: {target.name} muted for {reason}, expires in {time}"
+        )
 
         # Set the user to the muted role
         await target.add_roles(mute_role)
@@ -632,19 +638,19 @@ class Admin(commands.Cog):
         try:
             mute_role = ctx.guild.get_role(int(db[sid]["mute_role"]))
         except KeyError:
-            await ctx.send("This server has no mute role set.")
+            await ctx.send(":anger: This server has no mute role set.")
             return
 
         if sid not in mute_db:
-            await ctx.send("This server has no mutes.")
+            await ctx.send(":anger: This server has no mutes.")
             return
 
         if uid not in mute_db[sid]:
-            await ctx.send("This member is not muted.")
+            await ctx.send(":anger: This member is not muted.")
             return
 
-        await target.send(f"You have been unmuted in {ctx.guild.name}.")
-        await ctx.send(f"Unmuted {target.name}.")
+        await target.send(f":speaking_head: You have been unmuted in {ctx.guild.name}.")
+        await ctx.send(f":speaking_head: Unmuted {target.name}.")
 
         # Remove the mute role and delete the entry from the database
         await target.remove_roles(mute_role)

@@ -58,7 +58,7 @@ def msg_op_or_level(required=10):
             try:
                 user_level = get_account(ctx.guild, ctx.author)
             except KeyError as e:
-                await ctx.send(f"KeyError: {e}")
+                await ctx.send(f":anger: KeyError: {e}")
                 return False
             else:
                 return user_level >= required
@@ -82,7 +82,7 @@ class Messages(commands.Cog):
         """
         # Avoid posting to the same channel
         if message.channel == target:
-            await ctx.send("Target must be a different channel.")
+            await ctx.send(":anger: Target must be a different channel.")
             return
 
         # Image only messages
@@ -111,9 +111,9 @@ class Messages(commands.Cog):
 
         try:
             await target.send(embed=embed)
-            await ctx.send("Message crossposted!")
+            await ctx.send(":white_check_mark: Message crossposted!")
         except Exception as error:
-            await ctx.send(f"Unabled to crosspost: {error}")
+            await ctx.send(f":anger: Unabled to crosspost: {error}")
 
     @commands.command(aliases=["mv", "->"])
     @msg_op_or_level(5)
@@ -123,7 +123,7 @@ class Messages(commands.Cog):
         """
         # Avoid posting to the same channel
         if message.channel == target:
-            await ctx.send("Target must be a different channel.")
+            await ctx.send(":anger: Target must be a different channel.")
 
         # Image only messages
         content = message.content
@@ -152,15 +152,15 @@ class Messages(commands.Cog):
         try:
             await target.send(embed=embed)
         except Exception as error:
-            await ctx.send(f"Unable to send message: {error}")
+            await ctx.send(f":anger: Unable to send message: {error}")
             return
         try:
             await message.delete()
         except Exception as error:
-            await ctx.send(f"Unable to delete message: {error}")
+            await ctx.send(f":anger: Unable to delete message: {error}")
             return
 
-        await ctx.send("Message moved!")
+        await ctx.send(":white_check_mark: Message moved!")
 
 def setup(bot):
     if prefix is not None:

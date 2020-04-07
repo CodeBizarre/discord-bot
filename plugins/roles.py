@@ -85,7 +85,7 @@ class Roles(commands.Cog):
 
                 await ctx.send(embed=embed)
             else:
-                await ctx.send("This server has no assignable roles.")
+                await ctx.send(":anger: This server has no assignable roles.")
 
     @role.command(name="get", aliases=["g"])
     @commands.guild_only()
@@ -94,16 +94,16 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in db:
-            await ctx.send("This server has no assignable roles.")
+            await ctx.send(":anger: This server has no assignable roles.")
             return
 
         if role_name not in db[sid]:
-            await ctx.send("That is not an assignable role on this server.")
+            await ctx.send(":anger: That is not an assignable role on this server.")
         else:
             role = ctx.guild.get_role(int(db[sid][role_name]["id"]))
 
             await ctx.author.add_roles(role, reason="Self-assign")
-            await ctx.send("Role added!")
+            await ctx.send(":white_check_mark: Role added!")
 
     @role.command(name="lose", aliases=["l"])
     @commands.guild_only()
@@ -112,16 +112,16 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in db:
-            await ctx.send("This server has no assignable roles.")
+            await ctx.send(":anger: This server has no assignable roles.")
             return
 
         if role_name not in db[sid]:
-            await ctx.send("That is not an assignable role on this server.")
+            await ctx.send(":anger: That is not an assignable role on this server.")
         else:
             role = ctx.guild.get_role(int(db[sid][role_name]["id"]))
 
             await ctx.author.remove_roles(role, reason="Self-remove")
-            await ctx.send("Role removed!")
+            await ctx.send(":white_check_mark: Role removed!")
 
     @role.command(name="add", aliases=["a"])
     @commands.guild_only()
@@ -145,10 +145,10 @@ class Roles(commands.Cog):
 
             db[sid][name] = role_info
 
-            await ctx.send(f"Added {name} to assignable roles.")
+            await ctx.send(f":white_check_mark: Added {name} to assignable roles.")
             update_db(sql_db, db, "servers")
         except Exception as e:
-            await ctx.send(f"Error adding role: {e}")
+            await ctx.send(f":anger: Error adding role: {e}")
 
     @role.command(name="remove", aliases=["r"])
     @commands.guild_only()
@@ -160,19 +160,21 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in db:
-            await ctx.send("There are no assignable roles on this server.")
+            await ctx.send(":anger: There are no assignable roles on this server.")
             return
 
         if role_get.name not in db[sid]:
-            await ctx.send("That is not an assignable role on this server.")
+            await ctx.send(":anger: That is not an assignable role on this server.")
         else:
             try:
                 del db[sid][role_get.name]
 
-                await ctx.send(f"Removed {role_get.name} from assignable roles.")
+                await ctx.send(
+                    f":white_check_mark: Removed {role_get.name} from assignable roles."
+                )
                 update_db(sql_db, db, "servers")
             except Exception as e:
-                await ctx.send(f"Error removing role: {e}")
+                await ctx.send(f":anger: Error removing role: {e}")
 
 def setup(bot):
     bot.add_cog(Roles(bot))
