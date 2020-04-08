@@ -119,6 +119,8 @@ async def warn_check():
         if len(warn_db[sid]) <= 0:
             continue
 
+        guild = bot.get_guild(int(sid))
+
         # Each warn in the server
         for uid in warn_db[sid]:
             for i, w in warn_db[sid][uid].items():
