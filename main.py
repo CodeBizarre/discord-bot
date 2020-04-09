@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.2.0b1"
+VERSION = "2.2.0b2"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -400,7 +400,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
                 icon_url=instance.app_info.icon_url
             )
 
-        embed.set_footer(text="https://github.com/Aurexine/DiscordBot")
+        embed.set_footer(text="https://github.com/Aurexine/discord-bot")
 
         await ctx.send(embed=embed)
 
