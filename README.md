@@ -22,16 +22,39 @@ Filesystem standards:
 ```
 shutdown: Turn the bot off
     Botmaster required
+
 ping: Ping/pong test
+
 echo <Message>: Have the bot repeat Message
+
 info: Bot info
+
 status <Message>:
+    Botmaster required
     Set the bot's "Playing" status to Message
+
 blacklist <User> [blacklist=True]:
   Aliases = bl, block
   Botmaster required
   Add or remove User to/from the bot's blacklist
   Invoking with blacklist equal to false will remove User from blacklist, all true values will add User to the blacklist
+
+logs [edits | deletes | channel]:
+    MUST HAVE DISCORD ADMINISTRATOR PERMISSION
+    Invoke without arguments to display current server's settings
+
+    channel <Channel>:
+        MUST HAVE DISCORD ADMINISTRATOR PERMISSION
+        Set the message logging channel to Channel (TextChannel)
+
+    edits <Enabled>:
+        MUST HAVE DISCORD ADMINISTRATOR PERMISSION
+        Set logging message edits to the logs channel to Enabled
+
+    deletes <Enabled>:
+        MUST HAVE DISCORD ADMINISTRATOR PERMISSION
+        Set logging message deletes to the logs channel to Enabled
+
 plugins [load | unload | enable | disable]:
     Aliases = pl, cogs
     Invoke without arguments to display currently loaded plugins
