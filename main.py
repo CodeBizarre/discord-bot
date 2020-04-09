@@ -6,7 +6,7 @@ import json
 
 from datetime import datetime
 from sqlitedict import SqliteDict
-from discord import Guild, Message, User, Member, Embed
+from discord import Guild, Message, User, Member, Embed, Game
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -332,6 +332,17 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def cmd_ping(ctx: Context):
         """Ping/pong test."""
         await ctx.send(f":ping_pong: Pong {ctx.author.mention}")
+
+    @bot.command(name="echo")
+    async def cmd_echo(ctx: Context, *, message: str):
+        """Echo command."""
+        await ctx.send(message)
+
+    @bot.command(name="status")
+    async def cmd_status(ctx: Context, *, status: str):
+        """Set the bot to 'Playing <Status>'."""
+        activity = Game(name=status)
+        await bot.change_presence(activity=activity)
 
     @bot.command(name="info")
     async def cmd_info(ctx: Context):
