@@ -370,6 +370,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         await ctx.send(message)
 
     @bot.command(name="status")
+    @is_botmaster()
     async def cmd_status(ctx: Context, *, status: str):
         """Set the bot to 'Playing <Status>'."""
         activity = Game(name=status)
