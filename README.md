@@ -23,7 +23,10 @@ Filesystem standards:
 shutdown: Turn the bot off
     Botmaster required
 ping: Ping/pong test
+echo <Message>: Have the bot repeat Message
 info: Bot info
+status <Message>:
+    Set the bot's "Playing" status to Message
 blacklist <User> [blacklist=True]:
   Aliases = bl, block
   Botmaster required
