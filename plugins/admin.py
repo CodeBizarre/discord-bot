@@ -107,7 +107,7 @@ async def tempban_check(bot: commands.Bot):
                 print(f"[ADMIN][TEMPBAN][REMOVE] {target.id} in <{guild.name}>")
 
 # Coroutine to run in a background thread to check if warns are expired
-async def warn_check():
+async def warn_check(bot: commands.Bot):
     ts = datetime.now(tz=timezone.utc).timestamp()
 
     # No servers registered
@@ -200,7 +200,7 @@ class Admin(commands.Cog):
         while True:
             try:
                 await tempban_check(self.bot)
-                await warn_check()
+                await warn_check(self.bot)
                 await mute_check(self.bot)
                 await asyncio.sleep(60)
             except RuntimeError:
