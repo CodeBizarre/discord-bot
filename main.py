@@ -6,13 +6,13 @@ import json
 
 from datetime import datetime
 from sqlitedict import SqliteDict
-from discord import Guild, Message, User, Member, Embed, Game
+from discord import Guild, Message, User, Member, Embed, Game, TextChannel
 from discord.ext import commands
 from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.1.2b2"
+VERSION = "2.2.0b1"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -272,6 +272,8 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
     @bot.event
     async def on_message_edit(former: Message, latter: Message):
+        sid = str(former.guild.id)
+
         # Embeds cause message edit events even if the user didn't edit them
         if former.content == latter.content and former.embeds != latter.embeds:
             return
@@ -283,12 +285,28 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             log.info(f"[BEFORE] <{former.author}>: {former.content}")
             log.info(f"[AFTER] <{latter.author}>: {latter.content}")
 
+        # Log the edit to a channel if the server has it set up
+        try:
+            if instance.servers[sid]["log_edits"]:
+                guild = former.guild
+                channel = guild.get_channel(int(instance.servers[sid]["log_channel"]))
+
+                embed = Embed(title="Message Edited", color=0xff0000)
+                embed.add_field(name="Before", value=former.content, inline=False)
+                embed.add_field(name="After", value=latter.content, inline=False)
+
+                await channel.send(embed=embed)
+        except KeyError:
+            pass
+
         # Process the commands from the message afterwards if enabled
         if instance.cmd_on_edit:
             await bot.process_commands(latter)
 
     @bot.event
     async def on_message_delete(msg: Message):
+        sid = str(msg.guild.id)
+
         # Log the delete to the console/log file if enabled
         if instance.log_deletes:
             timestamp = pretty_datetime(datetime.now(), display="TIME")
@@ -297,6 +315,19 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             content = f"[{msg.guild}] #{msg.channel} <{msg.author}>: {msg.content}"
 
             log.info(f"{header} {content}")
+
+        # Log the delete to a channel if the server has it set up
+        try:
+            if instance.servers[sid]["log_deletes"]:
+                guild = msg.guild
+                channel = guild.get_channel(int(instance.servers[sid]["log_channel"]))
+
+                embed = Embed(title="Message Deleted", color=0xff0000)
+                embed.add_field(name="Message", value=msg.content)
+
+                await channel.send(embed=embed)
+        except KeyError:
+            pass
 
     @bot.event
     async def on_command(ctx: Context):
@@ -400,6 +431,84 @@ def initialize(instance: DiscordBot) -> commands.Bot:
                 await ctx.send(f":anger: {target.name} is not blacklisted.")
 
         update_db(db, instance.blacklist, "blacklist")
+
+    @bot.group(name="logs")
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def cmd_logs(ctx: Context):
+        """Toggle logging message edits and deletes to a channel in your server.
+
+        Running the command without arguments will display your server's currect settings.
+        """
+        sid = str(ctx.guild.id)
+
+        if ctx.invoked_subcommand is None:
+            embed = Embed(title="Log Settings", color=0x7289DA)
+            try:
+                guild = ctx.bot.get_guild(int(sid))
+                channel = guild.get_channel(int(instance.servers[sid]["log_channel"]))
+
+                embed.add_field(
+                    name="Log Edits",
+                    value=str(instance.servers[sid]["log_edits"])
+                )
+                embed.add_field(
+                    name="Log Deletes",
+                    value=str(instance.servers[sid]["log_deletes"])
+                )
+                embed.add_field(
+                    name="Log Channel",
+                    value=channel.mention
+                )
+            except KeyError:
+                await ctx.send("Server is not set up or channels have been changed.")
+                return
+
+            await ctx.send(embed=embed)
+
+    @cmd_logs.command(name="edits")
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def cmd_logs_edits(ctx: Context, enabled: bool):
+        """Set logging of message edits to the server's log channel to <Enabled>."""
+        sid = str(ctx.guild.id)
+
+        if sid not in instance.servers:
+            instance.servers[sid] = {}
+
+        instance.servers[sid]["log_edits"] = enabled
+        update_db(db, instance.servers, "servers")
+
+        await ctx.send(f":white_check_mark: Logging message edits set to {enabled}.")
+
+    @cmd_logs.command(name="deletes")
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def cmd_logs_deletes(ctx: Context, enabled: bool):
+        """Set logging of message deletes to the server's log channel to <Enabled>."""
+        sid = str(ctx.guild.id)
+
+        if sid not in instance.servers:
+            instance.servers[sid] = {}
+
+        instance.servers[sid]["log_deletes"] = enabled
+        update_db(db, instance.servers, "servers")
+
+        await ctx.send(f":white_check_mark: Logging message deletes set to {enabled}.")
+
+    @cmd_logs.command(name="channel")
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def cmd_logs_channe(ctx: Context, channel: TextChannel):
+        sid = str(ctx.guild.id)
+
+        if sid not in instance.servers:
+            instance.servers[sid] = {}
+
+        instance.servers[sid]["log_channel"] = str(channel.id)
+        update_db(db, instance.servers, "servers")
+
+        await ctx.send(f":white_check_mark: Logging channel set to {channel.mention}.")
 
     # Accounts
     @bot.group(name="account", aliases=["accounts", "accs"])
