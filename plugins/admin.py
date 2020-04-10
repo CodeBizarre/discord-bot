@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 from main import is_level, get_account
 from helpers import update_db, pretty_datetime, pretty_timedelta
 
-VERSION = "2.2b2"
+VERSION = "2.3b1"
 
 # Set up the database
 db_file = "db/admin.sql"
@@ -429,8 +429,15 @@ class Admin(commands.Cog):
     @commands.guild_only()
     async def purge_self(self, ctx: Context, count: int = 10):
         """Purge messages from yourself in the last <Count> messages."""
-        await ctx.channel.purge(limit=count, check=lambda m: m.author == ctx.author)
+        result = len(
+            await ctx.channel.purge(limit=count, check=lambda m: m.author == ctx.author)
+        )
+
         await self.log_to_channel(ctx, ctx.author)
+
+        await ctx.send(
+            f":white_check_mark: Purged {result} messages from you in {count}."
+        )
 
     @purge.command(name="bot")
     @commands.guild_only()
@@ -439,8 +446,18 @@ class Admin(commands.Cog):
         """Purge messages sent by the bot in the last <Count> messages.
         Level 5 required
         """
-        await ctx.channel.purge(limit=count, check=lambda m: m.author.id == ctx.bot.id)
+        result = len(
+            await ctx.channel.purge(
+                limit=count,
+                check=lambda m: m.author.id == ctx.bot.user.id
+            )
+        )
+
         await self.log_to_channel(ctx, ctx.author)
+
+        await ctx.send(
+            f":white_check_mark: Purged {result} messages from the bot in {count}."
+        )
 
     @purge.command(name="all", aliases=["everyone"])
     @commands.guild_only()
@@ -449,8 +466,13 @@ class Admin(commands.Cog):
         """Purge all of the last <Count> messages.
         Level 5 required
         """
-        await ctx.channel.purge(limit=count)
+        result = len(await ctx.channel.purge(limit=count))
+
         await self.log_to_channel(ctx, ctx.author)
+
+        await ctx.send(
+            f":white_check_mark: Purged {result} messages."
+        )
 
     @purge.command(name="member", aliases=["user"])
     @commands.guild_only()
@@ -459,8 +481,16 @@ class Admin(commands.Cog):
         """Purge messages from <Member> (Member) in the last <Count> messages.
         Level 5 required
         """
-        await ctx.channel.purge(limit=count, check=lambda m: m.author == member)
+        result = len(
+            await ctx.channel.purge(limit=count, check=lambda m: m.author == member)
+        )
+
         await self.log_to_channel(ctx, member)
+
+        mention = member.mention
+        await ctx.send(
+            f":white_check_mark: Purged {result} messages from {mention} in {count}."
+        )
 
     @purge.command(name="role", aliases=["group"])
     @commands.guild_only()
@@ -469,8 +499,15 @@ class Admin(commands.Cog):
         """Purge messages from <Role> (Role) in the last <Count> messages.
         Level 5 required
         """
-        await ctx.channel.purge(limit=count, check=lambda m: role in m.author.roles)
+        result = len(
+            await ctx.channel.purge(limit=count,check=lambda m: role in m.author.roles)
+        )
+
         await self.log_to_channel(ctx, ctx.author)
+
+        await ctx.send(
+            f":white_check_mark: Purged {result} messages from {role.mention} in {count}."
+        )
 
     @commands.command()
     @commands.guild_only()
