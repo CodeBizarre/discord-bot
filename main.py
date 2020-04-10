@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.2.0b3"
+VERSION = "2.2.1b1"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -355,6 +355,10 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def on_command_error(ctx: Context, error):
         # Just send the error to the command's channel
         await ctx.send(f":anger: Error: {error}")
+
+    @bot.event
+    async def on_error(error, *args, **kwargs):
+        log.error(f"[ERROR] {error} {args}")
 
     ## COMMANDS
     # Basic
