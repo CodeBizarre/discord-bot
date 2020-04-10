@@ -292,6 +292,10 @@ def initialize(instance: DiscordBot) -> commands.Bot:
                 channel = guild.get_channel(int(instance.servers[sid]["log_channel"]))
 
                 embed = Embed(title="Message Edited", color=0xff0000)
+                embed.add_field(
+                    name=f"Edited by {former.author.name}#{former.author.discriminator}",
+                    value=f"Edited in {former.channel.mention}. UID: {former.author.id}"
+                )
                 embed.add_field(name="Before", value=former.content, inline=False)
                 embed.add_field(name="After", value=latter.content, inline=False)
 
@@ -323,7 +327,11 @@ def initialize(instance: DiscordBot) -> commands.Bot:
                 channel = guild.get_channel(int(instance.servers[sid]["log_channel"]))
 
                 embed = Embed(title="Message Deleted", color=0xff0000)
-                embed.add_field(name="Message", value=msg.content)
+                embed.add_field(
+                    name=f"Deleted by {msg.author.name}#{msg.author.discriminator}",
+                    value=f"Deleted from {msg.channel.mention}. UID: {msg.author.id}"
+                )
+                embed.add_field(name="Message", value=msg.content, inline=False)
 
                 await channel.send(embed=embed)
         except KeyError:
