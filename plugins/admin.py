@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 from main import is_level, get_account
 from helpers import update_db, pretty_datetime, pretty_timedelta
 
-VERSION = "2.2b1"
+VERSION = "2.2b2"
 
 # Set up the database
 db_file = "db/admin.sql"
@@ -675,3 +675,7 @@ class Admin(commands.Cog):
 
 def setup(bot):
     bot.add_cog(Admin(bot))
+
+def teardown(bot):
+    sql_db.close()
+    bot.remove_cog("Admin")

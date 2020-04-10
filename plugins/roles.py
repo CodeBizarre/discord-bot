@@ -11,7 +11,7 @@ from discord.ext.commands import Context
 from main import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "1.1b1"
+VERSION = "1.1b2"
 
 # Get the database set up
 db_file = "db/roles.sql"
@@ -186,3 +186,7 @@ class Roles(commands.Cog):
 
 def setup(bot):
     bot.add_cog(Roles(bot))
+
+def teardown(bot):
+    sql_db.close()
+    bot.remove_cog("Roles")
