@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 from main import is_level, get_account
 from helpers import update_db, pretty_datetime, pretty_timedelta
 
-VERSION = "2.1b1"
+VERSION = "2.2b1"
 
 # Set up the database
 db_file = "db/admin.sql"
@@ -68,7 +68,8 @@ async def time_parser(span: str, length: int, dt: datetime) -> datetime:
         "days": lambda: timedelta(days=length),
         "weeks": lambda: timedelta(weeks=length),
         "months": lambda: timedelta(days=length*30),
-        "years": lambda: timedelta(days=length*365)
+        "years": lambda: timedelta(days=length*365),
+        "max": lambda: timedelta(days=3650)
     }
 
     if span in switcher:
@@ -387,6 +388,7 @@ class Admin(commands.Cog):
         *, reason: str = None):
         """Temporarily ban <Target> (Member) from the server for [Reason] lasting
         <Length> <Span>(s) (Example: 10 days, plural and non-plural spans accepted).
+        Use "max" as <Span> for psuedo-permanence (10 years).
         Level 8 required
         """
         sid = str(ctx.guild.id)
@@ -477,6 +479,7 @@ class Admin(commands.Cog):
         *, reason: str):
         """Warn <Target> (Member) for [Reason] and set it to expire in <Length> <Span>(s).
         (Example: 10 days, plural and non-plural spans accepted).
+        Use "max" as <Span> for psuedo-permanence (10 years).
         Level 4 required
         """
         sid = str(ctx.guild.id)
@@ -589,6 +592,7 @@ class Admin(commands.Cog):
         *, reason: str):
         """Set <Target> (Member) to the mute role for [Reason] expiring in
         <Length> <Span>(s). (Example: 10 days, plural and non-plural spans accepted).
+        Use "max" as <Span> for psuedo-permanence (10 years).
         Level 4 required
         """
         sid = str(ctx.guild.id)
