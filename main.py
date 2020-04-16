@@ -328,8 +328,8 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
                 embed = Embed(title="Message Deleted", color=0xff0000)
                 embed.add_field(
-                    name=f"Deleted by {msg.author.name}#{msg.author.discriminator}",
-                    value=f"Deleted from {msg.channel.mention}. UID: {msg.author.id}"
+                    name=f"Author - {msg.author.name}#{msg.author.discriminator}",
+                    value=f"Deleted from {msg.channel.mention} - UID: {msg.author.id}"
                 )
                 embed.add_field(name="Message", value=msg.content, inline=False)
 
