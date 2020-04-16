@@ -6,7 +6,7 @@ Coding standards:
   - Double-hash section header comments
   - No punctuation for single line comments
   - Punctuation in multi-line hash comments and all docstring comments
-  - Imports in order of lowest to highest level, with a line break between stdlib and 3rd party
+  - Imports in order of lowest to highest level
 
 Filesystem standards:
   - Config files in JSON stored in /config
