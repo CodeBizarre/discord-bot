@@ -117,7 +117,7 @@ def get_db_dict(file: str, table: str, base_key: str) -> dict:
 def load_plugins(bot: commands.Bot, logger: Logger, plugins: list):
     """Load available cogs."""
     for p in os.listdir("plugins"):
-        p = p.rstrip(".py")
+        p = p.split(".")[0]
         # This wasn't an issue before but is now
         if p == "__pycache__":
             return
