@@ -289,7 +289,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def admin_log(self, ctx: Context, enabled: bool, channel: TextChannel = None):
-        """Set to-channel logging to <Channel> (TextChannel) to <Enabled>.
+        """Enable/disable to-channel logging and set the log channel.
         MUST HAVE SERVER ADMINISTRATOR PERMISSION
         """
         sid = str(ctx.guild.id)
@@ -320,7 +320,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def admin_role(self, ctx: Context, role: Role):
-        """Set the mute <Role> (Role) for the server.
+        """Set the mute role for the server.
         MUST HAVE SERVER ADMINISTRATOR PERMISSION
         """
         sid = str(ctx.guild.id)
@@ -339,7 +339,7 @@ class Admin(commands.Cog):
     @commands.command()
     @is_level(6)
     async def kick(self, ctx: Context, target: Member, *, reason: str = None):
-        """Kick <Target> (Member) from the server for [Reason].
+        """Kick a member from the server.
         Level 6 required
         """
         embed = await embed_builder("Kicked", target, reason)
@@ -353,8 +353,7 @@ class Admin(commands.Cog):
     @is_level(7)
     async def softban(self, ctx: Context, target: Member, purge: int = 1,
         *, reason: str = None):
-        """Softban (kick and purge messages) <Target> (Member) from the server for
-        [Reason] and remove all of their messages from the past [Purge] days.
+        """Softban (kick and purge messages) a member from the server.
         Level 7 required
         """
         embed = await embed_builder("Kicked", target, reason)
@@ -370,8 +369,7 @@ class Admin(commands.Cog):
     @is_level(8)
     async def ban(self, ctx: Context, target: Member, purge: int = 7,
         *, reason: str = None):
-        """Ban <Target> (Member) from the server for [Reason] and remove all of their
-        messages from the past [Purge] days.
+        """Ban a member from the server.
         Level 8 required
         """
         embed = await embed_builder("Permanently Banned", target, reason)
@@ -386,9 +384,9 @@ class Admin(commands.Cog):
     @is_level(8)
     async def tempban(self, ctx: Context, target: Member, length: int, span: str,
         *, reason: str = None):
-        """Temporarily ban <Target> (Member) from the server for [Reason] lasting
-        <Length> <Span>(s) (Example: 10 days, plural and non-plural spans accepted).
-        Use "max" as <Span> for psuedo-permanence (10 years).
+        """Temporarily ban a member from the server.
+        For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
+        Use "max" as the span for psuedo-permanence (10 years).
         Level 8 required
         """
         sid = str(ctx.guild.id)
@@ -428,7 +426,7 @@ class Admin(commands.Cog):
     @purge.command(name="self", aliases=["me"])
     @commands.guild_only()
     async def purge_self(self, ctx: Context, count: int = 10):
-        """Purge messages from yourself in the last <Count> messages."""
+        """Purge messages from yourself."""
         result = len(
             await ctx.channel.purge(limit=count, check=lambda m: m.author == ctx.author)
         )
@@ -443,7 +441,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(5)
     async def purge_bot(self, ctx: Context, count: int = 10):
-        """Purge messages sent by the bot in the last <Count> messages.
+        """Purge messages sent by the bot.
         Level 5 required
         """
         result = len(
@@ -463,7 +461,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(5)
     async def purge_all(self, ctx: Context, count: int = 10):
-        """Purge all of the last <Count> messages.
+        """Purge all messages.
         Level 5 required
         """
         result = len(await ctx.channel.purge(limit=count))
@@ -478,7 +476,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(5)
     async def purge_member(self, ctx: Context, member: Member, count: int = 10):
-        """Purge messages from <Member> (Member) in the last <Count> messages.
+        """Purge messages from a member.
         Level 5 required
         """
         result = len(
@@ -496,7 +494,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(5)
     async def purge_group(self, ctx: Context, role: Role, count: int = 10):
-        """Purge messages from <Role> (Role) in the last <Count> messages.
+        """Purge messages from a role.
         Level 5 required
         """
         result = len(
@@ -514,9 +512,9 @@ class Admin(commands.Cog):
     @is_level(4)
     async def warn(self, ctx: Context, target: Member, length: int, span: str,
         *, reason: str):
-        """Warn <Target> (Member) for [Reason] and set it to expire in <Length> <Span>(s).
-        (Example: 10 days, plural and non-plural spans accepted).
-        Use "max" as <Span> for psuedo-permanence (10 years).
+        """Warn a member.
+        For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
+        Use "max" as the span for psuedo-permanence (10 years).
         Level 4 required
         """
         sid = str(ctx.guild.id)
@@ -562,7 +560,7 @@ class Admin(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def warns(self, ctx: Context, member: Member = None):
-        """List all active warns of yourself or [Member] (Member).
+        """List all active warns of yourself or another member.
         Invoke without argument to view your own warns.
         Level 4 required to view other Members' warns
         """
@@ -627,9 +625,9 @@ class Admin(commands.Cog):
     @is_level(4)
     async def mute(self, ctx: Context, target: Member, length: int, span: str,
         *, reason: str):
-        """Set <Target> (Member) to the mute role for [Reason] expiring in
-        <Length> <Span>(s). (Example: 10 days, plural and non-plural spans accepted).
-        Use "max" as <Span> for psuedo-permanence (10 years).
+        """Set a member to the mute role.
+        For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
+        Use "max" as the span for psuedo-permanence (10 years).
         Level 4 required
         """
         sid = str(ctx.guild.id)
@@ -679,7 +677,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(4)
     async def unmute(self, ctx: Context, target: Member):
-        """Unmute <Target> (Member) early.
+        """Unmute a member early.
         Level 4 required
         """
         sid = str(ctx.guild.id)

@@ -66,7 +66,7 @@ class XKCD(commands.Cog):
 
     @xkcd.command(name="number")
     async def xkcd_number(self, ctx: Context, number: int):
-        """Get xkcd comic <Number>."""
+        """Get a specific xkcd comic."""
         comic = await self.get_comic("number", number)
         await ctx.send(embed=comic)
 

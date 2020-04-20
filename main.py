@@ -419,7 +419,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @bot.command(name="blacklist", aliases=["bl", "block"])
     @is_botmaster()
     async def cmd_blacklist(ctx: Context, target: User, blacklist = True):
-        """Set <Target> (User)'s blacklist status to <Blacklist>.
+        """Add or remove a user from the blacklist.
         Botmaster required.
         """
         uid = str(target.id)
@@ -452,6 +452,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         """Toggle logging message edits and deletes to a channel in your server.
 
         Running the command without arguments will display your server's currect settings.
+        MUST HAVE SERVER ADMINISTRATOR PERMISSION
         """
         sid = str(ctx.guild.id)
 
@@ -483,7 +484,9 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def cmd_logs_edits(ctx: Context, enabled: bool):
-        """Set logging of message edits to the server's log channel to <Enabled>."""
+        """Set logging of message edits to the server's log channel.
+        MUST HAVE SERVER ADMINISTRATOR PERMISSION
+        """
         sid = str(ctx.guild.id)
 
         if sid not in instance.servers:
@@ -498,7 +501,9 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def cmd_logs_deletes(ctx: Context, enabled: bool):
-        """Set logging of message deletes to the server's log channel to <Enabled>."""
+        """Set logging of message deletes to the server's log channel.
+        MUST HAVE SERVER ADMINISTRATOR PERMISSION
+        """
         sid = str(ctx.guild.id)
 
         if sid not in instance.servers:
@@ -512,7 +517,10 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_logs.command(name="channel")
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    async def cmd_logs_channe(ctx: Context, channel: TextChannel):
+    async def cmd_logs_channel(ctx: Context, channel: TextChannel):
+        """Set the message edit/delete logging channel.
+        MUST HAVE SERVER ADMINISTRATOR PERMISSION
+        """
         sid = str(ctx.guild.id)
 
         if sid not in instance.servers:
@@ -551,7 +559,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_account.command(name="search", aliases=["lookup", "find"])
     @commands.guild_only()
     async def account_search(ctx: Context, target: Member):
-        """Look up <Target> (Member)'s account."""
+        """Look up a member's account."""
         uid = str(target.id)
         sid = str(ctx.guild.id)
 
@@ -565,7 +573,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @level(10)
     async def account_add(ctx: Context, target: Member, level: int):
-        """Add an account for <Target> (Member) at <Level>.
+        """Add an account for a member.
         Level 10 required.
         """
         uid = str(target.id)
@@ -588,7 +596,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @level(10)
     async def account_remove(ctx: Context, target: Member):
-        """Remove <Target> (Member)'s account from the server.
+        """Remove a member's account from the server.
         Level 10 required.
         """
         uid = str(target.id)
@@ -610,7 +618,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @level(10)
     async def account_update(ctx: Context, target: Member, level: int):
-        """Change <Target> (Member)'s account level to <Level>.
+        """Change a member's account level.
         Level 10 required.
         """
         uid = str(target.id)
@@ -666,7 +674,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="load")
     @is_botmaster()
     async def cmd_plugins_load(ctx: Context, name: str):
-        """Load plugin (Cog) <Name>. Do not include file extension.
+        """Load plugin (Cog). Do not include file extension.
         Botmaster required.
         """
         if name in instance.plugins:
@@ -691,7 +699,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="unload")
     @is_botmaster()
     async def cmd_plugins_unload(ctx: Context, name: str):
-        """Unload plugin (Cog) <Name>. Do not include file extension.
+        """Unload plugin (Cog). Do not include file extension.
         Botmaster required.
         """
         if name not in instance.plugins:
@@ -712,7 +720,9 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="reload")
     @is_botmaster()
     async def cmd_plugins_reload(ctx: Context, name: str):
-        """Reload plugin (Cog) <Name>. Do not include file extension."""
+        """Reload plugin (Cog). Do not include file extension.
+        Botmaster required.
+        """
         if name not in instance.plugins:
             await ctx.send(f":anger: Plugin {name}.py is not loaded.")
         else:
@@ -740,7 +750,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="enable")
     @level(10)
     async def cmd_plugins_enable(ctx: Context, name: str):
-        """Enable a loaded plugin (Cog) <Name> on your server.
+        """Enable a loaded plugin (Cog) on your server.
         Level 10 required.
         """
         sid = str(ctx.guild.id)
@@ -759,7 +769,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="disable")
     @level(10)
     async def cmd_plugins_disable(ctx: Context, name: str):
-        """Disable a loaded plugin (Cog) <Name> on your server.
+        """Disable a loaded plugin (Cog) on your server.
         Level 10 required.
         """
         sid = str(ctx.guild.id)

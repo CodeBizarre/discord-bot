@@ -90,7 +90,7 @@ class Roles(commands.Cog):
     @role.command(name="get", aliases=["g"])
     @commands.guild_only()
     async def role_get(self, ctx: Context, *, role_name: str):
-        """Add the <Role Name> to yourself."""
+        """Get a role."""
         sid = str(ctx.guild.id)
 
         if sid not in db:
@@ -112,7 +112,7 @@ class Roles(commands.Cog):
     @role.command(name="lose", aliases=["l"])
     @commands.guild_only()
     async def role_lose(self, ctx: Context, *, role_name: str):
-        """Remove the <Role Name> from yourself."""
+        """Lose a role."""
         sid = str(ctx.guild.id)
 
         if sid not in db:
@@ -135,7 +135,7 @@ class Roles(commands.Cog):
     @commands.guild_only()
     @is_level(10)
     async def role_add(self, ctx: Context, role_get: Role, *, description: str):
-        """Add/update the assignable roles list with <Role Get> (Role) <Description>
+        """Add/update a role on the assignable roles list.
         Level 10 required
         """
         sid = str(ctx.guild.id)
@@ -162,7 +162,7 @@ class Roles(commands.Cog):
     @commands.guild_only()
     @is_level(10)
     async def role_remove(self, ctx: Context, *, role_get: Role):
-        """Remove the role <Role Get> (Role) from the assignable roles list.
+        """Remove a role from the assignable roles list.
         Level 10 required
         """
         sid = str(ctx.guild.id)
