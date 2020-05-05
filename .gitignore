@@ -2,3 +2,4 @@
 TODO.md
 /plugins/code.py
 /plugins/furry.py
+*.code-workspace
