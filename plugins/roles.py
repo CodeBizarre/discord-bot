@@ -63,29 +63,30 @@ class Roles(commands.Cog):
         Running the command without arguments will display the list of available roles
         in the current server.
         """
-        if ctx.invoked_subcommand is None:
-            sid = str(ctx.guild.id)
+        if ctx.invoked_subcommand is not None:
+            return
+        sid = str(ctx.guild.id)
 
-            # Get the app info for the embed author
-            if sid in db and len(db[sid]) > 0:
-                if self.app_info is None:
-                    self.app_info = await self.bot.application_info()
+        # Get the app info for the embed author
+        if sid in db and len(db[sid]) > 0:
+            if self.app_info is None:
+                self.app_info = await self.bot.application_info()
 
-                embed = Embed(title="Available roles:", color=0x7289DA)
+            embed = Embed(title="Available roles:", color=0x7289DA)
 
-                embed.set_author(name=self.bot.user.name, icon_url=self.app_info.icon_url)
+            embed.set_author(name=self.bot.user.name, icon_url=self.app_info.icon_url)
 
-                # Add an entry for every assignable role
-                for name, info in db[sid].items():
-                    embed.add_field(name=name, value=info["description"])
+            # Add an entry for every assignable role
+            for name, info in db[sid].items():
+                embed.add_field(name=name, value=info["description"])
 
-                embed.set_footer(
-                    text="For more information use the `help roles` command."
-                )
+            embed.set_footer(
+                text="For more information use the `help roles` command."
+            )
 
-                await ctx.send(embed=embed)
-            else:
-                await ctx.send(":anger: This server has no assignable roles.")
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send(":anger: This server has no assignable roles.")
 
     @role.command(name="get", aliases=["g"])
     @commands.guild_only()

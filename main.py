@@ -18,7 +18,7 @@ VERSION = "2.2.1b1"
 # Get the filesystem in ship-shape
 try:
     # Generate a default config if it doesn't exist
-    if not os.path.exists("config") or not os.path.exists("config/config.json"):
+    if not (os.path.exists("config") and os.path.exists("config/config.json")):
         os.makedirs("config")
         default_config = {
             "Database": "database.sql",
@@ -88,16 +88,16 @@ class DiscordBot:
             return "Bot not initialized."
         else:
             server_names = [i.name for i in self.bot.guilds]
-            lines = []
-            lines.append(f"[------------------------STATUS------------------------]")
-            lines.append("Source: https://github.com/Aurexine/discord-bot")
-            lines.append(f"Time: {datetime.now()}")
-            lines.append(f"Version: {VERSION}")
-            lines.append(f"Logged in as {self.bot.user} ({self.bot.user.id})")
-            lines.append(f"Loaded plugins - {self.plugins}")
-            lines.append(f"Joined {len(self.bot.guilds)} server(s) - {server_names}")
-            lines.append(f"[------------------------STATUS------------------------]")
-            return lines
+            return [
+                f'[------------------------STATUS------------------------]',
+                "Source: https://github.com/Aurexine/discord-bot",
+                f'Time: f"Time: {datetime.now()}"',
+                f'Version: f"Version: {VERSION}"',
+                f'Logged in as f"Logged in as {self.bot.user} ({self.bot.user.id})" (f"Logged in as {self.bot.user} ({self.bot.user.id})")',
+                f'Loaded plugins - f"Loaded plugins - {self.plugins}"',
+                f'Joined f"Joined {len(self.bot.guilds)} server(s) - {server_names}" server(s) - f"Joined {len(self.bot.guilds)} server(s) - {server_names}"',
+                f'[------------------------STATUS------------------------]',
+            ]
 
 # Function to build an account level embed
 async def account_embed(member: Member, level: int) -> Embed:
@@ -194,12 +194,11 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             return True
 
         # Not a plugin
-        if ctx.cog == None:
+        if ctx.cog is None:
             return True
 
         try:
-            result = instance.servers[sid][ctx.cog.name]
-            return result
+            return instance.servers[sid][ctx.cog.name]
         except KeyError:
             # Plugin will default to enabled if not set by a server admin
             return True
@@ -454,10 +453,10 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         Running the command without arguments will display your server's currect settings.
         MUST HAVE SERVER ADMINISTRATOR PERMISSION
         """
-        sid = str(ctx.guild.id)
-
         if ctx.invoked_subcommand is None:
             embed = Embed(title="Log Settings", color=0x7289DA)
+            sid = str(ctx.guild.id)
+
             try:
                 guild = ctx.bot.get_guild(int(sid))
                 channel = guild.get_channel(int(instance.servers[sid]["log_channel"]))
