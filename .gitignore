@@ -1,5 +1,4 @@
 /.vscode
 TODO.md
-/plugins/code.py
-/plugins/furry.py
+/local-plugins/*
 *.code-workspace
