@@ -89,14 +89,14 @@ class DiscordBot:
         else:
             server_names = [i.name for i in self.bot.guilds]
             return [
-                f'[------------------------STATUS------------------------]',
+                f"[------------------------STATUS------------------------]",
                 "Source: https://github.com/Aurexine/discord-bot",
-                f'Time: f"Time: {datetime.now()}"',
-                f'Version: f"Version: {VERSION}"',
-                f'Logged in as f"Logged in as {self.bot.user} ({self.bot.user.id})" (f"Logged in as {self.bot.user} ({self.bot.user.id})")',
-                f'Loaded plugins - f"Loaded plugins - {self.plugins}"',
-                f'Joined f"Joined {len(self.bot.guilds)} server(s) - {server_names}" server(s) - f"Joined {len(self.bot.guilds)} server(s) - {server_names}"',
-                f'[------------------------STATUS------------------------]',
+                f"Time: {datetime.now()}",
+                f"Version: {VERSION}",
+                f"Logged in as {self.bot.user} ({self.bot.user.id})",
+                f"Loaded plugins - {self.plugins}",
+                f"Joined {len(self.bot.guilds)} server(s) - {server_names}",
+                f"[------------------------STATUS------------------------]",
             ]
 
 # Function to build an account level embed
@@ -738,7 +738,9 @@ def initialize(instance: DiscordBot) -> commands.Bot:
                 instance.plugins.append(name)
 
                 update_db(db, instance.plugins, "plugins")
-                await ctx.send(f":white_check_mark: Plugin {name}.py successfully loaded.")
+                await ctx.send(
+                    f":white_check_mark: Plugin {name}.py successfully loaded."
+                )
             except Exception as e:
                 exc = f"{type(e).__name__}, {e}"
                 await ctx.send(
