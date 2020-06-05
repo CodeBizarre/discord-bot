@@ -260,30 +260,32 @@ class Admin(commands.Cog):
         Run without arguments to view current server settings.
         MUST HAVE SERVER ADMINISTRATOR PERMISSION
         """
-        if ctx.invoked_subcommand is None:
-            sid = str(ctx.guild.id)
-            log_status = None
-            mute_role = None
+        if ctx.invoked_subcommand is not None:
+            return
 
-            # Get the server's config values
-            try:
-                channel = self.bot.get_channel(int(db[sid]["log_channel"]))
-                log_status = f"{db[sid]['log']}, {channel.mention}"
-            except KeyError:
-                log_status = "Not set up"
-            try:
-                role = ctx.guild.get_role(int(db[sid]["mute_role"]))
-                mute_role = role.name
-            except KeyError:
-                mute_role = "Not set up"
+        sid = str(ctx.guild.id)
+        log_status = None
+        mute_role = None
 
-            # Post them as en embed
-            embed = Embed(title="Admin Info", color=0x7289DA)
-            embed.add_field(name="Log", value=log_status, inline=True)
-            embed.add_field(name="Mute Role", value=mute_role, inline=True)
-            embed.set_footer(text=pretty_datetime(datetime.now()))
+        # Get the server's config values
+        try:
+            channel = self.bot.get_channel(int(db[sid]["log_channel"]))
+            log_status = f"{db[sid]['log']}, {channel.mention}"
+        except KeyError:
+            log_status = "Not set up"
+        try:
+            role = ctx.guild.get_role(int(db[sid]["mute_role"]))
+            mute_role = role.name
+        except KeyError:
+            mute_role = "Not set up"
 
-            await ctx.send(embed=embed)
+        # Post them as en embed
+        embed = Embed(title="Admin Info", color=0x7289DA)
+        embed.add_field(name="Log", value=log_status, inline=True)
+        embed.add_field(name="Mute Role", value=mute_role, inline=True)
+        embed.set_footer(text=pretty_datetime(datetime.now()))
+
+        await ctx.send(embed=embed)
 
     @admin.command(name="log")
     @commands.guild_only()
@@ -527,7 +529,7 @@ class Admin(commands.Cog):
 
         # Add 1 to the amount of warns the user may already have
         if uid in warn_db[sid]:
-            for w in warn_db[sid][uid]:
+            for _ in warn_db[sid][uid]:
                 warn_count += 1
 
         # Get the current UTC time, a future time from time_parser, and the difference
