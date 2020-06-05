@@ -65,6 +65,7 @@ class Roles(commands.Cog):
         """
         if ctx.invoked_subcommand is not None:
             return
+
         sid = str(ctx.guild.id)
 
         # Get the app info for the embed author
