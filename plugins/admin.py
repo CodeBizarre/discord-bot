@@ -10,7 +10,7 @@ from discord.ext import commands
 from discord.ext.commands import Context
 
 from main import is_level, get_account
-from helpers import update_db, pretty_datetime, pretty_timedelta
+from helpers import update_db, pretty_datetime, pretty_timedelta, time_parser
 
 VERSION = "2.3b1"
 
@@ -57,30 +57,6 @@ db = sql_db["admin"]
 tempban_db = sql_db["temp_bans"]
 warn_db = sql_db["warns"]
 mute_db = sql_db["mutes"]
-
-# Parser to convert length/span combos into a future datetime object
-async def time_parser(span: str, length: int, dt: datetime) -> datetime:
-    # Psuedo switch/case to return a lambda function for the timedelta
-    switcher = {
-        "seconds": lambda: timedelta(seconds=length),
-        "minutes": lambda: timedelta(minutes=length),
-        "hours": lambda: timedelta(hours=length),
-        "days": lambda: timedelta(days=length),
-        "weeks": lambda: timedelta(weeks=length),
-        "months": lambda: timedelta(days=length*30),
-        "years": lambda: timedelta(days=length*365),
-        "max": lambda: timedelta(days=3650)
-    }
-
-    if span in switcher:
-        # Grab the function from the switcher
-        case = switcher[span]
-    elif span + "s" in switcher:
-        case = switcher[span + "s"]
-
-    # Calculate and return the time in the future
-    future = dt + case()
-    return future
 
 # Coroutine to run in a background thread to check if tempbans are expired
 async def tempban_check(bot: commands.Bot):

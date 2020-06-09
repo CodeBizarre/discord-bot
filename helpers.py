@@ -61,6 +61,30 @@ def pretty_timedelta(td: timedelta):
 
     return result
 
+async def time_parser(span: str, length: int, dt: datetime) -> datetime:
+    """Parser to convert length/span combos into a future datetime object"""
+    # Psuedo switch/case to return a lambda function for the timedelta
+    switcher = {
+        "seconds": lambda: timedelta(seconds=length),
+        "minutes": lambda: timedelta(minutes=length),
+        "hours": lambda: timedelta(hours=length),
+        "days": lambda: timedelta(days=length),
+        "weeks": lambda: timedelta(weeks=length),
+        "months": lambda: timedelta(days=length*30),
+        "years": lambda: timedelta(days=length*365),
+        "max": lambda: timedelta(days=3650)
+    }
+
+    if span in switcher:
+        # Grab the function from the switcher
+        case = switcher[span]
+    elif span + "s" in switcher:
+        case = switcher[span + "s"]
+
+    # Calculate and return the time in the future
+    future = dt + case()
+    return future
+
 def get_logger(file_name) -> Logger:
     """Get an instance of Logger and set up log files."""
     timestamp = pretty_datetime(datetime.now(), "FILE")
