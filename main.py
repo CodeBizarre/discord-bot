@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.2.1b1"
+VERSION = "2.2.2b1"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
