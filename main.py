@@ -6,7 +6,7 @@ import json
 
 from datetime import datetime
 from sqlitedict import SqliteDict
-from discord import Guild, Message, User, Member, Embed, Game, TextChannel
+from discord import Guild, Message, User, Member, Embed, Game, TextChannel, AuditLogAction
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -310,6 +310,14 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def on_message_delete(msg: Message):
         sid = str(msg.guild.id)
 
+        # Try to get the user who deleted the message, not sure if this is reliable
+        action = await msg.guild.audit_logs(
+            limit=1,
+            action=AuditLogAction.message_delete
+        ).flatten()
+
+        who = action[0].user
+
         # Log the delete to the console/log file if enabled
         if instance.log_deletes:
             timestamp = pretty_datetime(datetime.now(), display="TIME")
@@ -326,6 +334,11 @@ def initialize(instance: DiscordBot) -> commands.Bot:
                 channel = guild.get_channel(int(instance.servers[sid]["log_channel"]))
 
                 embed = Embed(title="Message Deleted", color=0xff0000)
+                embed.add_field(
+                    name="Deleted By",
+                    value=f"{who.name}#{who.discriminator}",
+                    inline=False
+                )
                 embed.add_field(
                     name=f"Author - {msg.author.name}#{msg.author.discriminator}",
                     value=f"Deleted from {msg.channel.mention} - UID: {msg.author.id}"
