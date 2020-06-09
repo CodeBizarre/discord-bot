@@ -355,10 +355,6 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         # Just send the error to the command's channel
         await ctx.send(f":anger: Error: {error}")
 
-    @bot.event
-    async def on_error(error, *args, **kwargs):
-        log.error(f"[ERROR] {error} {args}")
-
     ## COMMANDS
     # Basic
     @bot.command(name="shutdown")
