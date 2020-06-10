@@ -1,4 +1,8 @@
 /.vscode
-TODO.md
+/__pycache__
 /local-plugins/*
+/build
+/dist
 *.code-workspace
+*.spec
+TODO.md
