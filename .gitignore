@@ -5,4 +5,5 @@
 /dist
 *.code-workspace
 *.spec
+*.pyo
 TODO.md
