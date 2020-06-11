@@ -347,8 +347,8 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
                 embed = Embed(title="Message Deleted", color=0xff0000)
                 embed.add_field(
-                    name="Deleted By",
-                    value=f"{who.name}#{who.discriminator}",
+                    name="Last message delete action performed by:",
+                    value=f"{who.name}#{who.discriminator} or a bot",
                     inline=False
                 )
                 embed.add_field(
