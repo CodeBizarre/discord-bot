@@ -152,7 +152,7 @@ def load_plugins(bot: commands.Bot, logger: Logger, plugins: list):
         try:
             path = f"plugins.{plugin}"
             bot.load_extension(path)
-            plugins.append(p)
+            plugins.append(plugin)
         except Exception as e:
             exc = "{0}: {1}".format(type(e).__name__, e)
             logger.warning(f"Failed to load plugin {p}:\n    - {exc}")
