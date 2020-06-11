@@ -78,6 +78,9 @@ async def group_check(bot: commands.Bot):
                 print(f"[ERROR]\n    - {e}")
                 break
 
+            if last_message is None:
+                return
+
             last_datetime = last_message.created_at.replace(tzinfo=timezone.utc)
             delta = datetime.now(tz=timezone.utc) - last_datetime
 
