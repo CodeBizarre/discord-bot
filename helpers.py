@@ -142,7 +142,7 @@ def load_plugins(bot: commands.Bot, logger: Logger, plugins: list):
     """Load available cogs."""
     for p in os.listdir("plugins"):
         if not (p.endswith(".py") or p.endswith(".pyc")):
-            return
+            continue
 
         plugin = p.split(".")[0]
 
