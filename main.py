@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.2.2b1"
+VERSION = "2.2.2b2"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -47,6 +47,9 @@ try:
         os.makedirs("plugins")
 except IOError as e:
     print(e)
+    exit()
+except json.JSONDecodeError:
+    print("Error reading config, please validate your JSON!")
     exit()
 
 ## CLASSES
