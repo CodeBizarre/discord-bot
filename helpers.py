@@ -141,12 +141,17 @@ def get_db_dict(file: str, table: str, base_key: str) -> dict:
 def load_plugins(bot: commands.Bot, logger: Logger, plugins: list):
     """Load available cogs."""
     for p in os.listdir("plugins"):
-        p = p.split(".")[0]
-        # This wasn't an issue before but is now
-        if p == "__pycache__":
+        if not (p.endswith(".py") or p.endswith(".pyc")):
             return
+
+        plugin = p.split(".")[0]
+
+        if plugin == "__pycache__":
+            return
+
         try:
-            bot.load_extension(f"plugins.{p}")
+            path = f"plugins.{plugin}"
+            bot.load_extension(path)
             plugins.append(p)
         except Exception as e:
             exc = "{0}: {1}".format(type(e).__name__, e)
