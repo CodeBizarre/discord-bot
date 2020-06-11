@@ -47,22 +47,6 @@ if "servers" not in sql_db:
 
 db = sql_db["servers"]
 
-# db_skeleton = {
-#     "servers": {
-#         "server_id": {
-#             "group_name": {
-#                 "info": {
-#                     "description": "My Cool Friends",
-#                     "category": "category_id",
-#                     "text_channel": "text_channel_id",
-#                     "voice_channel": "voice_channel_id"
-#                     "role": "role_id"
-#                 }
-#             }
-#         }
-#     }
-# }
-
 async def group_check(bot: commands.Bot):
     # No servers registered
     if len(db) <= 0:
