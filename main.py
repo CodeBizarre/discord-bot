@@ -274,11 +274,12 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
     @bot.event
     async def on_message_edit(former: Message, latter: Message):
-        sid = str(former.guild.id)
+        sid = str(former.guild.id) if former.guild is not None else None
 
         # Embeds cause message edit events even if the user didn't edit them
         if former.content == latter.content and former.embeds != latter.embeds:
             return
+
         # Log the edit to the console/log file if enabled
         if instance.log_edits:
             timestamp = pretty_datetime(datetime.now(), display="TIME")
@@ -286,6 +287,14 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             log.info(f"-{timestamp}- [EDIT] [{former.guild}] #{former.channel}")
             log.info(f"[BEFORE] <{former.author}>: {former.content}")
             log.info(f"[AFTER] <{latter.author}>: {latter.content}")
+
+        # Process the commands from the message afterwards if enabled
+        if instance.cmd_on_edit:
+            await bot.process_commands(latter)
+
+        # If this is a DM, we don't need to try and log to channel
+        if sid is None:
+            return
 
         # Log the edit to a channel if the server has it set up
         try:
@@ -305,13 +314,9 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         except KeyError:
             pass
 
-        # Process the commands from the message afterwards if enabled
-        if instance.cmd_on_edit:
-            await bot.process_commands(latter)
-
     @bot.event
     async def on_message_delete(msg: Message):
-        sid = str(msg.guild.id)
+        sid = str(msg.guild.id) if msg.guild is not None else None
 
         # Try to get the user who deleted the message, not sure if this is reliable
         action = await msg.guild.audit_logs(
@@ -329,6 +334,10 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             content = f"[{msg.guild}] #{msg.channel} <{msg.author}>: {msg.content}"
 
             log.info(f"{header} {content}")
+
+        # If this is a DM, we don't need to try and log to channel
+        if sid is None:
+            return
 
         # Log the delete to a channel if the server has it set up
         try:
