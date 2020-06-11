@@ -32,7 +32,7 @@ if os.path.exists(db_file) and backup:
         shutil.copyfile(db_file, f"db/backups/groups-{timestamp}.sql")
     except IOError as e:
         error_file = f"db/backups/groups-{timestamp}.sql"
-        log.error(f"Unable to create file {error_file}\n    - {e}")
+        print(f"Unable to create file {error_file}\n    - {e}")
 
 sql_db = SqliteDict(
     filename=db_file,
