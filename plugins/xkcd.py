@@ -8,7 +8,7 @@ from discord.ext.commands import Context
 # Uncomment the following line to fly
 #import antigravity
 
-VERSION = "1.2b1"
+VERSION = "1.2b2"
 
 class XKCD(commands.Cog):
     """A plugin to retrieve XKCD comics."""
@@ -37,7 +37,7 @@ class XKCD(commands.Cog):
             alt_text = exc.getAsciiAltText().decode("ascii")
             number = exc.number
 
-            embed = Embed(title=title, url=link, color=0x96A8C8)
+            embed = Embed(title=title, url=f"https://xkcd.com/{number}", color=0x96A8C8)
             embed.add_field(name=str(number), value=alt_text)
             embed.set_image(image_link)
 
@@ -66,7 +66,7 @@ class XKCD(commands.Cog):
 
     @xkcd.command(name="number")
     async def xkcd_number(self, ctx: Context, number: int):
-        """Get a specific xkcd comic."""
+        """Get xkcd comic <number>."""
         comic = await self.get_comic("number", number)
         await ctx.send(embed=comic)
 
