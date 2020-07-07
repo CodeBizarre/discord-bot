@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.3.1b3"
+VERSION = "2.3.1b4"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -390,8 +390,22 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
     @bot.event
     async def on_command_error(ctx: Context, error):
-        # Just send the error to the command's channel
-        await ctx.send(f":anger: Error: {error}")
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.send(f":anger: This command is not available in DMs.")
+        elif isinstance(error, commands.CommandNotFound):
+            # Ignore commands that don't exist
+            pass
+        elif isinstance(error, commands.TooManyArguments):
+            await ctx.send(":anger: Too many arguments passed.")
+        elif isinstance(error, commands.MissingPermissions):
+            await ctx.send(":anger: You do not have the required permissions.")
+        elif isinstance(error, commands.BotMissingPermissions):
+            await ctx.send(":anger: I don't have permission to do that.")
+        elif isinstance(error, commands.CheckFailure):
+            await ctx.send(f":anger: {e.__cause__}")
+        else:
+            # For remaining errors, simply sending it to the issuing channel is enough
+            await ctx.send(f":anger: Error: {error}")
 
     ## COMMANDS
     # Basic
