@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.3.1b4"
+VERSION = "2.3.1b5"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -422,11 +422,6 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def cmd_ping(ctx: Context):
         """Ping/pong test."""
         await ctx.send(f":ping_pong: Pong {ctx.author.mention}")
-
-    @bot.command(name="echo")
-    async def cmd_echo(ctx: Context, *, message: str):
-        """Echo command."""
-        await ctx.send(message)
 
     @bot.command(name="status")
     @is_botmaster()
