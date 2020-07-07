@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.3.1b7"
+VERSION = "2.3.1b8"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -436,7 +436,11 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def cmd_status(ctx: Context, *, status: str):
         """Set the bot to 'Playing <status>'."""
         activity = Game(name=status)
-        await bot.change_presence(activity=activity)
+        try:
+            await bot.change_presence(activity=activity)
+            await ctx.send(":white_check_mark: Status changed.")
+        except Exception as e:
+            await ctx.send(f":anger: Unable to change status: {e}")
 
     @bot.command(name="info")
     async def cmd_info(ctx: Context):
