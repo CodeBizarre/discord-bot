@@ -9,7 +9,7 @@ from discord.ext.commands import Context
 from main import get_account
 from helpers import pretty_datetime
 
-VERSION = "2.2b1"
+VERSION = "2.3b1"
 
 # Get the config file to grab the command prefix
 prefix = None
@@ -34,10 +34,14 @@ def msg_op_or_level(required=10):
 
         # Split the message into arguments and fetch the requested message
         # This check is specifically for the move/crosspost commands
-        # Therefore it can be assuemed args[1] will be a message id
-        args = ctx.message.content.split(" ")
+        # Therefore it can be assuemed args[1] will be a message link or snowflake
+        argument = ctx.message.content.split(" ")[1]
 
-        exc = asyncio.run_coroutine_threadsafe(ctx.fetch_message(args[1]), loop)
+        # If the passed argument is a discord channel link, grab the snowflake
+        if argument.startswith("https://discordapp.com/channels/"):
+            argument = argument.split("/")[6]
+
+        exc = asyncio.run_coroutine_threadsafe(ctx.fetch_message(argument), loop)
 
         while not exc.done():
             await asyncio.sleep(0.1)
@@ -77,7 +81,9 @@ class Messages(commands.Cog):
     @commands.command(aliases=["xpost", "x-post"])
     @msg_op_or_level(5)
     async def crosspost(self, ctx: Context, message: Message, target: TextChannel):
-        """Cross-post a message to another channel.
+        """Cross-post <message> to <target>.
+        Message must be a snowflake or discord message link.
+
         Must be the message OP or level 5
         """
         # Avoid posting to the same channel
@@ -118,7 +124,9 @@ class Messages(commands.Cog):
     @commands.command(aliases=["mv", "->"])
     @msg_op_or_level(5)
     async def move(self, ctx: Context, message: Message, target: TextChannel):
-        """Move a message to a different channel.
+        """Move a <message> to a different channel.
+        Message must be a snowflake or discord message link.
+
         Must be the message OP or level 5
         """
         # Avoid posting to the same channel
