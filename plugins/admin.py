@@ -220,8 +220,13 @@ class Admin(commands.Cog):
         # Log the info as an embed
         tag = f"{target.name}#{target.discriminator} ({target.id})"
 
-        embed = Embed(title=action, color=0xff0000)
-        embed.add_field(name=ctx.command.name, value=tag, inline=True)
+        embed = Embed(
+            title=f"{ctx.author.name}#{ctx.author.discriminator} {ctx.command.name}",
+            color=0xff0000
+        )
+        embed.set_thumbnail(url=str(ctx.author.avatar_url))
+        embed.add_field(name="Action", value=action, inline=False)
+        embed.add_field(name="Target", value=tag)
         embed.add_field(name="Info", value=info)
         embed.set_footer(text=pretty_datetime(datetime.now()))
 
