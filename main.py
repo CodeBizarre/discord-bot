@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.3.0b2"
+VERSION = "2.3.1b3"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -582,6 +582,30 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         update_db(db, instance.servers, "servers")
 
         await ctx.send(f":white_check_mark: Ghost reporting set to {enabled}.")
+
+    @bot.command(name="whois", aliases=["who", "identify"])
+    @commands.guild_only()
+    async def cmd_whois(ctx: Context, target: Member):
+        embed = Embed(title=f"{target.name}#{target.discriminator}", color=0x7289DA)
+        embed.set_thumbnail(url=str(target.avatar_url))
+
+        embed.add_field(
+            name="Joined At",
+            value=f"{pretty_datetime(target.joined_at)}"
+        )
+        embed.add_field(
+            name="Nickname",
+            value=f"{target.nick}"
+        )
+        embed.add_field(
+            name="Roles",
+            value=f"{[r.name for r in target.roles[1:]]}",
+            inline=False
+        )
+
+        embed.set_footer(text="Try ~info!")
+
+        await ctx.send(embed=embed)
 
     # Accounts
     @bot.group(name="account", aliases=["accounts", "accs"])
