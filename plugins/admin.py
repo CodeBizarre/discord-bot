@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 from main import is_level, get_account
 from helpers import update_db, pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.3b1"
+VERSION = "2.3b2"
 
 # Set up the database
 db_file = "db/admin.sql"
@@ -31,7 +31,7 @@ if os.path.exists(db_file) and backup:
         shutil.copyfile(db_file, f"db/backups/admin-{timestamp}.sql")
     except IOError as e:
         error_file = f"db/backups/admin-{timestamp}.sql"
-        log.error(f"Unable to create file {error_file}\n    - {e}")
+        print(f"Unable to create file {error_file}\n    - {e}")
 
 sql_db = SqliteDict(
     filename=db_file,
@@ -81,7 +81,7 @@ async def tempban_check(bot: commands.Bot):
 
                 del tempban_db[sid][uid]
                 update_db(sql_db, tempban_db, "temp_bans")
-                print(f"[ADMIN][TEMPBAN][REMOVE] {target.id} in <{guild.name}>")
+                print(f"[ADMIN][TEMPBAN][REMOVE] {uid} in <{guild.name}>")
 
 # Coroutine to run in a background thread to check if warns are expired
 async def warn_check(bot: commands.Bot):
