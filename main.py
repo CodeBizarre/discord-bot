@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.3.1b6"
+VERSION = "2.3.1b7"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -79,7 +79,7 @@ class DiscordBot:
             print(e)
             exit()
         # Non-config initializations
-        self.blacklist = []
+        self.blocklist = []
         self.plugins = []
         self.servers = {}
         self.accounts = {}
@@ -149,8 +149,14 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         autocommit=True
     )
 
-    if "blacklist" not in db:
+    # Convert old databases to the new format
+    # This will be removed in a coming commit, so update soon.
+    if "blacklist" in db:
+        db["blocklist"] = db["blacklist"]
         db["blacklist"] = []
+
+    if "blocklist" not in db:
+        db["blocklist"] = []
 
     if "servers" not in db:
         db["servers"] = {}
@@ -158,7 +164,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     if "accounts" not in db:
         db["accounts"] = {}
 
-    instance.blacklist = db["blacklist"]
+    instance.blocklist = db["blocklist"]
     instance.servers = db["servers"]
     instance.accounts = db["accounts"]
 
@@ -169,10 +175,10 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             return str(ctx.author.id) in instance.botmasters
         return commands.check(predicate)
 
-    # Global check for if the user is blacklisted
+    # Global check for if the user is blocked
     @bot.check
     async def allowed(ctx: Context):
-        return str(ctx.author.id) not in instance.blacklist
+        return str(ctx.author.id) not in instance.blocklist
 
     # Local check for the user's bot account level
     def level(required=0):
@@ -460,34 +466,34 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
         await ctx.send(embed=embed)
 
-    @bot.command(name="blacklist", aliases=["bl", "block"])
+    @bot.command(name="block", aliases=["bl"])
     @is_botmaster()
-    async def cmd_blacklist(ctx: Context, target: User, blacklist = True):
-        """Add or remove a user from the blacklist.
+    async def cmd_block(ctx: Context, target: User, block = True):
+        """Add or remove a user from the block list.
         Botmaster required.
         """
         uid = str(target.id)
 
-        if uid in instance.blacklist:
-            # Trying to blacklist a user who is already blacklisted
-            if blacklist:
-                await ctx.send(f":anger: {target.name} is already blacklisted.")
-            # Remove a user from the blacklist
+        if uid in instance.blocklist:
+            # Trying to block a user who is already blocked
+            if block:
+                await ctx.send(f":anger: {target.name} is already blocked.")
+            # Unblock a user.
             else:
-                instance.blacklist.remove(uid)
+                instance.blocklist.remove(uid)
                 await ctx.send(
-                    f":white_check_mark: {target.name} removed from blacklist."
+                    f":white_check_mark: {target.name} unblocked."
                 )
         else:
-            # Add a user to the blacklist
-            if blacklist:
-                instance.blacklist.append(uid)
-                await ctx.send(f":white_check_mark: {target.name} added to blacklist.")
-            # Trying to remove a user who is not blacklisted
+            # Add a user to the blocklist
+            if block:
+                instance.blocklist.append(uid)
+                await ctx.send(f":white_check_mark: {target.name} blocked.")
+            # Trying to remove a user who is not blocklisted
             else:
-                await ctx.send(f":anger: {target.name} is not blacklisted.")
+                await ctx.send(f":anger: {target.name} is not blocked.")
 
-        update_db(db, instance.blacklist, "blacklist")
+        update_db(db, instance.blocklist, "blocklist")
 
     @bot.group(name="logs")
     @commands.guild_only()
