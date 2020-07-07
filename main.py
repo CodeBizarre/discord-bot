@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.2.2b2"
+VERSION = "2.3.0b2"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -336,7 +336,20 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             log.info(f"{header} {content}")
 
         # If this is a DM, we don't need to try and log to channel
-        if sid is None:
+        if sid is not None:
+            # Check if the server should report mention deletes
+            try:
+                report_ghosts = instance.servers[sid]["report_ghosts"]
+            except KeyError:
+                # This server is not configured.
+                return
+
+            if len(msg.mentions) > 0 and report_ghosts:
+                mentions = [f"{m.name}#{m.discriminator}" for m in msg.mentions]
+                await msg.channel.send(
+                    f"{msg.author.mention} removed a message mentioning {mentions}."
+                )
+        else:
             return
 
         # Log the delete to a channel if the server has it set up
@@ -550,6 +563,25 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         update_db(db, instance.servers, "servers")
 
         await ctx.send(f":white_check_mark: Logging channel set to {channel.mention}.")
+
+    @bot.command(name="ghosts", aliases=["ghost", "pings"])
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def cmd_ghosts(ctx: Context, enabled: bool = True):
+        """Set reporting of messages being deleted contianing mentions (pings).
+        This causes a 'Ghost' notification on the client of the user who was mentioned.
+
+        If enabled, the bot will post a message showing all users mentioned.
+        """
+        sid = str(ctx.guild.id)
+
+        if sid not in instance.servers:
+            instance.servers[sid] = {}
+
+        instance.servers[sid]["report_ghosts"] = enabled
+        update_db(db, instance.servers, "servers")
+
+        await ctx.send(f":white_check_mark: Ghost reporting set to {enabled}.")
 
     # Accounts
     @bot.group(name="account", aliases=["accounts", "accs"])
