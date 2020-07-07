@@ -11,7 +11,7 @@ from discord.ext.commands import Context
 
 from helpers import pretty_datetime, update_db
 
-VERSION = "1.0b1"
+VERSION = "1.0b2"
 GP = "Groups plugin."
 IA = "Inactivity."
 
@@ -120,7 +120,7 @@ class Groups(commands.Cog):
     @commands.group(aliases=["group", "gr"])
     @commands.guild_only()
     async def groups(self, ctx: Context):
-        """Group related commands.
+        """Base command to manage groups.
 
         Running the command without arguments will display the groups you currently
         have access to.

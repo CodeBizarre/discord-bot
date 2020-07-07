@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.3.1b5"
+VERSION = "2.3.1b6"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -402,7 +402,9 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         elif isinstance(error, commands.BotMissingPermissions):
             await ctx.send(":anger: I don't have permission to do that.")
         elif isinstance(error, commands.CheckFailure):
-            await ctx.send(f":anger: {e.__cause__}")
+            await ctx.send(
+                f":anger: You do not meet one or more requirements to use this command."
+            )
         else:
             # For remaining errors, simply sending it to the issuing channel is enough
             await ctx.send(f":anger: Error: {error}")
@@ -426,7 +428,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @bot.command(name="status")
     @is_botmaster()
     async def cmd_status(ctx: Context, *, status: str):
-        """Set the bot to 'Playing <Status>'."""
+        """Set the bot to 'Playing <status>'."""
         activity = Game(name=status)
         await bot.change_presence(activity=activity)
 
@@ -491,7 +493,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def cmd_logs(ctx: Context):
-        """Toggle logging message edits and deletes to a channel in your server.
+        """Command to change settings for logging edited or deleted messages.
 
         Running the command without arguments will display your server's currect settings.
         MUST HAVE SERVER ADMINISTRATOR PERMISSION
@@ -526,7 +528,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def cmd_logs_edits(ctx: Context, enabled: bool):
-        """Set logging of message edits to the server's log channel.
+        """Set logging of edited messages to the server's log channel.
         MUST HAVE SERVER ADMINISTRATOR PERMISSION
         """
         sid = str(ctx.guild.id)
@@ -543,7 +545,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def cmd_logs_deletes(ctx: Context, enabled: bool):
-        """Set logging of message deletes to the server's log channel.
+        """Set logging of deleted messages to the server's log channel.
         MUST HAVE SERVER ADMINISTRATOR PERMISSION
         """
         sid = str(ctx.guild.id)
@@ -560,7 +562,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def cmd_logs_channel(ctx: Context, channel: TextChannel):
-        """Set the message edit/delete logging channel.
+        """Set the server's message logging channel.
         MUST HAVE SERVER ADMINISTRATOR PERMISSION
         """
         sid = str(ctx.guild.id)
@@ -577,7 +579,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def cmd_ghosts(ctx: Context, enabled: bool = True):
-        """Set reporting of messages being deleted contianing mentions (pings).
+        """Set per-server reporting of deleted messages contianing mentions (pings).
         This causes a 'Ghost' notification on the client of the user who was mentioned.
 
         If enabled, the bot will post a message showing all users mentioned.
@@ -594,7 +596,11 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
     @bot.command(name="whois", aliases=["who", "identify"])
     @commands.guild_only()
-    async def cmd_whois(ctx: Context, target: Member):
+    async def cmd_whois(ctx: Context, target: Member = None):
+        """Display basic information about <target>.
+
+        Running the command without arguments will show information about you.
+        """
         embed = Embed(title=f"{target.name}#{target.discriminator}", color=0x7289DA)
         embed.set_thumbnail(url=str(target.avatar_url))
 
@@ -620,7 +626,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @bot.group(name="account", aliases=["accounts", "accs"])
     @commands.guild_only()
     async def cmd_account(ctx: Context):
-        """Add/remove/update accounts.
+        """Base command to manage accounts.
 
         Running the command without arguments will display your current account level.
         """
@@ -644,7 +650,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_account.command(name="search", aliases=["lookup", "find"])
     @commands.guild_only()
     async def account_search(ctx: Context, target: Member):
-        """Look up a member's account."""
+        """Look up a member's account on the current server."""
         uid = str(target.id)
         sid = str(ctx.guild.id)
 
@@ -658,7 +664,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @level(10)
     async def account_add(ctx: Context, target: Member, level: int):
-        """Add an account for a member.
+        """Add an account for a member on the current server.
         Level 10 required.
         """
         uid = str(target.id)
@@ -681,7 +687,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @level(10)
     async def account_remove(ctx: Context, target: Member):
-        """Remove a member's account from the server.
+        """Remove a member's account on the current server.
         Level 10 required.
         """
         uid = str(target.id)
@@ -703,7 +709,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @level(10)
     async def account_update(ctx: Context, target: Member, level: int):
-        """Change a member's account level.
+        """Change a member's account level on the current server.
         Level 10 required.
         """
         uid = str(target.id)
@@ -725,7 +731,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def account_admin(ctx: Context):
-        """Set yourself as an administrator of the server to create accounts.
+        """Set yourself as an administrator of the current server to create accounts.
         MUST HAVE SERVER ADMINISTRATOR PERMISSION
         """
         uid = str(ctx.author.id)
@@ -745,7 +751,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     # Plugins
     @bot.group(name="plugins", aliases=["pl", "cogs"])
     async def cmd_plugins(ctx: Context):
-        """Plugin handling.
+        """Base command to manage plugins.
 
         Running the command without arguments will list loaded plugins.
         """
@@ -837,7 +843,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="enable")
     @level(10)
     async def cmd_plugins_enable(ctx: Context, name: str):
-        """Enable a loaded plugin (Cog) on your server.
+        """Enable a loaded plugin (Cog) on the current server.
         Level 10 required.
         """
         sid = str(ctx.guild.id)
@@ -856,7 +862,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     @cmd_plugins.command(name="disable")
     @level(10)
     async def cmd_plugins_disable(ctx: Context, name: str):
-        """Disable a loaded plugin (Cog) on your server.
+        """Disable a loaded plugin (Cog) on the current server.
         Level 10 required.
         """
         sid = str(ctx.guild.id)

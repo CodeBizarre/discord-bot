@@ -11,7 +11,7 @@ from discord.ext.commands import Context
 from main import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "1.1b2"
+VERSION = "1.1b3"
 
 # Get the database set up
 db_file = "db/roles.sql"
@@ -58,7 +58,7 @@ class Roles(commands.Cog):
     @commands.group(aliases=["roles"])
     @commands.guild_only()
     async def role(self, ctx: Context):
-        """Role related commands.
+        """Base role management commands.
 
         Running the command without arguments will display the list of available roles
         in the current server.
@@ -92,7 +92,7 @@ class Roles(commands.Cog):
     @role.command(name="get", aliases=["g"])
     @commands.guild_only()
     async def role_get(self, ctx: Context, *, role_name: str):
-        """Get a role."""
+        """Get a role from the assignable roles list."""
         sid = str(ctx.guild.id)
 
         if sid not in db:
@@ -114,7 +114,7 @@ class Roles(commands.Cog):
     @role.command(name="lose", aliases=["l"])
     @commands.guild_only()
     async def role_lose(self, ctx: Context, *, role_name: str):
-        """Lose a role."""
+        """Lose a role from the assignable roles list."""
         sid = str(ctx.guild.id)
 
         if sid not in db:
@@ -137,7 +137,7 @@ class Roles(commands.Cog):
     @commands.guild_only()
     @is_level(10)
     async def role_add(self, ctx: Context, role_get: Role, *, description: str):
-        """Add/update a role on the assignable roles list.
+        """Add or update a role on the assignable roles list.
         Level 10 required
         """
         sid = str(ctx.guild.id)
