@@ -324,14 +324,6 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     async def on_message_delete(msg: Message):
         sid = str(msg.guild.id) if msg.guild is not None else None
 
-        # Try to get the user who deleted the message, not sure if this is reliable
-        action = await msg.guild.audit_logs(
-            limit=1,
-            action=AuditLogAction.message_delete
-        ).flatten()
-
-        who = action[0].user
-
         # Log the delete to the console/log file if enabled
         if instance.log_deletes:
             timestamp = pretty_datetime(datetime.now(), display="TIME")
@@ -361,6 +353,14 @@ def initialize(instance: DiscordBot) -> commands.Bot:
         # Log the delete to a channel if the server has it set up
         try:
             if instance.servers[sid]["log_deletes"]:
+                # Try to get the user who deleted the message, not sure if this is reliable
+                action = await msg.guild.audit_logs(
+                    limit=1,
+                    action=AuditLogAction.message_delete
+                ).flatten()
+
+                who = action[0].user
+
                 guild = msg.guild
                 channel = guild.get_channel(int(instance.servers[sid]["log_channel"]))
 
