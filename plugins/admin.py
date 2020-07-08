@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 from main import is_level, get_account
 from helpers import update_db, pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.3b2"
+VERSION = "2.3b3"
 
 # Set up the database
 db_file = "db/admin.sql"
@@ -455,20 +455,20 @@ class Admin(commands.Cog):
             f":white_check_mark: Purged {result} messages."
         )
 
-    @purge.command(name="member", aliases=["user"])
+    @purge.command(name="member", aliases=["user", "target"])
     @commands.guild_only()
     @is_level(5)
-    async def purge_member(self, ctx: Context, member: Member, count: int = 10):
+    async def purge_member(self, ctx: Context, target: Member, count: int = 10):
         """Purge messages from a member.
         Level 5 required
         """
         result = len(
-            await ctx.channel.purge(limit=count, check=lambda m: m.author == member)
+            await ctx.channel.purge(limit=count, check=lambda m: m.author == target)
         )
 
-        await self.log_to_channel(ctx, member)
+        await self.log_to_channel(ctx, target)
 
-        mention = member.mention
+        mention = target.mention
         await ctx.send(
             f":white_check_mark: Purged {result} messages from {mention} in {count}."
         )
@@ -542,19 +542,19 @@ class Admin(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def warns(self, ctx: Context, member: Member = None):
+    async def warns(self, ctx: Context, target: Member = None):
         """List all active warns of yourself or another member.
         Invoke without argument to view your own warns.
         Level 4 required to view other Members' warns
         """
         sid = str(ctx.guild.id)
 
-        if member is None:
-            member = ctx.author
+        if target is None:
+            target = ctx.author
 
-        uid = str(member.id)
+        uid = str(target.id)
 
-        if member is not ctx.author:
+        if target is not ctx.author:
             level = get_account(ctx.guild, ctx.author)
             if level < 4:
                 await ctx.send(":anger: Must be level 4 to view other users' warns.")
@@ -569,7 +569,7 @@ class Admin(commands.Cog):
             return
 
         embed = Embed(
-            title=f"{member.name}#{member.discriminator}'s Warns",
+            title=f"{target.name}#{target.discriminator}'s Warns",
             color=0xff0000
         )
 
