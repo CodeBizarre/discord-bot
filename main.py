@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.3.1b10"
+VERSION = "2.3.1b11"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -626,6 +626,8 @@ def initialize(instance: DiscordBot) -> commands.Bot:
 
         Running the command without arguments will show information about you.
         """
+        if target is None: target = ctx.author
+
         embed = Embed(title=f"{target.name}#{target.discriminator}", color=0x7289DA)
         embed.set_thumbnail(url=str(target.avatar_url))
 
@@ -643,7 +645,7 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             inline=False
         )
 
-        embed.set_footer(text="Try ~info!")
+        embed.set_footer(text="Try the info command!")
 
         await ctx.send(embed=embed)
 
