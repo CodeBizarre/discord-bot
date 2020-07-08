@@ -6,4 +6,6 @@
 *.code-workspace
 *.spec
 *.pyo
+*.zip
+*.pyc
 TODO.md
