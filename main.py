@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 
 from helpers import *
 
-VERSION = "2.3.1b9"
+VERSION = "2.3.1b10"
 
 ## FILESYSTEM
 # Get the filesystem in ship-shape
@@ -351,13 +351,19 @@ def initialize(instance: DiscordBot) -> commands.Bot:
                 # This server is not configured.
                 return
 
-            if len(msg.mentions) > 0 and report_ghosts:
-                mentions = [f"{m.name}#{m.discriminator}" for m in msg.mentions]
-                await msg.channel.send(
-                    f"{msg.author.mention} removed a message mentioning {mentions}."
-                )
-        else:
-            return
+            if report_ghosts:
+                title = f"A message from {msg.author.mention} was removed mentioning"
+
+                if len(msg.mentions) > 0:
+                    mentions = [f"{m.name}#{m.discriminator}" for m in msg.mentions]
+                    await msg.channel.send(f"{title}: {mentions}")
+                elif msg.mention_everyone:
+                    await msg.channel.send(f"{title}: Everyone or Here")
+                elif len(msg.role_mentions) > 0:
+                    mentions = [f"{r.name}" for r in msg.role_mentions]
+                    await msg.channel.send(f"{title}: {mentions}")
+            else:
+                return
 
         # Log the delete to a channel if the server has it set up
         try:
