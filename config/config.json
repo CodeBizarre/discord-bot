@@ -6,6 +6,7 @@
         "Go here WITH QUOTES"
     ],
     "Prefix": "~",
+    "MentionCommands": false,
     "Token": "Bot token goes here",
     "CommandsOnEdit": true,
     "DeleteCommands": false,

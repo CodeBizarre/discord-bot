@@ -25,6 +25,7 @@ try:
             "BackupDB": True,
             "Botmasters": ["Discord user IDS", "Go here WITH QUOTES"],
             "Prefix": "~",
+            "MentionCommands": False,
             "Token": "Bot token goes here",
             "CommandsOnEdit": True,
             "DeleteCommands": False,
@@ -66,6 +67,7 @@ class DiscordBot:
                 self.database       = config["Database"]
                 self.backup_db      = config["BackupDB"]
                 self.config_prefix  = config["Prefix"]
+                self.mention_cmds   = config["MentionCommands"]
                 self.config_token   = config["Token"]
                 self.cmd_on_edit    = config["CommandsOnEdit"]
                 self.delete_cmds    = config["DeleteCommands"]
@@ -124,10 +126,17 @@ def initialize(instance: DiscordBot) -> commands.Bot:
     log = get_logger(instance.log_file)
 
     # Discord.py's commands.ext Bot
-    bot = commands.Bot(
-        commands.when_mentioned_or(instance.config_prefix),
-        description=instance.description
-    )
+    if instance.mention_cmds:
+        bot = commands.Bot(
+                commands.when_mentioned_or(instance.config_prefix),
+            description=instance.description
+        )
+    else:
+        bot = commands.Bot(
+            instance.config_prefix,
+            description=instance.description
+        )
+
     instance.bot = bot
 
     # Make any required backup and initialize the database
