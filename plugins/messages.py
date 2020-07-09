@@ -41,7 +41,7 @@ def msg_op_or_level(required=10):
         if argument.startswith("https://discordapp.com/channels/"):
             argument = argument.split("/")[6]
 
-        exc = asyncio.run_coroutine_threadsafe(ctx.fetch_message(argument), loop)
+        exc = asyncio.run_coroutine_threadsafe(ctx.fetch_message(int(argument)), loop)
 
         while not exc.done():
             await asyncio.sleep(0.1)
