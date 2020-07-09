@@ -418,6 +418,8 @@ def initialize(instance: DiscordBot) -> commands.Bot:
             pass
         elif isinstance(error, commands.TooManyArguments):
             await ctx.send(":anger: Too many arguments passed.")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.send(f":anger: {error}")
         elif isinstance(error, commands.MissingPermissions):
             await ctx.send(":anger: You do not have the required permissions.")
         elif isinstance(error, commands.BotMissingPermissions):
