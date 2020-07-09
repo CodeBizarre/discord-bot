@@ -9,7 +9,7 @@ from discord.ext.commands import Context
 from main import get_account
 from helpers import pretty_datetime
 
-VERSION = "2.3b1"
+VERSION = "3.0b1"
 
 # Get the config file to grab the command prefix
 prefix = None
@@ -20,28 +20,37 @@ try:
 except Exception as error:
     print(f"Error loading prefix from configuration file.\n    - {error}")
 
-def msg_op_or_level(required=10):
-    """See if the user is the OP of the message, or high enough level otherwise."""
+def msg_op_or_level(required=4):
+    """
+    Check if a user is either high enough level, or the original poster of the message.
+    """
     async def predicate(ctx: Context):
-        uid = str(ctx.author.id)
-        loop = ctx.bot.loop
+        # Always show the command as available in help
+        if ctx.invoked_with == "help": return True
 
-        # If the check if being ran through the help command always pass
-        # This is so the help command will correctly display that everyone can use this
-        if ctx.invoked_with == "help":
-            ctx.message.content = ""
+        # First check if the user is a high enough level to bypass the check
+        # This is far more efficient than the previous method
+        if get_account(ctx.guild, ctx.author) >= required:
             return True
 
-        # Split the message into arguments and fetch the requested message
-        # This check is specifically for the move/crosspost commands
-        # Therefore it can be assuemed args[1] will be a message link or snowflake
-        argument = ctx.message.content.split(" ")[1]
+        # Otherwise, start the process of checking if the command author is the OP
+        # Split the message into arguments
+        arguments = ctx.message.content.split(" ")[1:]
 
-        # If the passed argument is a discord channel link, grab the snowflake
-        if argument.startswith("https://discordapp.com/channels/"):
-            argument = argument.split("/")[6]
+        # Ensure that the first argument is a Discord message link
+        if not arguments[0].startswith("https://discordapp.com/channels/"):
+            raise commands.BadArgument("Message must be a Discord message link.")
 
-        exc = asyncio.run_coroutine_threadsafe(ctx.fetch_message(int(argument)), loop)
+        # Split the link and grab the channel and message ids
+        split = arguments[0].split("/")
+        channel = int(split[4])
+        message = int(split[5])
+
+        # Run a threadsafe coroutine to get the target message from the link
+        exc = asyncio.run_coroutine_threadsafe(
+            ctx.guild.get_channel(channel).fetch_message(message),
+            ctx.bot.loop
+        )
 
         while not exc.done():
             await asyncio.sleep(0.1)
@@ -51,21 +60,7 @@ def msg_op_or_level(required=10):
         except HTTPException:
             return False
 
-        # User ID of the message open
-        tid = str(target.author.id)
-
-        # If the user is the OP
-        if uid == tid:
-            return True
-        # Else try to fetch the user's account
-        else:
-            try:
-                user_level = get_account(ctx.guild, ctx.author)
-            except KeyError as e:
-                await ctx.send(f":anger: KeyError: {e}")
-                return False
-            else:
-                return user_level >= required
+        return target.author == ctx.author
 
     return commands.check(predicate)
 
@@ -79,10 +74,11 @@ class Messages(commands.Cog):
         self.name = "messages"
 
     @commands.command(aliases=["xpost", "x-post"])
-    @msg_op_or_level(5)
+    @commands.guild_only()
+    @msg_op_or_level(4)
     async def crosspost(self, ctx: Context, message: Message, target: TextChannel):
         """Cross-post <message> to <target>.
-        Message must be a snowflake or discord message link.
+        Message must be a Discord message link.
 
         Must be the message OP or level 5
         """
@@ -100,7 +96,7 @@ class Messages(commands.Cog):
 
         # Set up the embed
         embed = Embed(
-            title=f"X-Post from #{ctx.channel.name}",
+            title=f"X-Post from #{message.channel.name}",
             url=message.jump_url,
             color=0x7289DA
         )
@@ -119,13 +115,14 @@ class Messages(commands.Cog):
             await target.send(embed=embed)
             await ctx.send(":white_check_mark: Message crossposted!")
         except Exception as error:
-            await ctx.send(f":anger: Unabled to crosspost: {error}")
+            await ctx.send(f":anger: Unable to crosspost: {error}")
 
     @commands.command(aliases=["mv", "->"])
-    @msg_op_or_level(5)
+    @commands.guild_only()
+    @msg_op_or_level(4)
     async def move(self, ctx: Context, message: Message, target: TextChannel):
         """Move a <message> to a different channel.
-        Message must be a snowflake or discord message link.
+        Message must be a Discord message link.
 
         Must be the message OP or level 5
         """
@@ -142,7 +139,7 @@ class Messages(commands.Cog):
 
         # Set up the embed
         embed = Embed(
-            title=f"Moved message from #{ctx.channel.name}",
+            title=f"Moved message from #{message.channel.name}",
             url=message.jump_url,
             color=0x7289DA
         )
