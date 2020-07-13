@@ -21,6 +21,7 @@ class Core(commands.Cog):
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "core"
+        self.version = VERSION
 
         try:
             with open("config/config.json") as cfg:

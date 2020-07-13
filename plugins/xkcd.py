@@ -12,11 +12,12 @@ from discord_bot import DiscordBot
 
 VERSION = "1.2b3"
 
-class XKCD(commands.Cog):
+class Xkcd(commands.Cog):
     """A plugin to retrieve XKCD comics."""
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "xkcd"
+        self.version = VERSION
 
     # Helper function for getting comics
     async def get_comic(self, comic, number = None) -> Embed:

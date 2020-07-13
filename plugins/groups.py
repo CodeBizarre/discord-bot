@@ -116,6 +116,7 @@ class Groups(commands.Cog):
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "groups"
+        self.version = VERSION
         asyncio.create_task(self.task_scheduler())
 
     @commands.group(aliases=["group", "gr"])

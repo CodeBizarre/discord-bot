@@ -54,6 +54,7 @@ class Roles(commands.Cog):
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "roles"
+        self.version = VERSION
         self.app_info = None
 
     @commands.group(aliases=["roles"])

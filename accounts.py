@@ -5,6 +5,8 @@ from discord.ext.commands import Context
 from discord_bot import DiscordBot
 from helpers import update_db, get_db_dict
 
+VERSION = "1.0b1"
+
 # Function to build an account level embed
 async def account_embed(member: Member, level: int) -> Embed:
     tag = f"{member.name}#{member.discriminator}"
@@ -36,6 +38,7 @@ class Accounts(commands.Cog):
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "accounts"
+        self.version = VERSION
 
     ## Commands
     @commands.group(name="account", aliases=["accounts", "accs"])

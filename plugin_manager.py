@@ -9,11 +9,14 @@ from helpers import update_db
 from core import is_botmaster
 from accounts import is_level
 
+VERSION = "1.0b1"
+
 class PluginManager(Cog):
     """Plugin management system."""
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "plugins"
+        self.version = VERSION
 
     async def bot_check(self, ctx: Context):
         try:
@@ -41,7 +44,12 @@ class PluginManager(Cog):
         if ctx.invoked_subcommand is None:
             embed = Embed(title="Loaded Plugins", color=0x7289DA)
             for i in range(len(self.bot.plugins)):
-                embed.add_field(name=str(i + 1), value=self.bot.plugins[i])
+                plugin = self.bot.plugins[i].capitalize()
+                cog = self.bot.cogs[plugin]
+                embed.add_field(
+                    name=str(i + 1),
+                    value=f"{plugin} v{cog.version}"
+                )
 
             await ctx.send(embed=embed)
 

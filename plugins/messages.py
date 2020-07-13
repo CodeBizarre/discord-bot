@@ -72,6 +72,7 @@ class Messages(commands.Cog):
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "messages"
+        self.version = VERSION
 
     @commands.command(aliases=["xpost", "x-post"])
     @commands.guild_only()

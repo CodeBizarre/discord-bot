@@ -13,6 +13,7 @@ class Inspirobot(commands.Cog):
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "inspirobot"
+        self.version = VERSION
 
     @commands.command(aliases=["ib", "inspire"])
     async def inspirobot(self, ctx: Context):

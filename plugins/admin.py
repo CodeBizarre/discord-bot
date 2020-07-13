@@ -189,6 +189,7 @@ class Admin(commands.Cog):
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "admin"
+        self.version = VERSION
         asyncio.create_task(self.task_scheduler())
 
     # Send an embed-formatted log of an event to a channel
