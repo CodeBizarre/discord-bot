@@ -117,8 +117,18 @@ class DiscordBot(commands.Bot):
         self.servers = self.db["servers"]
         self.accounts = self.db["accounts"]
 
+        if self.mention_cmds:
+            self.mode = commands.when_mentioned_or(self.config_prefix)
+        else:
+            self.mode = self.command_prefix
+
         super(DiscordBot, self).__init__(
-            self.config_prefix, description=description, *args, **kwargs
+            self.mode,
+            description=description,
+            help_command=commands.DefaultHelpCommand(
+                paginator=commands.Paginator(max_size=500)
+            ),
+            *args, **kwargs
         )
 
     # Return current information
