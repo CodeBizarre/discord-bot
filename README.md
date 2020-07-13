@@ -1,4 +1,5 @@
 # Multipurpose Discord bot mainly made for my personal server
+# Master branch is currently in-development for version 3.0, and may not function as expected, Use branch 2.x for stability.
 
 Coding standards:
   - 90 char line length limits
