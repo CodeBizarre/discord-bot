@@ -9,7 +9,7 @@ from discord.ext import commands
 
 from helpers import get_logger, pretty_datetime
 
-VERSION = "3.0.0b1"
+VERSION = "3.0.0b2"
 
 class DiscordBot(commands.Bot):
     """Extensible bot using Discord.py's Cogs"""
