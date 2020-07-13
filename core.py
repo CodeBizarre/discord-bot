@@ -203,8 +203,10 @@ class Core(commands.Cog):
             pass
         elif isinstance(error, commands.TooManyArguments):
             await ctx.send(":anger: Too many arguments passed.")
+            await ctx.send_help(ctx.command)
         elif isinstance(error, commands.BadArgument):
             await ctx.send(f":anger: {error}")
+            await ctx.send_help(ctx.command)
         elif isinstance(error, commands.MissingPermissions):
             await ctx.send(":anger: You do not have the required permissions.")
         elif isinstance(error, commands.BotMissingPermissions):
