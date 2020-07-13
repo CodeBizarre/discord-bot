@@ -35,17 +35,6 @@ class Core(commands.Cog):
     async def allowed(self, ctx: Context):
         return str(ctx.author.id) not in self.bot.blocklist
 
-    # Global check used in a hacky way to delete command invokes if the config says so
-    @commands.check
-    async def delete_invokes(self, ctx: Context):
-        if self.bot.delete_cmds:
-            try:
-                await ctx.message.delete(delay=2)
-            except Exception as e:
-                self.bot.log.warning(f"Unable to delete command message:\n    - {e}")
-
-        return True
-
     ## Events
     @Cog.listener()
     async def on_guild_join(self, guild: Guild):
@@ -197,6 +186,12 @@ class Core(commands.Cog):
             header = f"-{timestamp}- [COMMAND] `{command}`"
 
             self.bot.log.info(f"{header} by `{author}` in `{location}`")
+
+        if self.bot.delete_cmds:
+            try:
+                await ctx.message.delete(delay=2)
+            except Exception as e:
+                self.bot.log.warning(f"Unable to delete command message:\n    - {e}")
 
     @Cog.listener()
     async def on_command_error(self, ctx: Context, error):
