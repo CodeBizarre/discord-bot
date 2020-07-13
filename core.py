@@ -32,8 +32,7 @@ class Core(commands.Cog):
 
     ## Checks
     # Global check for if the user is blocked
-    @commands.check
-    async def allowed(self, ctx: Context):
+    async def bot_check(self, ctx):
         return str(ctx.author.id) not in self.bot.blocklist
 
     ## Events
