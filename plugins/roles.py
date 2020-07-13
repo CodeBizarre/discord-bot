@@ -12,7 +12,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "1.1b4"
+VERSION = "1.1b5"
 
 # Get the database set up
 db_file = "db/roles.sql"
@@ -55,7 +55,6 @@ class Roles(commands.Cog):
         self.bot = bot
         self.name = "roles"
         self.version = VERSION
-        self.app_info = None
 
     @commands.group(aliases=["roles"])
     @commands.guild_only()
@@ -72,12 +71,9 @@ class Roles(commands.Cog):
 
         # Get the app info for the embed author
         if sid in db and len(db[sid]) > 0:
-            if self.app_info is None:
-                self.app_info = await self.bot.application_info()
-
             embed = Embed(title="Available roles:", color=0x7289DA)
 
-            embed.set_author(name=self.bot.user.name, icon_url=self.app_info.icon_url)
+            embed.set_author(name=self.bot.user.name, icon_url=self.bot.app_info.icon_url)
 
             # Add an entry for every assignable role
             for name, info in db[sid].items():
