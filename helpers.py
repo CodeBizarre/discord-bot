@@ -8,7 +8,6 @@ import json
 from logging import Logger
 from sqlitedict import SqliteDict
 from datetime import datetime, timedelta
-from discord.ext import commands
 
 def pretty_datetime(dt: datetime, display: str = "FULL") -> str:
     """Format date/timestamps for messages."""
@@ -137,22 +136,3 @@ def get_db_dict(file: str, table: str, base_key: str) -> dict:
         db_dict = database[base_key]
         database.close()
         return db_dict
-
-def load_plugins(bot: commands.Bot, logger: Logger, plugins: list):
-    """Load available cogs."""
-    for p in os.listdir("plugins"):
-        if not (p.endswith(".py") or p.endswith(".pyc")):
-            continue
-
-        plugin = p.split(".")[0]
-
-        if plugin == "__pycache__":
-            return
-
-        try:
-            path = f"plugins.{plugin}"
-            bot.load_extension(path)
-            plugins.append(plugin)
-        except Exception as e:
-            exc = "{0}: {1}".format(type(e).__name__, e)
-            logger.warning(f"Failed to load plugin {p}:\n    - {exc}")

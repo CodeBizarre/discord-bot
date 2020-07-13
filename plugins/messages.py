@@ -6,10 +6,10 @@ from discord import HTTPException
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from main import get_account
+from discord_bot import DiscordBot
 from helpers import pretty_datetime
 
-VERSION = "3.0b1"
+VERSION = "3.0b2"
 
 # Get the config file to grab the command prefix
 prefix = None
@@ -30,7 +30,7 @@ def msg_op_or_level(required=4):
 
         # First check if the user is a high enough level to bypass the check
         # This is far more efficient than the previous method
-        if get_account(ctx.guild, ctx.author) >= required:
+        if ctx.bot.accounts[str(ctx.guild.id)][str(ctx.author.id)] >= required:
             return True
 
         # Otherwise, start the process of checking if the command author is the OP
@@ -69,7 +69,7 @@ class Messages(commands.Cog):
 
     Allows cross-posting and moving of messages.
     """
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "messages"
 

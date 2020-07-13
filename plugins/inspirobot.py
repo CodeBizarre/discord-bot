@@ -4,11 +4,13 @@ import requests
 from discord.ext import commands
 from discord.ext.commands import Context
 
-VERSION = "1.0b4"
+from discord_bot import DiscordBot
+
+VERSION = "1.0b5"
 
 class Inspirobot(commands.Cog):
     """Get inspirational images from the Inspirobot."""
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "inspirobot"
 

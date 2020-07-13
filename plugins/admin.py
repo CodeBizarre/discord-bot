@@ -9,10 +9,11 @@ from discord import Member, Role, TextChannel, Embed
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from main import is_level, get_account
+from discord_bot import DiscordBot
+from accounts import is_level
 from helpers import update_db, pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.3b3"
+VERSION = "2.3b4"
 
 # Set up the database
 db_file = "db/admin.sql"
@@ -59,7 +60,7 @@ warn_db = sql_db["warns"]
 mute_db = sql_db["mutes"]
 
 # Coroutine to run in a background thread to check if tempbans are expired
-async def tempban_check(bot: commands.Bot):
+async def tempban_check(bot: DiscordBot):
     ts = datetime.now(tz=timezone.utc).timestamp()
 
     # No servers registered
@@ -185,7 +186,7 @@ class Admin(commands.Cog):
                 # This is expected when new bans/warns/mutes are added
                 continue
 
-    def __init__(self, bot):
+    def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "admin"
         asyncio.create_task(self.task_scheduler())
@@ -555,7 +556,7 @@ class Admin(commands.Cog):
         uid = str(target.id)
 
         if target is not ctx.author:
-            level = get_account(ctx.guild, ctx.author)
+            level = self.bot.accounts[sid][uid]
             if level < 4:
                 await ctx.send(":anger: Must be level 4 to view other users' warns.")
                 return

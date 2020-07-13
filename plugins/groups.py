@@ -9,9 +9,10 @@ from discord import Embed, PermissionOverwrite, Member
 from discord.ext import commands
 from discord.ext.commands import Context
 
+from discord_bot import DiscordBot
 from helpers import pretty_datetime, update_db
 
-VERSION = "1.0b2"
+VERSION = "1.0b3"
 GP = "Groups plugin."
 IA = "Inactivity."
 
@@ -47,7 +48,7 @@ if "servers" not in sql_db:
 
 db = sql_db["servers"]
 
-async def group_check(bot: commands.Bot):
+async def group_check(bot: DiscordBot):
     # No servers registered
     if len(db) <= 0:
         return
@@ -112,7 +113,7 @@ class Groups(commands.Cog):
                 # are added to the database, or old ones removed
                 continue
 
-    def __init__(self, bot):
+    def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "groups"
         asyncio.create_task(self.task_scheduler())

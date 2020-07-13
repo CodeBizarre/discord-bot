@@ -8,10 +8,11 @@ from discord import Role, Member, Embed
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from main import is_level
+from discord_bot import DiscordBot
+from accounts import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "1.1b3"
+VERSION = "1.1b4"
 
 # Get the database set up
 db_file = "db/roles.sql"
@@ -50,7 +51,7 @@ class Roles(commands.Cog):
 
     This plugin allows you to add roles to a list for users to safely assign themselves.
     """
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "roles"
         self.app_info = None

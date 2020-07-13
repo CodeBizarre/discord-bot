@@ -5,14 +5,16 @@ from discord import Embed
 from discord.ext import commands
 from discord.ext.commands import Context
 
+from discord_bot import DiscordBot
+
 # Uncomment the following line to fly
 #import antigravity
 
-VERSION = "1.2b2"
+VERSION = "1.2b3"
 
 class XKCD(commands.Cog):
     """A plugin to retrieve XKCD comics."""
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "xkcd"
 
@@ -29,17 +31,17 @@ class XKCD(commands.Cog):
 
         while not exc.done():
             await asyncio.sleep(0.1)
-        exc = exc.result()
+        result = exc.result()
 
         try:
-            image_link = exc.getImageLink()
-            title = exc.getAsciiTitle().decode("ascii")
-            alt_text = exc.getAsciiAltText().decode("ascii")
-            number = exc.number
+            image_link = result.getImageLink()
+            title = result.getAsciiTitle().decode("ascii")
+            alt_text = result.getAsciiAltText().decode("ascii")
+            number = result.number
 
             embed = Embed(title=title, url=f"https://xkcd.com/{number}", color=0x96A8C8)
             embed.add_field(name=str(number), value=alt_text)
-            embed.set_image(image_link)
+            embed.set_image(url=image_link)
 
             return embed
         except AttributeError as error:
