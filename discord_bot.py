@@ -125,8 +125,13 @@ class DiscordBot(commands.Bot):
         super(DiscordBot, self).__init__(
             self.mode,
             description=description,
-            help_command=commands.DefaultHelpCommand(
-                paginator=commands.Paginator(max_size=500)
+            help_command=commands.MinimalHelpCommand(
+                paginator=commands.Paginator(
+                        max_size=800,
+                        prefix=None,
+                        suffix=None
+                    ),
+                sort_commands=False
             ),
             *args, **kwargs
         )
