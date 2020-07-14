@@ -11,15 +11,6 @@ from helpers import pretty_datetime
 
 VERSION = "3.0b2"
 
-# Get the config file to grab the command prefix
-prefix = None
-
-try:
-    with open("config/config.json") as cfg:
-        prefix = json.load(cfg)["Prefix"]
-except Exception as error:
-    print(f"Error loading prefix from configuration file.\n    - {error}")
-
 def msg_op_or_level(required=4):
     """
     Check if a user is either high enough level, or the original poster of the message.
@@ -73,6 +64,15 @@ class Messages(commands.Cog):
         self.bot = bot
         self.name = "messages"
         self.version = VERSION
+
+        # Get the config file to grab the command prefix
+        self.prefix = None
+
+        try:
+            with open("config/config.json") as cfg:
+                self.prefix = json.load(cfg)["Prefix"]
+        except Exception as error:
+            self.bot.log.error(f"Error loading prefix from configfile.\n    - {error}")
 
     @commands.command(aliases=["xpost", "x-post"])
     @commands.guild_only()
@@ -169,7 +169,7 @@ class Messages(commands.Cog):
         await ctx.send(":white_check_mark: Message moved!")
 
 def setup(bot):
-    if prefix is not None:
+    if bot.cogs["Messages"].prefix is not None:
         bot.add_cog(Messages(bot))
     else:
-        print("Unable to load messages plugin.")
+        bot.log.warning("Unable to load messages plugin.")

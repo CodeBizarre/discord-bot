@@ -13,141 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import update_db, pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.3b4"
-
-# Set up the database
-db_file = "db/admin.sql"
-backup = True
-
-# Check the config and make any required backups
-try:
-    with open("config/config.json") as cfg:
-        backup = json.load(cfg)["BackupDB"]
-except Exception as error:
-    print(f"Error loading prefix from configuration file.\n    - {error}")
-
-if os.path.exists(db_file) and backup:
-    timestamp = pretty_datetime(datetime.now(), display="FILE")
-    try:
-        shutil.copyfile(db_file, f"db/backups/admin-{timestamp}.sql")
-    except IOError as e:
-        error_file = f"db/backups/admin-{timestamp}.sql"
-        print(f"Unable to create file {error_file}\n    - {e}")
-
-sql_db = SqliteDict(
-    filename=db_file,
-    tablename="admin",
-    autocommit=True,
-    encode=json.dumps,
-    decode=json.loads
-)
-
-if "admin" not in sql_db:
-    sql_db["admin"] = {}
-
-if "temp_bans" not in sql_db:
-    sql_db["temp_bans"] = {}
-
-if "warns" not in sql_db:
-    sql_db["warns"] = {}
-
-if "mutes" not in sql_db:
-    sql_db["mutes"] = {}
-
-db = sql_db["admin"]
-tempban_db = sql_db["temp_bans"]
-warn_db = sql_db["warns"]
-mute_db = sql_db["mutes"]
-
-# Coroutine to run in a background thread to check if tempbans are expired
-async def tempban_check(bot: DiscordBot):
-    ts = datetime.now(tz=timezone.utc).timestamp()
-
-    # No servers registered
-    if len(tempban_db) <= 0:
-        return
-
-    for sid in tempban_db:
-        # No tempbans in this server
-        if len(tempban_db[sid]) <= 0:
-            continue
-
-        # Each tempban in the server
-        for uid in tempban_db[sid]:
-            info = tempban_db[sid][uid]
-
-            if ts >= float(info["expires"]):
-                guild = bot.get_guild(int(sid))
-                await guild.unban(bot.get_user(uid))
-
-                del tempban_db[sid][uid]
-                update_db(sql_db, tempban_db, "temp_bans")
-                print(f"[ADMIN][TEMPBAN][REMOVE] {uid} in <{guild.name}>")
-
-# Coroutine to run in a background thread to check if warns are expired
-async def warn_check(bot: commands.Bot):
-    ts = datetime.now(tz=timezone.utc).timestamp()
-
-    # No servers registered
-    if len(warn_db) <= 0:
-        return
-
-    for sid in warn_db:
-        # No warns in the server
-        if len(warn_db[sid]) <= 0:
-            continue
-
-        guild = bot.get_guild(int(sid))
-
-        # Each warn in the server
-        for uid in warn_db[sid]:
-            for i, w in warn_db[sid][uid].items():
-                if ts >= float(w["expires"]):
-                    del warn_db[sid][uid][i]
-                    update_db(sql_db, warn_db, "warns")
-                    print(f"[ADMIN][WARN][REMOVE] {uid}.{i} in <{guild.name}>")
-
-# Coroutine to run in a background thread to check if mutes are expired
-async def mute_check(bot: commands.Bot):
-    ts = datetime.now(tz=timezone.utc).timestamp()
-
-    # No servers registered
-    if len(mute_db) <= 0:
-        return
-
-    for sid in mute_db:
-        # No mutes in this server
-        if len(mute_db[sid]) <= 0:
-            continue
-
-    # Each mute in the server
-    for uid, info in mute_db[sid].items():
-        if ts >= float(info["expires"]):
-            guild = bot.get_guild(int(sid))
-
-            # Get the mute role
-            try:
-                role = guild.get_role(int(db[sid]["mute_role"]))
-            # Delete the mute from the database if we're unable to get the mute role
-            except KeyError:
-                del mute_db[sid][uid]
-                break
-
-            # Else get the member and remove the mute role
-            target = guild.get_member(int(uid))
-
-            if role in target.roles:
-                await target.remove_roles(role, reason="Auto mute remove.")
-                await target.send(
-                    f":speaking_head: Your mute in {guild.name} has expired."
-                )
-            else:
-                del mute_db[sid][uid]
-                break
-
-            del mute_db[sid][uid]
-            update_db(sql_db, mute_db, "mutes")
-            print(f"[ADMIN][MUTE][REMOVE] {target.id} in <{guild.name}>")
+VERSION = "2.4b1"
 
 async def embed_builder(action: str, member: Member, reason: str,
     td: timedelta = None) -> Embed:
@@ -173,13 +39,109 @@ class Admin(commands.Cog):
 
     Features warning, kicking, banning, soft bans, timed bans, and message purging.
     """
+    # Coroutine to run in a background thread to check if tempbans are expired
+    async def tempban_check(self):
+        ts = datetime.now(tz=timezone.utc).timestamp()
+
+        # No servers registered
+        if len(self.tempban_db) <= 0:
+            return
+
+        for sid in self.tempban_db:
+            # No tempbans in this server
+            if len(self.tempban_db[sid]) <= 0:
+                continue
+
+            # Each tempban in the server
+            for uid in self.tempban_db[sid]:
+                info = self.tempban_db[sid][uid]
+
+                if ts >= float(info["expires"]):
+                    guild = self.bot.get_guild(int(sid))
+                    await guild.unban(bot.get_user(uid))
+
+                    del self.tempban_db[sid][uid]
+                    update_db(self.sql_db, self.tempban_db, "temp_bans")
+                    self.bot.log.info(
+                        f"[ADMIN][TEMPBAN][REMOVE] {uid} in <{guild.name}>"
+                    )
+
+    # Coroutine to run in a background thread to check if warns are expired
+        async def warn_check(self):
+            ts = datetime.now(tz=timezone.utc).timestamp()
+
+            # No servers registered
+            if len(self.warn_db) <= 0:
+                return
+
+            for sid in self.warn_db:
+                # No warns in the server
+                if len(self.warn_db[sid]) <= 0:
+                    continue
+
+                guild = self.bot.get_guild(int(sid))
+
+                # Each warn in the server
+                for uid in self.warn_db[sid]:
+                    for i, w in self.warn_db[sid][uid].items():
+                        if ts >= float(w["expires"]):
+                            del self.warn_db[sid][uid][i]
+                            update_db(self.sql_db, self.warn_db, "warns")
+                            self.bot.log.info(
+                                f"[ADMIN][WARN][REMOVE] {uid}.{i} in <{guild.name}>"
+                            )
+
+        # Coroutine to run in a background thread to check if mutes are expired
+        async def mute_check(self):
+            ts = datetime.now(tz=timezone.utc).timestamp()
+
+            # No servers registered
+            if len(self.mute_db) <= 0:
+                return
+
+            for sid in self.mute_db:
+                # No mutes in this server
+                if len(self.mute_db[sid]) <= 0:
+                    continue
+
+            # Each mute in the server
+            for uid, info in self.mute_db[sid].items():
+                if ts >= float(info["expires"]):
+                    guild = self.bot.get_guild(int(sid))
+
+                    # Get the mute role
+                    try:
+                        role = guild.get_role(int(self.db[sid]["mute_role"]))
+                    # Delete the mute from the database if we're unable to get the mute role
+                    except KeyError:
+                        del self.mute_db[sid][uid]
+                        break
+
+                    # Else get the member and remove the mute role
+                    target = guild.get_member(int(uid))
+
+                    if role in target.roles:
+                        await target.remove_roles(role, reason="Auto mute remove.")
+                        await target.send(
+                            f":speaking_head: Your mute in {guild.name} has expired."
+                        )
+                    else:
+                        del self.mute_db[sid][uid]
+                        break
+
+                    del self.mute_db[sid][uid]
+                    update_db(self.sql_db, self.mute_db, "mutes")
+                    self.bot.log.info(
+                        f"[ADMIN][MUTE][REMOVE] {target.id} in <{guild.name}>"
+                    )
+
     # Background task scheduling system
     async def task_scheduler(self):
         while True:
             try:
-                await tempban_check(self.bot)
-                await warn_check(self.bot)
-                await mute_check(self.bot)
+                await self.tempban_check()
+                await self.warn_check()
+                await self.mute_check()
                 await asyncio.sleep(60)
             except RuntimeError:
                 # Database changed during iteration
@@ -190,6 +152,51 @@ class Admin(commands.Cog):
         self.bot = bot
         self.name = "admin"
         self.version = VERSION
+        self.backup = True
+
+        # Check the config and make any required backups
+        try:
+            with open("config/config.json") as cfg:
+                self.backup = json.load(cfg)["BackupDB"]
+        except Exception as error:
+            self.bot.log.error(f"Error loading prefix from config file.\n    - {error}")
+
+        # Set up the database
+        db_file = "db/admin.sql"
+
+        if os.path.exists(db_file) and self.backup:
+            timestamp = pretty_datetime(datetime.now(), display="FILE")
+            try:
+                shutil.copyfile(db_file, f"db/backups/admin-{timestamp}.sql")
+            except IOError as e:
+                error_file = f"db/backups/admin-{timestamp}.sql"
+                self.bot.log.error(f"Unable to create file {error_file}\n    - {e}")
+
+        self.sql_db = SqliteDict(
+            filename=db_file,
+            tablename="admin",
+            autocommit=True,
+            encode=json.dumps,
+            decode=json.loads
+        )
+
+        if "admin" not in self.sql_db:
+            self.sql_db["admin"] = {}
+
+        if "temp_bans" not in self.sql_db:
+            self.sql_db["temp_bans"] = {}
+
+        if "warns" not in self.sql_db:
+            self.sql_db["warns"] = {}
+
+        if "mutes" not in self.sql_db:
+            self.sql_db["mutes"] = {}
+
+        self.db = self.sql_db["admin"]
+        self.tempban_db = self.sql_db["temp_bans"]
+        self.warn_db = self.sql_db["warns"]
+        self.mute_db = self.sql_db["mutes"]
+
         asyncio.create_task(self.task_scheduler())
 
     # Send an embed-formatted log of an event to a channel
@@ -200,13 +207,13 @@ class Admin(commands.Cog):
         action = ctx.message.content
 
         # Try and get the config values for the server
-        if sid in db:
+        if sid in self.db:
             try:
-                channel = ctx.guild.get_channel(int(db[sid]["log_channel"]))
+                channel = ctx.guild.get_channel(int(self.db[sid]["log_channel"]))
             except KeyError:
                 channel = None
             try:
-                enabled = db[sid]["log"]
+                enabled = self.db[sid]["log"]
             except KeyError:
                 enabled = False
         else:
@@ -252,12 +259,12 @@ class Admin(commands.Cog):
 
         # Get the server's config values
         try:
-            channel = self.bot.get_channel(int(db[sid]["log_channel"]))
-            log_status = f"{db[sid]['log']}, {channel.mention}"
+            channel = self.bot.get_channel(int(self.db[sid]["log_channel"]))
+            log_status = f"{self.db[sid]['log']}, {channel.mention}"
         except KeyError:
             log_status = "Not set up"
         try:
-            role = ctx.guild.get_role(int(db[sid]["mute_role"]))
+            role = ctx.guild.get_role(int(self.db[sid]["mute_role"]))
             mute_role = role.name
         except KeyError:
             mute_role = "Not set up"
@@ -280,20 +287,20 @@ class Admin(commands.Cog):
         sid = str(ctx.guild.id)
 
         # Initialize the server in the database if required
-        if sid not in db:
-            db[sid] = {}
+        if sid not in self.db:
+            self.db[sid] = {}
 
         # Set the config values based on user input (or lack thereof for log channel)
-        db[sid]["log"] = enabled
+        self.db[sid]["log"] = enabled
 
         if channel is not None:
-            db[sid]["log_channel"] = str(channel.id)
+            self.db[sid]["log_channel"] = str(channel.id)
         else:
-            if "log_channel" not in db[sid]:
-                db[sid]["log_channel"] = str(ctx.message.channel.id)
+            if "log_channel" not in self.db[sid]:
+                self.db[sid]["log_channel"] = str(ctx.message.channel.id)
             channel = ctx.message.channel
 
-        update_db(sql_db, db, "admin")
+        update_db(self.sql_db, self.db, "admin")
 
         embed = Embed(title="Log Settings", color=0xff0000)
         embed.add_field(name="Enabled", value=str(enabled))
@@ -311,13 +318,13 @@ class Admin(commands.Cog):
         sid = str(ctx.guild.id)
 
         # Initialize the server in the database if required
-        if sid not in db:
-            db[sid] = {}
+        if sid not in self.db:
+            self.db[sid] = {}
 
         # Set the mute role
-        db[sid]["mute_role"] = str(role.id)
+        self.db[sid]["mute_role"] = str(role.id)
 
-        update_db(sql_db, db, "admin")
+        update_db(self.sql_db, self.db, "admin")
 
         await ctx.send(f":white_check_mark: Mute role set to: {role.name}.")
 
@@ -377,8 +384,8 @@ class Admin(commands.Cog):
         sid = str(ctx.guild.id)
 
         # Initialize the server in the tempban database if required
-        if sid not in tempban_db:
-            tempban_db[sid] = {}
+        if sid not in self.tempban_db:
+            self.tempban_db[sid] = {}
 
         # Get the current UTC time, a future time from time_parser, and the difference
         now = datetime.now(tz=timezone.utc)
@@ -392,13 +399,13 @@ class Admin(commands.Cog):
         await target.ban(reason=reason, delete_message_days=0)
 
         # Add the tempban to the database
-        tempban_db[sid][target.id] = {
+        self.tempban_db[sid][target.id] = {
             "issued_by": str(ctx.author.id),
             "reason": reason,
             "expires": str(future.timestamp())
         }
 
-        update_db(sql_db, tempban_db, "temp_bans")
+        update_db(self.sql_db, self.tempban_db, "temp_bans")
         await self.log_to_channel(ctx, target, reason)
 
     @commands.group()
@@ -507,12 +514,12 @@ class Admin(commands.Cog):
         warn_count = 1
 
         # Initialize the server in the warn database if required
-        if sid not in warn_db:
-            warn_db[sid] = {}
+        if sid not in self.warn_db:
+            self.warn_db[sid] = {}
 
         # Add 1 to the amount of warns the user may already have
-        if uid in warn_db[sid]:
-            for _ in warn_db[sid][uid]:
+        if uid in self.warn_db[sid]:
+            for _ in self.warn_db[sid][uid]:
                 warn_count += 1
 
         # Get the current UTC time, a future time from time_parser, and the difference
@@ -529,17 +536,17 @@ class Admin(commands.Cog):
         )
 
         # Add the warn to the database
-        if uid not in warn_db[sid]:
-            warn_db[sid][uid] = {}
+        if uid not in self.warn_db[sid]:
+            self.warn_db[sid][uid] = {}
 
         warning = {
             "issued_by": str(ctx.author.id),
             "reason": reason,
             "expires": str(future.timestamp())
         }
-        warn_db[sid][uid][str(warn_count)] = warning
+        self.warn_db[sid][uid][str(warn_count)] = warning
 
-        update_db(sql_db, warn_db, "warns")
+        update_db(self.sql_db, self.warn_db, "warns")
         await self.log_to_channel(ctx, target, reason)
 
     @commands.command()
@@ -562,11 +569,11 @@ class Admin(commands.Cog):
                 await ctx.send(":anger: Must be level 4 to view other users' warns.")
                 return
 
-        if sid not in warn_db:
+        if sid not in self.warn_db:
             await ctx.send(":anger: Server has no warns.")
             return
 
-        if uid not in warn_db[sid]:
+        if uid not in self.warn_db[sid]:
             await ctx.send(":anger: Member has no warns.")
             return
 
@@ -575,7 +582,7 @@ class Admin(commands.Cog):
             color=0xff0000
         )
 
-        warn_count = len(warn_db[sid][uid])
+        warn_count = len(self.warn_db[sid][uid])
 
         embed.add_field(
             name="Total warns",
@@ -584,7 +591,7 @@ class Admin(commands.Cog):
         )
 
         # Build the fields of the embed by iterating through a user's warns
-        for i, w in warn_db[sid][uid].items():
+        for i, w in self.warn_db[sid][uid].items():
             # Get the current time and the expiry time of the warn
             now = datetime.now(tz=timezone.utc)
             then = datetime.fromtimestamp(float(w["expires"]), tz=timezone.utc)
@@ -621,14 +628,14 @@ class Admin(commands.Cog):
 
         # Try to get the mute role from the server
         try:
-            mute_role = ctx.guild.get_role(int(db[sid]["mute_role"]))
+            mute_role = ctx.guild.get_role(int(self.db[sid]["mute_role"]))
         except KeyError:
             await ctx.send(":anger: Server has no mute role set.")
             return
 
         # Initialize the server in the mute database if required
-        if sid not in mute_db:
-            mute_db[sid] = {}
+        if sid not in self.mute_db:
+            self.mute_db[sid] = {}
 
         # Get the current UTC time, a future time from time_parser, and the difference
         now = datetime.now(tz=timezone.utc)
@@ -653,9 +660,9 @@ class Admin(commands.Cog):
             "expires": str(future.timestamp())
         }
 
-        mute_db[sid][uid] = mute
+        self.mute_db[sid][uid] = mute
 
-        update_db(sql_db, mute_db, "mutes")
+        update_db(self.sql_db, self.mute_db, "mutes")
         await self.log_to_channel(ctx, target, reason)
 
     @commands.command()
@@ -671,16 +678,16 @@ class Admin(commands.Cog):
 
         # Try to get the mute role from the server
         try:
-            mute_role = ctx.guild.get_role(int(db[sid]["mute_role"]))
+            mute_role = ctx.guild.get_role(int(self.db[sid]["mute_role"]))
         except KeyError:
             await ctx.send(":anger: This server has no mute role set.")
             return
 
-        if sid not in mute_db:
+        if sid not in self.mute_db:
             await ctx.send(":anger: This server has no mutes.")
             return
 
-        if uid not in mute_db[sid]:
+        if uid not in self.mute_db[sid]:
             await ctx.send(":anger: This member is not muted.")
             return
 
@@ -689,13 +696,13 @@ class Admin(commands.Cog):
 
         # Remove the mute role and delete the entry from the database
         await target.remove_roles(mute_role)
-        del mute_db[sid][uid]
+        del self.mute_db[sid][uid]
 
-        update_db(sql_db, mute_db, "mutes")
+        update_db(self.sql_db, self.mute_db, "mutes")
 
 def setup(bot):
     bot.add_cog(Admin(bot))
 
 def teardown(bot):
-    sql_db.close()
+    bot.cogs["Admin"].sql_db.close()
     bot.remove_cog("Admin")

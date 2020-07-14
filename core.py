@@ -8,7 +8,7 @@ from discord.ext.commands import Context, Cog
 from discord_bot import DiscordBot
 from helpers import update_db, pretty_datetime
 
-VERSION = "1.0b1"
+VERSION = "1.0b2"
 
 # Exportable check for if the user is a botmaster
 def is_botmaster():
@@ -28,7 +28,7 @@ class Core(commands.Cog):
                 config = json.load(cfg)
                 self.bot.botmasters = config["Botmasters"]
         except Exception as error:
-            print(f"Error loading config file for Core module:\n    - {error}")
+            self.bot.log.error(f"Error loading config for Core module:\n    - {error}")
 
     ## Checks
     # Global check for if the user is blocked

@@ -12,101 +12,72 @@ from discord.ext.commands import Context
 from discord_bot import DiscordBot
 from helpers import pretty_datetime, update_db
 
-VERSION = "1.0b3"
+VERSION = "1.1b1"
 GP = "Groups plugin."
 IA = "Inactivity."
-
-# Set up database
-db_file = "db/groups.sql"
-backup = True
-
-# Check config and make a backup if required
-try:
-    with open("config/config.json") as cfg:
-        backup = json.load(cfg)["BackupDB"]
-except Exception as error:
-    print(f"Error loading prefix from configuration file.\n    - {error}")
-
-if os.path.exists(db_file) and backup:
-    timestamp = pretty_datetime(datetime.now(), display="FILE")
-    try:
-        shutil.copyfile(db_file, f"db/backups/groups-{timestamp}.sql")
-    except IOError as e:
-        error_file = f"db/backups/groups-{timestamp}.sql"
-        print(f"Unable to create file {error_file}\n    - {e}")
-
-sql_db = SqliteDict(
-    filename=db_file,
-    tablename="groups",
-    autocommit=True,
-    encode=json.dumps,
-    decode=json.loads
-)
-
-if "servers" not in sql_db:
-    sql_db["servers"] = {}
-
-db = sql_db["servers"]
-
-async def group_check(bot: DiscordBot):
-    # No servers registered
-    if len(db) <= 0:
-        return
-
-    for sid in db:
-        # No groups on this server
-        if len(db[sid]) <= 0:
-            continue
-
-        # Each group in the server
-        for group, data in db[sid].items():
-            info = data["info"]
-            guild = bot.get_guild(int(sid))
-
-            # Instance the channels and roles
-            category = guild.get_channel(int(info["category"]))
-            text_channel = guild.get_channel(int(info["text_channel"]))
-            voice_channel = guild.get_channel(int(info["voice_channel"]))
-            role = guild.get_role(int(info["role"]))
-
-            # Try to get the latest message from the text channel
-            try:
-                last_message = await text_channel.fetch_message(
-                    text_channel.last_message_id
-                )
-            except Exception as e:
-                # No message found, or there was some error
-                print(f"[ERROR]\n    - {e}")
-                break
-
-            if last_message is None:
-                return
-
-            last_datetime = last_message.created_at.replace(tzinfo=timezone.utc)
-            delta = datetime.now(tz=timezone.utc) - last_datetime
-
-            since_sent = int(delta.total_seconds())
-
-            if not voice_channel.members and since_sent >= 1800:
-                try:
-                    await voice_channel.delete(reason=IA)
-                    await text_channel.delete(reason=IA)
-                    await category.delete(reason=IA)
-                    await role.delete(reason=IA)
-                    db[sid].pop(group, f"Unable to remove {group} from database.")
-                except Exception as e:
-                    print(f"[ERROR]:\n    - {e}")
 
 class Groups(commands.Cog):
     """Dynamic group management plugin.
 
     Allows users to make and invite to temporary dynamic groups.
     """
+    # Background task to check and remove old groups
+    async def group_check(self):
+        # No servers registered
+        if len(self.db) <= 0:
+            return
+
+        for sid in self.db:
+            # No groups on this server
+            if len(self.db[sid]) <= 0:
+                continue
+
+            # Each group in the server
+            for group, data in self.db[sid].items():
+                info = data["info"]
+                guild = self.bot.get_guild(int(sid))
+
+                # Instance the channels and roles
+                category = guild.get_channel(int(info["category"]))
+                text_channel = guild.get_channel(int(info["text_channel"]))
+                voice_channel = guild.get_channel(int(info["voice_channel"]))
+                role = guild.get_role(int(info["role"]))
+
+                # Try to get the latest message from the text channel
+                try:
+                    last_message = await text_channel.fetch_message(
+                        text_channel.last_message_id
+                    )
+                except Exception as e:
+                    # No message found, or there was some error
+                    self.bot.log.error(f"[ERROR]\n    - {e}")
+                    break
+
+                if last_message is None:
+                    return
+
+                last_datetime = last_message.created_at.replace(tzinfo=timezone.utc)
+                delta = datetime.now(tz=timezone.utc) - last_datetime
+
+                since_sent = int(delta.total_seconds())
+
+                if not voice_channel.members and since_sent >= 1800:
+                    try:
+                        await voice_channel.delete(reason=IA)
+                        await text_channel.delete(reason=IA)
+                        await category.delete(reason=IA)
+                        await role.delete(reason=IA)
+                        self.db[sid].pop(
+                            group,
+                            f"Unable to remove {group} from database."
+                        )
+                    except Exception as e:
+                        self.bot.log.error(f"[ERROR]:\n    - {e}")
     # Background task scheduler
     async def task_scheduler(self):
         while True:
             try:
-                await group_check(self.bot)
+                await self.group_check()
                 await asyncio.sleep(60)
             except RuntimeError:
                 # Database changed during iteration, this is expected when new entries
@@ -117,6 +88,40 @@ class Groups(commands.Cog):
         self.bot = bot
         self.name = "groups"
         self.version = VERSION
+
+        self.backup = True
+
+        # Check config and make a backup if required
+        try:
+            with open("config/config.json") as cfg:
+                self.backup = json.load(cfg)["BackupDB"]
+        except Exception as error:
+            self.bot.log.error(f"Error loading prefix from config file.\n    - {error}")
+
+        # Set up database
+        db_file = "db/groups.sql"
+
+        if os.path.exists(db_file) and self.backup:
+            timestamp = pretty_datetime(datetime.now(), display="FILE")
+            try:
+                shutil.copyfile(db_file, f"db/backups/groups-{timestamp}.sql")
+            except IOError as e:
+                error_file = f"db/backups/groups-{timestamp}.sql"
+                self.bot.log.error(f"Unable to create file {error_file}\n    - {e}")
+
+        self.sql_db = SqliteDict(
+            filename=db_file,
+            tablename="groups",
+            autocommit=True,
+            encode=json.dumps,
+            decode=json.loads
+        )
+
+        if "servers" not in self.sql_db:
+            self.sql_db["servers"] = {}
+
+        self.db = self.sql_db["servers"]
+
         asyncio.create_task(self.task_scheduler())
 
     @commands.group(aliases=["group", "gr"])
@@ -132,13 +137,13 @@ class Groups(commands.Cog):
 
         sid = str(ctx.guild.id)
 
-        if sid in db and len(db[sid]) > 0:
+        if sid in self.db and len(self.db[sid]) > 0:
             # Build an embed showing all groups the member is part of
             embed = Embed(title="Your groups:", color=0x7289DA)
 
             embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
 
-            for group, data in db[sid].items():
+            for group, data in self.db[sid].items():
                 info = data["info"]
 
                 embed.add_field(name=group, value=info["description"])
@@ -159,8 +164,8 @@ class Groups(commands.Cog):
         """
         sid = str(ctx.guild.id)
 
-        if sid not in db:
-            db[sid] = {}
+        if sid not in self.db:
+            self.db[sid] = {}
 
         # Try to make a role, text, and voice channel for the group
         try:
@@ -189,7 +194,7 @@ class Groups(commands.Cog):
                 category=category
             )
 
-            db[sid] = {
+            self.db[sid] = {
                 name: {
                     "info": {
                         "description": description,
@@ -200,7 +205,7 @@ class Groups(commands.Cog):
                     }
                 }
             }
-            update_db(sql_db, db, "servers")
+            update_db(self.sql_db, self.db, "servers")
 
             await ctx.author.add_roles(role, reason="Group created.")
 
@@ -219,18 +224,18 @@ class Groups(commands.Cog):
         """Invite someone to your group!"""
         sid = str(ctx.guild.id)
 
-        if sid not in db:
+        if sid not in self.db:
             await ctx.send(":anger: This server has no groups, try `group create`!")
             return
 
-        if group not in db[sid]:
+        if group not in self.db[sid]:
             await ctx.send(
                 f":anger: That group doesn't exist, try `group create {group}`!"
             )
             return
 
         # Get the group role
-        role = ctx.guild.get_role(int(db[sid][group]["info"]["role"]))
+        role = ctx.guild.get_role(int(self.db[sid][group]["info"]["role"]))
 
         if role not in ctx.author.roles:
             await ctx.send(":anger: You are not part of that group!")
@@ -247,7 +252,7 @@ class Groups(commands.Cog):
                 )
 
                 group_channel = ctx.guild.get_channel(
-                    int(db[sid][group]["info"]["text_channel"])
+                    int(self.db[sid][group]["info"]["text_channel"])
                 )
                 await group_channel.send(f"Welcome to {group} {target.mention}!")
 
@@ -256,3 +261,7 @@ class Groups(commands.Cog):
 
 def setup(bot):
     bot.add_cog(Groups(bot))
+
+def teardown(bot):
+    bot.cogs["Groups"].sql_db.close()
+    bot.remove_cog("Groups")
