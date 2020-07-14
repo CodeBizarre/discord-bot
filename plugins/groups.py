@@ -71,6 +71,7 @@ class Groups(commands.Cog):
                             group,
                             f"Unable to remove {group} from database."
                         )
+                        update_db(self.sql_db, self.db, "servers")
                     except Exception as e:
                         self.bot.log.error(f"[ERROR]:\n    - {e}")
     # Background task scheduler
