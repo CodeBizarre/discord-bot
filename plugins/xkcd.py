@@ -84,4 +84,4 @@ class Xkcd(commands.Cog):
             await ctx.send(f"Module {module} imported.")
 
 def setup(bot):
-    bot.add_cog(XKCD(bot))
+    bot.add_cog(Xkcd(bot))
