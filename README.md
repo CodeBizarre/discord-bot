@@ -1,22 +1,8 @@
-# Multipurpose Discord bot mainly made for my personal server
-# Master branch is currently in-development for version 3.0, and may not function as expected, Use branch 2.x for stability.
+# Multipurpose Discord bot extensible using Discord.py's cogs with extra custom features.
 
-Coding standards:
-  - 90 char line length limits
-  - Double-quote for strings (Even single character strings)
-  - Double-hash section header comments
-  - No punctuation for single line comments
-  - Punctuation in multi-line hash comments and all docstring comments
-  - Imports in order of lowest to highest level
-
-Filesystem standards:
-  - Config files in JSON stored in /config
-  - Database files stored in /db and backed up in /db/backup
-  - All databases must use SQLite using SqliteDict and use .sql extension
-  - All base extension cogs must go in the root folder
-  - All addon plugins (cogs) must go in the /plugins folder
-  - Any official plugin must add requirements to the requirements.txt file
-    - All official plugins must only use resources provided in direct code or through pip
+## Installation instructions:
+Requires Python 3.8 or newer.
+Coming soon(tm)!
 
 ## Command reference:
 ### Base commands:
@@ -25,8 +11,6 @@ shutdown: Turn the bot off
     Botmaster required
 
 ping: Ping/pong test
-
-echo <Message>: Have the bot repeat Message
 
 info: Bot info
 
@@ -56,31 +40,17 @@ logs [edits | deletes | channel]:
         MUST HAVE DISCORD ADMINISTRATOR PERMISSION
         Set logging message deletes to the logs channel to Enabled
 
-plugins [load | unload | enable | disable]:
-    Aliases = pl, cogs
-    Invoke without arguments to display currently loaded plugins
+ghosts [enabled=True]:
+    MUST HAVE DISCORD ADMINISTRATOR PERMISSION
+    Set reporting of ghost pings (A message containing the mention of a user was deleted) on your server.
 
-    load <Name>:
-        Botmaster required
-        Load the plugin Name (Do not include the .py extension)
+whois [Member]:
+    Displays basic information about a member, including their join date, roles, and avatar.
+    Invoke without arguments to display information about yourself.
 
-    unload <Name>:
-        Botmaster required
-        Unload the plugin Name (Do not include the .py extension)
-
-    reload <Name>:
-        Botmaster required
-        Shorthand for running `plugins unload Name` followed by `plugins load Name`
-
-    enable <Name>:
-        Level 10 required
-        Enable the plugin Name on your server (Name will be the same as it displays in the loaded plugins list)
-
-    disable <Name>:
-        Level 10 required
-        Disable the plugin Name on your server (Name will be the same as it displays in the loaded plugins list)
 ```
-### Account plugin commands
+### Account plugin
+###### Create and manager user accounts on a per-server basis to control access to moderation commands
 ```
 accounts [search | add | remove | update | genesis]:
     Aliases = accs
@@ -109,7 +79,35 @@ accounts [search | add | remove | update | genesis]:
         MUST HAVE DISCORD ADMINISTRATOR PERMISSION
         Create yourself an account with the highest level (10) on the current server
 ```
-### Messages plugin commands
+### Plugin manager
+###### Manage loaded plugins, and enable/disable them on a per-server basis
+```
+plugins [load | unload | enable | disable]:
+    Aliases = pl, cogs
+    Invoke without arguments to display currently loaded plugins
+
+    load <Name>:
+        Botmaster required
+        Load the plugin Name (Do not include the .py extension)
+
+    unload <Name>:
+        Botmaster required
+        Unload the plugin Name (Do not include the .py extension)
+
+    reload <Name>:
+        Botmaster required
+        Shorthand for running `plugins unload Name` followed by `plugins load Name`
+
+    enable <Name>:
+        Level 10 required
+        Enable the plugin Name on your server (Name will be the same as it displays in the loaded plugins list)
+
+    disable <Name>:
+        Level 10 required
+        Disable the plugin Name on your server (Name will be the same as it displays in the loaded plugins list)
+```
+### Messages plugin
+###### Move or crosspost messages to other channels
 ```
 crosspost <Message> <Target>:
     Aliases = xpost, x-post
@@ -121,7 +119,8 @@ move <Message> <Target>:
     Must be message OP or level 5
     Move a Message to Target channel
 ```
-### XKCD plugin commands
+### Xkcd plugin
+###### Get comics from xkcd
 ```
 xkcd [random | number]:
     Invoke without arguments to display latest comic
@@ -132,13 +131,15 @@ xkcd [random | number]:
     number <Number>:
         XKCD comic Number
 ```
-### Inspirobot plugin commands
+### Inspirobot plugin
+###### Generate inspirobot images
 ```
 inspirobot:
     Aliases = ib, inspire
     Generates a new inspirational quote
 ```
-### Roles plugin commands
+### Roles plugin
+###### Add user-assignable roles to your server
 ```
 role [get | lose | add | remove]:
     Aliases = roles
@@ -159,7 +160,8 @@ role [get | lose | add | remove]:
         Level 10 required
         Remove Role from the assignable roles list
 ```
-### Admin plugin commands
+### Admin plugin
+###### Various administration features such as warn, mute, kick, ban, and more
 Note: For commands requiring length and span arguments, span will be the unit of time where length is the amount of those units.
 Valid Span(s) are: second, seconds, minute, minutes, hour, hours, day, days, week, weeks, month, months, year, years
 ```
@@ -230,3 +232,36 @@ admin [log | role]:
             Level 5 required
             purge messages from Role within the last Count messages
 ```
+### Groups plugin
+###### Create temporary private groups with a voice and text channel
+```
+groups [create | invite]:
+    Aliases = group, gr
+    Invoke without arguments to view the groups you are currently part of
+
+    create <Name> <Description>:
+        Aliases = c, cr, new
+        Create a new group. <Name> must have no spaces or special characters, and <Description> may include any utf-8 symbols.
+
+    invite <Target> <Group>:
+        Aliases = i, inv
+        Invite <Target> to a <Group> you are part of.
+```
+## Development
+
+Coding standards:
+  - 90 char line length limits
+  - Double-quote for strings (Even single character strings)
+  - Double-hash section header comments
+  - No punctuation for single line comments
+  - Punctuation in multi-line hash comments and all docstring comments
+  - Imports in order of lowest to highest level
+
+Filesystem standards:
+  - Config files in JSON stored in /config
+  - Database files stored in /db and backed up in /db/backup
+  - All databases must use SQLite using SqliteDict and use .sql extension
+  - All base extension cogs must go in the root folder
+  - All addon plugins (cogs) must go in the /plugins folder
+  - Any official plugin must add requirements to the requirements.txt file
+    - All official plugins must only use resources provided in direct code or through pip
