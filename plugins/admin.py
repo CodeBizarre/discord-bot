@@ -13,7 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import update_db, pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.4b1"
+VERSION = "2.4b2"
 
 async def embed_builder(action: str, member: Member, reason: str,
     td: timedelta = None) -> Embed:
@@ -67,73 +67,73 @@ class Admin(commands.Cog):
                     )
 
     # Coroutine to run in a background thread to check if warns are expired
-        async def warn_check(self):
-            ts = datetime.now(tz=timezone.utc).timestamp()
+    async def warn_check(self):
+        ts = datetime.now(tz=timezone.utc).timestamp()
 
-            # No servers registered
-            if len(self.warn_db) <= 0:
-                return
+        # No servers registered
+        if len(self.warn_db) <= 0:
+            return
 
-            for sid in self.warn_db:
-                # No warns in the server
-                if len(self.warn_db[sid]) <= 0:
-                    continue
+        for sid in self.warn_db:
+            # No warns in the server
+            if len(self.warn_db[sid]) <= 0:
+                continue
 
+            guild = self.bot.get_guild(int(sid))
+
+            # Each warn in the server
+            for uid in self.warn_db[sid]:
+                for i, w in self.warn_db[sid][uid].items():
+                    if ts >= float(w["expires"]):
+                        del self.warn_db[sid][uid][i]
+                        update_db(self.sql_db, self.warn_db, "warns")
+                        self.bot.log.info(
+                            f"[ADMIN][WARN][REMOVE] {uid}.{i} in <{guild.name}>"
+                        )
+
+    # Coroutine to run in a background thread to check if mutes are expired
+    async def mute_check(self):
+        ts = datetime.now(tz=timezone.utc).timestamp()
+
+        # No servers registered
+        if len(self.mute_db) <= 0:
+            return
+
+        for sid in self.mute_db:
+            # No mutes in this server
+            if len(self.mute_db[sid]) <= 0:
+                continue
+
+        # Each mute in the server
+        for uid, info in self.mute_db[sid].items():
+            if ts >= float(info["expires"]):
                 guild = self.bot.get_guild(int(sid))
 
-                # Each warn in the server
-                for uid in self.warn_db[sid]:
-                    for i, w in self.warn_db[sid][uid].items():
-                        if ts >= float(w["expires"]):
-                            del self.warn_db[sid][uid][i]
-                            update_db(self.sql_db, self.warn_db, "warns")
-                            self.bot.log.info(
-                                f"[ADMIN][WARN][REMOVE] {uid}.{i} in <{guild.name}>"
-                            )
-
-        # Coroutine to run in a background thread to check if mutes are expired
-        async def mute_check(self):
-            ts = datetime.now(tz=timezone.utc).timestamp()
-
-            # No servers registered
-            if len(self.mute_db) <= 0:
-                return
-
-            for sid in self.mute_db:
-                # No mutes in this server
-                if len(self.mute_db[sid]) <= 0:
-                    continue
-
-            # Each mute in the server
-            for uid, info in self.mute_db[sid].items():
-                if ts >= float(info["expires"]):
-                    guild = self.bot.get_guild(int(sid))
-
-                    # Get the mute role
-                    try:
-                        role = guild.get_role(int(self.db[sid]["mute_role"]))
-                    # Delete the mute from the database if we're unable to get the mute role
-                    except KeyError:
-                        del self.mute_db[sid][uid]
-                        break
-
-                    # Else get the member and remove the mute role
-                    target = guild.get_member(int(uid))
-
-                    if role in target.roles:
-                        await target.remove_roles(role, reason="Auto mute remove.")
-                        await target.send(
-                            f":speaking_head: Your mute in {guild.name} has expired."
-                        )
-                    else:
-                        del self.mute_db[sid][uid]
-                        break
-
+                # Get the mute role
+                try:
+                    role = guild.get_role(int(self.db[sid]["mute_role"]))
+                # Delete the mute from the database if we're unable to get the mute role
+                except KeyError:
                     del self.mute_db[sid][uid]
-                    update_db(self.sql_db, self.mute_db, "mutes")
-                    self.bot.log.info(
-                        f"[ADMIN][MUTE][REMOVE] {target.id} in <{guild.name}>"
+                    break
+
+                # Else get the member and remove the mute role
+                target = guild.get_member(int(uid))
+
+                if role in target.roles:
+                    await target.remove_roles(role, reason="Auto mute remove.")
+                    await target.send(
+                        f":speaking_head: Your mute in {guild.name} has expired."
                     )
+                else:
+                    del self.mute_db[sid][uid]
+                    break
+
+                del self.mute_db[sid][uid]
+                update_db(self.sql_db, self.mute_db, "mutes")
+                self.bot.log.info(
+                    f"[ADMIN][MUTE][REMOVE] {target.id} in <{guild.name}>"
+                )
 
     # Background task scheduling system
     async def task_scheduler(self):
@@ -558,24 +558,28 @@ class Admin(commands.Cog):
         """
         sid = str(ctx.guild.id)
 
+        if sid not in self.warn_db:
+            await ctx.send(":anger: Server has no warns.")
+            return
+
         if target is None:
             target = ctx.author
 
         uid = str(target.id)
 
-        if target is not ctx.author:
-            level = self.bot.accounts[sid][uid]
-            if level < 4:
-                await ctx.send(":anger: Must be level 4 to view other users' warns.")
-                return
-
-        if sid not in self.warn_db:
-            await ctx.send(":anger: Server has no warns.")
-            return
-
         if uid not in self.warn_db[sid]:
             await ctx.send(":anger: Member has no warns.")
             return
+
+        if target is not ctx.author:
+            try:
+                level = self.bot.accounts[sid][str(ctx.author.id)]
+            except KeyError:
+                await ctx.send(":anger: You must have an account on this server.")
+                return
+            if level < 4:
+                await ctx.send(":anger: Must be level 4 to view other users' warns.")
+                return
 
         embed = Embed(
             title=f"{target.name}#{target.discriminator}'s Warns",
