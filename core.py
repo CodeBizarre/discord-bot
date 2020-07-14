@@ -146,7 +146,7 @@ class Core(commands.Cog):
         # Log the delete to a channel if the server has it set up
         try:
             if self.bot.servers[sid]["log_deletes"]:
-                # Try to get the user who deleted the message, not sure if this is reliable
+                # Try to get the user who deleted the message, not reliable
                 action = await msg.guild.audit_logs(
                     limit=1,
                     action=AuditLogAction.message_delete
