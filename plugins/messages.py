@@ -9,7 +9,7 @@ from discord.ext.commands import Context
 from discord_bot import DiscordBot
 from helpers import pretty_datetime
 
-VERSION = "3.0b2"
+VERSION = "3.0b3"
 
 def msg_op_or_level(required=4):
     """
@@ -64,15 +64,6 @@ class Messages(commands.Cog):
         self.bot = bot
         self.name = "messages"
         self.version = VERSION
-
-        # Get the config file to grab the command prefix
-        self.prefix = None
-
-        try:
-            with open("config/config.json") as cfg:
-                self.prefix = json.load(cfg)["Prefix"]
-        except Exception as error:
-            self.bot.log.error(f"Error loading prefix from configfile.\n    - {error}")
 
     @commands.command(aliases=["xpost", "x-post"])
     @commands.guild_only()
@@ -169,7 +160,4 @@ class Messages(commands.Cog):
         await ctx.send(":white_check_mark: Message moved!")
 
 def setup(bot):
-    if bot.cogs["Messages"].prefix is not None:
-        bot.add_cog(Messages(bot))
-    else:
-        bot.log.warning("Unable to load messages plugin.")
+    bot.add_cog(Messages(bot))
