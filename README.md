@@ -34,11 +34,11 @@ status <Message>:
     Botmaster required
     Set the bot's "Playing" status to Message
 
-blacklist <User> [blacklist=True]:
+blocklist <User> [blocklist=True]:
   Aliases = bl, block
   Botmaster required
-  Add or remove User to/from the bot's blacklist
-  Invoking with blacklist equal to false will remove User from blacklist, all true values will add User to the blacklist
+  Add or remove User to/from the bot's blocklist
+  Invoking with blocklist equal to false will remove User from blocklist, all true values will add User to the blocklist
 
 logs [edits | deletes | channel]:
     MUST HAVE DISCORD ADMINISTRATOR PERMISSION
