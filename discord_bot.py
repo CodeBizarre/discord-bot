@@ -90,11 +90,11 @@ class DiscordBot(commands.Bot):
 
         if os.path.exists(db_file) and self.backup_db:
             timestamp = f"{pretty_datetime(datetime.now(), display='FILE')}"
-        try:
-            shutil.copyfile(db_file, f"db/backups/{self.database}-{timestamp}.sql")
-        except IOError as e:
-            error_file = f"db/backups/{self.database}-{timestamp}.sql"
-            self.log.error(f"Unable to create file {error_file}\n    - {e}")
+            try:
+                shutil.copyfile(db_file, f"db/backups/{self.database}-{timestamp}.sql")
+            except IOError as e:
+                error_file = f"db/backups/{self.database}-{timestamp}.sql"
+                self.log.error(f"Unable to create file {error_file}\n    - {e}")
 
         self.db = SqliteDict(
             filename=f"db/{self.database}",
