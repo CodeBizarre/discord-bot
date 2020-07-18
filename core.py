@@ -8,7 +8,7 @@ from discord.ext.commands import Context, Cog
 from discord_bot import DiscordBot
 from helpers import update_db, pretty_datetime
 
-VERSION = "1.0b2"
+VERSION = "1.0b3"
 
 # Exportable check for if the user is a botmaster
 def is_botmaster():
@@ -127,7 +127,7 @@ class Core(commands.Cog):
                 report_ghosts = self.bot.servers[sid]["report_ghosts"]
             except KeyError:
                 # This server is not configured.
-                return
+                report_ghosts = False
 
             if report_ghosts:
                 title = f"A message from {msg.author.mention} was removed mentioning"
@@ -140,38 +140,36 @@ class Core(commands.Cog):
                 elif len(msg.role_mentions) > 0:
                     mentions = [f"{r.name}" for r in msg.role_mentions]
                     await msg.channel.send(f"{title}: {mentions}")
-            else:
-                return
 
-        # Log the delete to a channel if the server has it set up
-        try:
-            if self.bot.servers[sid]["log_deletes"]:
-                # Try to get the user who deleted the message, not reliable
-                action = await msg.guild.audit_logs(
-                    limit=1,
-                    action=AuditLogAction.message_delete
-                ).flatten()
+            # Log the delete to a channel if the server has it set up
+            try:
+                if self.bot.servers[sid]["log_deletes"]:
+                    # Try to get the user who deleted the message, not reliable
+                    action = await msg.guild.audit_logs(
+                        limit=1,
+                        action=AuditLogAction.message_delete
+                    ).flatten()
 
-                who = action[0].user
+                    who = action[0].user
 
-                guild = msg.guild
-                channel = guild.get_channel(int(self.bot.servers[sid]["log_channel"]))
+                    guild = msg.guild
+                    channel = guild.get_channel(int(self.bot.servers[sid]["log_channel"]))
 
-                embed = Embed(title="Message Deleted", color=0xff0000)
-                embed.add_field(
-                    name="Last message delete action performed by:",
-                    value=f"{who.name}#{who.discriminator} or a bot",
-                    inline=False
-                )
-                embed.add_field(
-                    name=f"Author - {msg.author.name}#{msg.author.discriminator}",
-                    value=f"Deleted from {msg.channel.mention} - UID: {msg.author.id}"
-                )
-                embed.add_field(name="Message", value=msg.content, inline=False)
+                    embed = Embed(title="Message Deleted", color=0xff0000)
+                    embed.add_field(
+                        name="Last message delete action performed by:",
+                        value=f"{who.name}#{who.discriminator} or a bot",
+                        inline=False
+                    )
+                    embed.add_field(
+                        name=f"Author - {msg.author.name}#{msg.author.discriminator}",
+                        value=f"Deleted from {msg.channel.mention} - UID: {msg.author.id}"
+                    )
+                    embed.add_field(name="Message", value=msg.content, inline=False)
 
-                await channel.send(embed=embed)
-        except KeyError:
-            pass
+                    await channel.send(embed=embed)
+            except KeyError:
+                pass
 
     @Cog.listener()
     async def on_command(self, ctx: Context):
