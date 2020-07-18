@@ -8,7 +8,7 @@ from discord.ext.commands import Context, Cog
 from discord_bot import DiscordBot
 from helpers import update_db, pretty_datetime
 
-VERSION = "1.0b3"
+VERSION = "1.0b4"
 
 # Exportable check for if the user is a botmaster
 def is_botmaster():
@@ -85,27 +85,50 @@ class Core(commands.Cog):
         if self.bot.cmd_on_edit:
             await self.bot.process_commands(latter)
 
-        # If this is a DM, we don't need to try and log to channel
-        if sid is None:
-            return
+        # If this is a DM, we don't need to try and log to channel or report ghosts
+        if sid is not None:
+            # Check if the server should report mention deletes
+            try:
+                report_ghosts = self.bot.servers[sid]["report_ghosts"]
+            except KeyError:
+                # This server is not configured.
+                report_ghosts = False
 
-        # Log the edit to a channel if the server has it set up
-        try:
-            if self.bot.servers[sid]["log_edits"]:
-                guild = former.guild
-                channel = guild.get_channel(int(self.bot.servers[sid]["log_channel"]))
+            if report_ghosts and former.author.id is not self.bot.user.id:
+                title = f"A message from {former.author.mention} was edited removing"
+                difference = former.mentions
 
-                embed = Embed(title="Message Edited", color=0xff0000)
-                embed.add_field(
-                    name=f"Edited by {former.author.name}#{former.author.discriminator}",
-                    value=f"Edited in {former.channel.mention}. UID: {former.author.id}"
-                )
-                embed.add_field(name="Before", value=former.content, inline=False)
-                embed.add_field(name="After", value=latter.content, inline=False)
+                if difference != latter.mentions:
+                    for mention in latter.mentions:
+                        if mention in difference:
+                            difference.remove(mention)
 
-                await channel.send(embed=embed)
-        except KeyError:
-            pass
+                    mentions = [f"{m.name}#{m.discriminator}" for m in difference]
+                    await former.channel.send(f"{title} mention(s) from: {mentions}")
+                elif former.mention_everyone and not latter.mention_everyone:
+                    await former.channel.send(f"{title} an Everyone or Here mention")
+                elif former.role_mentions != latter.role_mentions:
+                    difference = former.role_mentions - latter.role_mentions
+                    mentions = [f"{r.name}" for r in difference]
+                    await former.channel.send(f"{title} role mention(s): {mentions}")
+
+            # Log the edit to a channel if the server has it set up
+            try:
+                if self.bot.servers[sid]["log_edits"]:
+                    guild = former.guild
+                    channel = guild.get_channel(int(self.bot.servers[sid]["log_channel"]))
+
+                    embed = Embed(title="Message Edited", color=0xff0000)
+                    embed.add_field(
+                        name=f"Edited by {former.author.name}#{former.author.discriminator}",
+                        value=f"Edited in {former.channel.mention}. UID: {former.author.id}"
+                    )
+                    embed.add_field(name="Before", value=former.content, inline=False)
+                    embed.add_field(name="After", value=latter.content, inline=False)
+
+                    await channel.send(embed=embed)
+            except KeyError:
+                pass
 
     @Cog.listener()
     async def on_message_delete(self, msg: Message):
@@ -120,7 +143,7 @@ class Core(commands.Cog):
 
             self.bot.log.info(f"{header} {content}")
 
-        # If this is a DM, we don't need to try and log to channel
+        # If this is a DM, we don't need to try and log to channel or report ghosts
         if sid is not None:
             # Check if the server should report mention deletes
             try:
@@ -129,7 +152,7 @@ class Core(commands.Cog):
                 # This server is not configured.
                 report_ghosts = False
 
-            if report_ghosts:
+            if report_ghosts and msg.author.id is not self.bot.user.id:
                 title = f"A message from {msg.author.mention} was removed mentioning"
 
                 if len(msg.mentions) > 0:
@@ -139,7 +162,7 @@ class Core(commands.Cog):
                     await msg.channel.send(f"{title}: Everyone or Here")
                 elif len(msg.role_mentions) > 0:
                     mentions = [f"{r.name}" for r in msg.role_mentions]
-                    await msg.channel.send(f"{title}: {mentions}")
+                    await msg.channel.send(f"{title} role: {mentions}")
 
             # Log the delete to a channel if the server has it set up
             try:
