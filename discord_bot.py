@@ -9,7 +9,7 @@ from discord.ext import commands
 
 from helpers import get_logger, pretty_datetime
 
-VERSION = "3.0.0b3"
+VERSION = "3.0.0b4"
 
 class DiscordBot(commands.Bot):
     """Extensible bot using Discord.py's Cogs"""
@@ -121,7 +121,7 @@ class DiscordBot(commands.Bot):
         if self.mention_cmds:
             self.mode = commands.when_mentioned_or(self.config_prefix)
         else:
-            self.mode = self.command_prefix
+            self.mode = self.config_prefix
 
         super(DiscordBot, self).__init__(
             self.mode,
