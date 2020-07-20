@@ -10,8 +10,9 @@ from discord.ext.commands import Context
 
 from discord_bot import DiscordBot
 from helpers import pretty_datetime, update_db
+from accounts import is_level
 
-VERSION = "1.0b2"
+VERSION = "1.0b3"
 
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
@@ -152,6 +153,7 @@ class Custom(commands.Cog):
             await ctx.send_help(self)
 
     @custom.command(name="prefix")
+    @is_level(10)
     @commands.guild_only()
     async def custom_prefix(self, ctx: Context, prefix: str = None):
         """Set your server's custom command prefix.
@@ -202,6 +204,7 @@ class Custom(commands.Cog):
             await ctx.send(f":anger: Something went wrong: {e}")
 
     @text.command(name="create", aliases=["c", "new", "make", "add"])
+    @is_level(8)
     @commands.guild_only()
     async def text_create(self, ctx: Context, name: str, *, text: str):
         """Create or update a new custom text command."""
@@ -222,6 +225,7 @@ class Custom(commands.Cog):
             await ctx.send(f":anger: Something went wrong: {e}")
 
     @text.command(name="remove", aliases=["r", "del", "delete"])
+    @is_level(8)
     @commands.guild_only()
     async def text_remove(self, ctx: Context, name: str):
         """Remove a custom text command."""
@@ -265,6 +269,7 @@ class Custom(commands.Cog):
             await ctx.send(f":anger: Something went wrong: {e}")
 
     @response.command(name="create", aliases=["c", "new", "make", "add"])
+    @is_level(8)
     @commands.guild_only()
     async def response_create(self, ctx: Context, prefix: str, *, text: str):
         """Create or update a new custom response."""
@@ -284,6 +289,7 @@ class Custom(commands.Cog):
             await ctx.send(f":anger: Something went wrong: {e}")
 
     @response.command(name="remove", aliases=["r", "del", "delete"])
+    @is_level(8)
     @commands.guild_only()
     async def response_remove(self, ctx: Context, prefix: str):
         """Remove a custom response."""
@@ -327,6 +333,7 @@ class Custom(commands.Cog):
             await ctx.send(f":anger: Something went wrong: {e}")
 
     @script.command(name="create", aliases=["c", "new", "make", "add"])
+    @is_level(8)
     @commands.guild_only()
     async def script_create(self, ctx: Context, prefix: str, *, text: str):
         """Create or update a new script response."""
@@ -346,6 +353,7 @@ class Custom(commands.Cog):
             await ctx.send(f":anger: Something went wrong: {e}")
 
     @script.command(name="remove", aliases=["r", "del", "delete"])
+    @is_level(8)
     @commands.guild_only()
     async def script_remove(self, ctx: Context, prefix: str):
         """Remove a custom response."""
