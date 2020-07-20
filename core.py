@@ -457,5 +457,12 @@ class Core(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.command()
+    async def prefix(self, ctx: Context):
+        """Display the bot's command prefix.
+        Only useful when MentionCommands is enabled.
+        """
+        await ctx.send(f"Command prefix is: `{self.bot.config_prefix}`")
+
 def setup(bot):
     bot.add_cog(Core(bot))
