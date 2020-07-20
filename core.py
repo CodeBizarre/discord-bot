@@ -8,7 +8,7 @@ from discord.ext.commands import Context, Cog
 from discord_bot import DiscordBot
 from helpers import update_db, pretty_datetime
 
-VERSION = "1.0b4"
+VERSION = "1.1b1"
 
 # Exportable check for if the user is a botmaster
 def is_botmaster():
