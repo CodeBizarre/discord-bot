@@ -12,7 +12,7 @@ from discord_bot import DiscordBot
 from helpers import pretty_datetime, update_db
 from accounts import is_level
 
-VERSION = "1.0b3"
+VERSION = "1.0b4"
 
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
@@ -101,7 +101,7 @@ class Custom(commands.Cog):
 
         # Text command
         if prefix is not None and msg.content.startswith(prefix):
-            command = msg.content.lstrip(prefix)
+            command = msg.content.split(" ")[0].lstrip(prefix)
 
             try:
                 cmd_result = self.db[sid]["text"][command]
