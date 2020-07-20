@@ -158,6 +158,7 @@ class Custom(commands.Cog):
     async def custom_prefix(self, ctx: Context, prefix: str = None):
         """Set your server's custom command prefix.
         Running the command without arguments will display the current prefix.
+        Level 10 required.
         """
         sid = str(ctx.guild.id)
 
@@ -207,7 +208,9 @@ class Custom(commands.Cog):
     @is_level(8)
     @commands.guild_only()
     async def text_create(self, ctx: Context, name: str, *, text: str):
-        """Create or update a new custom text command."""
+        """Create or update a new custom text command.
+        Level 8 required.
+        """
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
@@ -228,7 +231,9 @@ class Custom(commands.Cog):
     @is_level(8)
     @commands.guild_only()
     async def text_remove(self, ctx: Context, name: str):
-        """Remove a custom text command."""
+        """Remove a custom text command.
+        Level 8 required.
+        """
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
@@ -272,7 +277,9 @@ class Custom(commands.Cog):
     @is_level(8)
     @commands.guild_only()
     async def response_create(self, ctx: Context, prefix: str, *, text: str):
-        """Create or update a new custom response."""
+        """Create or update a new custom response.
+        Level 8 required.
+        """
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
@@ -292,7 +299,9 @@ class Custom(commands.Cog):
     @is_level(8)
     @commands.guild_only()
     async def response_remove(self, ctx: Context, prefix: str):
-        """Remove a custom response."""
+        """Remove a custom response.
+        Level 8 required.
+        """
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
@@ -336,7 +345,9 @@ class Custom(commands.Cog):
     @is_level(8)
     @commands.guild_only()
     async def script_create(self, ctx: Context, prefix: str, *, text: str):
-        """Create or update a new script response."""
+        """Create or update a new script response.
+        Level 8 required.
+        """
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
@@ -356,7 +367,9 @@ class Custom(commands.Cog):
     @is_level(8)
     @commands.guild_only()
     async def script_remove(self, ctx: Context, prefix: str):
-        """Remove a custom response."""
+        """Remove a custom response.
+        Level 8 required.
+        """
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
