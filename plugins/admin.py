@@ -13,7 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import update_db, pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.5b1"
+VERSION = "2.5b2"
 
 async def embed_builder(action: str, member: Member, reason: str,
     td: timedelta = None) -> Embed:
@@ -339,6 +339,9 @@ class Admin(commands.Cog):
         await target.send(embed=embed)
 
         await target.kick(reason=reason)
+
+        tag = f"{target.name}#{target.discriminator}"
+        await ctx.send(f":white_check_mark: Kicked {tag} for {reason}")
         await self.log_to_channel(ctx, target, reason)
 
     @commands.command(aliases=["sban"])
@@ -355,6 +358,8 @@ class Admin(commands.Cog):
         await target.ban(reason=f"Softbanned: {reason}", delete_message_days=purge)
         await target.unban(reason="Softban removal")
 
+        tag = f"{target.name}#{target.discriminator}"
+        await ctx.send(f":white_check_mark: Softbanned {tag} for {reason}")
         await self.log_to_channel(ctx, target, reason)
 
     @commands.command()
@@ -370,6 +375,8 @@ class Admin(commands.Cog):
 
         await target.ban(reason=reason, delete_message_days=purge)
 
+        tag = f"{target.name}#{target.discriminator}"
+        await ctx.send(f":white_check_mark: Banned {tag} for {reason}")
         await self.log_to_channel(ctx, target, reason)
 
     @commands.command(aliases=["tban"])
@@ -406,6 +413,9 @@ class Admin(commands.Cog):
         }
 
         update_db(self.sql_db, self.tempban_db, "temp_bans")
+
+        tag = f"{target.name}#{target.discriminator}"
+        await ctx.send(f":white_check_mark: Tempbanned {tag} for {reason}")
         await self.log_to_channel(ctx, target, reason)
 
     @commands.group()
