@@ -12,7 +12,7 @@ from discord_bot import DiscordBot
 from helpers import pretty_datetime, update_db
 from accounts import is_level
 
-VERSION = "1.0b4"
+VERSION = "1.0b5"
 
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
@@ -198,6 +198,16 @@ class Custom(commands.Cog):
                 embed = Embed(title="Text Commands", color=0x7289DA)
                 for cmd, rsp in self.db[sid]["text"].items():
                     embed.add_field(name=cmd, value=rsp)
+                    if len(embed.fields) > 5:
+                        length = len(self.db[sid]["text"])
+                        if length == 6: break
+
+                        embed.add_field(
+                            name="...",
+                            value=f"And {length - 6} more.",
+                            inline=False
+                        )
+                        break
                 await ctx.send(embed=embed)
             else:
                 await ctx.send(":anger: This server has no script responses.")
@@ -271,6 +281,16 @@ class Custom(commands.Cog):
                 embed = Embed(title="Responses", color=0x7289DA)
                 for cmd, rsp in self.db[sid]["response"].items():
                     embed.add_field(name=cmd, value=rsp)
+                    if len(embed.fields) > 5:
+                        length = len(self.db[sid]["response"])
+                        if length == 6: break
+
+                        embed.add_field(
+                            name="...",
+                            value=f"And {length - 6} more.",
+                            inline=False
+                        )
+                        break
                 await ctx.send(embed=embed)
             else:
                 await ctx.send(":anger: This server has no responses.")
@@ -343,6 +363,16 @@ class Custom(commands.Cog):
                 embed = Embed(title="Script Responses", color=0x7289DA)
                 for cmd, rsp in self.db[sid]["complex"].items():
                     embed.add_field(name=cmd, value=rsp)
+                    if len(embed.fields) > 5:
+                        length = len(self.db[sid]["complex"])
+                        if length == 6: break
+
+                        embed.add_field(
+                            name="...",
+                            value=f"And {length - 6} more.",
+                            inline=False
+                        )
+                        break
                 await ctx.send(embed=embed)
             else:
                 await ctx.send(":anger: This server has no script responses.")
