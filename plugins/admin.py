@@ -13,7 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import update_db, pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.4b2"
+VERSION = "2.5b1"
 
 async def embed_builder(action: str, member: Member, reason: str,
     td: timedelta = None) -> Embed:
@@ -549,9 +549,16 @@ class Admin(commands.Cog):
         update_db(self.sql_db, self.warn_db, "warns")
         await self.log_to_channel(ctx, target, reason)
 
-    @commands.command()
+    @commands.group()
     @commands.guild_only()
-    async def warns(self, ctx: Context, target: Member = None):
+    async def warns(self, ctx: Context):
+        """Base command to manage warns."""
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help("warns")
+
+    @warns.command(name="list", aliases=["find", "lookup", "member"])
+    @commands.guild_only()
+    async def warns_list(self, ctx: Context, target: Member = None):
         """List all active warns of yourself or another member.
         Invoke without argument to view your own warns.
         Level 4 required to view other Members' warns
@@ -615,6 +622,32 @@ class Admin(commands.Cog):
         embed.set_footer(text=pretty_datetime(datetime.now()))
 
         await ctx.send(embed=embed)
+
+    @warns.command(name="remove", aliases=["delete", "del"])
+    @commands.guild_only()
+    @is_level(4)
+    async def warns_remove(self, ctx: Context, target: Member, number: str):
+        """Remove a warning from a member.
+        Level 4 required
+        """
+        sid = str(ctx.guild.id)
+        tid = str(target.id)
+
+        if sid not in self.warn_db:
+            await ctx.send(":anger: Server has no warns.")
+            return
+        elif tid not in self.warn_db[sid]:
+            await ctx.send(":anger: Member has no warns.")
+            return
+
+        for i, w in self.warn_db[sid][tid].items():
+            if i == number:
+                del self.warn_db[sid][tid][i]
+                await ctx.send(f":white_check_mark: Warn #{i} (`{w['reason']}`) removed.")
+                await target.send(
+                    f"Warn #{i} for `{w['reason']}` in {ctx.guild.name} has been removed."
+                )
+                break
 
     @commands.command()
     @commands.guild_only()
