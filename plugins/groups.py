@@ -12,7 +12,7 @@ from discord.ext.commands import Context
 from discord_bot import DiscordBot
 from helpers import pretty_datetime, update_db
 
-VERSION = "1.1b1"
+VERSION = "1.1b2"
 GP = "Groups plugin."
 IA = "Inactivity."
 
@@ -195,17 +195,16 @@ class Groups(commands.Cog):
                 category=category
             )
 
-            self.db[sid] = {
-                name: {
-                    "info": {
-                        "description": description,
-                        "category": str(category.id),
-                        "text_channel": str(text.id),
-                        "voice_channel": str(voice.id),
-                        "role": str(role.id)
-                    }
+            self.db[sid][name] = {
+                "info": {
+                    "description": description,
+                    "category": str(category.id),
+                    "text_channel": str(text.id),
+                    "voice_channel": str(voice.id),
+                    "role": str(role.id)
                 }
             }
+
             update_db(self.sql_db, self.db, "servers")
 
             await ctx.author.add_roles(role, reason="Group created.")
