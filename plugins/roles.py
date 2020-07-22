@@ -12,12 +12,14 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "1.1b5"
+VERSION = "2.0b1"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
 
     This plugin allows you to add roles to a list for users to safely assign themselves.
+    There are also time-based roles to give users after they have been in the server a
+    certain amount of time.
     """
     def __init__(self, bot: DiscordBot):
         self.bot = bot
@@ -61,11 +63,10 @@ class Roles(commands.Cog):
     async def role(self, ctx: Context):
         """Base role management commands.
 
-        Running the command without arguments will display the list of available roles
+        Running ther command without arguments will display the list of available roles
         in the current server.
         """
-        if ctx.invoked_subcommand is not None:
-            return
+        if ctx.invoked_subcommand is not None: return
 
         sid = str(ctx.guild.id)
 
@@ -87,9 +88,9 @@ class Roles(commands.Cog):
         else:
             await ctx.send(":anger: This server has no assignable roles.")
 
-    @role.command(name="get", aliases=["g"])
+    @role.command(name="add", aliases=["a", "get", "give", "+"])
     @commands.guild_only()
-    async def role_get(self, ctx: Context, *, role_name: str):
+    async def role_add(self, ctx: Context, *, role_name: str):
         """Get a role from the assignable roles list."""
         sid = str(ctx.guild.id)
 
@@ -109,10 +110,10 @@ class Roles(commands.Cog):
             await ctx.author.add_roles(role, reason="Self-assign")
             await ctx.send(":white_check_mark: Role added!")
 
-    @role.command(name="lose", aliases=["l"])
+    @role.command(name="remove", aliases=["r", "lose", "take", "-"])
     @commands.guild_only()
-    async def role_lose(self, ctx: Context, *, role_name: str):
-        """Lose a role from the assignable roles list."""
+    async def role_remove(self, ctx: Context, *, role_name: str):
+        """Remove an assignable role from yourself."""
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
@@ -131,10 +132,40 @@ class Roles(commands.Cog):
             await ctx.author.remove_roles(role, reason="Self-remove")
             await ctx.send(":white_check_mark: Role removed!")
 
-    @role.command(name="add", aliases=["a"])
-    @commands.guild_only()
+    @role.group(name="admin")
     @is_level(10)
-    async def role_add(self, ctx: Context, role_get: Role, *, description: str):
+    @commands.guild_only()
+    async def role_admin(self, ctx: Context):
+        """Admin commands. Running the command without arguments will show all server
+        roles, including timed roles, command roles, and react roles.
+        Level 10 required
+        """
+        if ctx.invoked_subcommand is not None: return
+
+        sid = str(ctx.guild.id)
+
+        # Get the app info for the embed author
+        if sid in self.db and len(self.db[sid]) > 0:
+            embed = Embed(title="Available roles:", color=0x7289DA)
+
+            embed.set_author(name=self.bot.user.name, icon_url=self.bot.app_info.icon_url)
+
+            # Add an entry for every assignable role
+            for name, info in self.db[sid].items():
+                embed.add_field(name=name, value=info["description"])
+
+            embed.set_footer(
+                text="For more information use the `help roles` command."
+            )
+
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send(":anger: This server has no assignable roles.")
+
+    @role_admin.command(name="add")
+    @is_level(10)
+    @commands.guild_only()
+    async def role_admin_add(self, ctx: Context, role_get: Role, *, description: str):
         """Add or update a role on the assignable roles list.
         Level 10 required
         """
@@ -146,22 +177,20 @@ class Roles(commands.Cog):
             self.db[sid] = {}
 
         try:
-            role_info = {
+            self.db[sid][name] = {
                 "id": rid,
                 "description": description
             }
-
-            self.db[sid][name] = role_info
 
             await ctx.send(f":white_check_mark: Added {name} to assignable roles.")
             update_db(self.sql_db, self.db, "servers")
         except Exception as e:
             await ctx.send(f":anger: Error adding role: {e}")
 
-    @role.command(name="remove", aliases=["r"])
-    @commands.guild_only()
+    @role_admin.command(name="remove")
     @is_level(10)
-    async def role_remove(self, ctx: Context, *, role_get: Role):
+    @commands.guild_only()
+    async def role_admin_remove(self, ctx: Context, *, role_get: Role):
         """Remove a role from the assignable roles list.
         Level 10 required
         """
