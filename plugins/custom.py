@@ -260,6 +260,10 @@ class Custom(commands.Cog):
 
         sid = str(ctx.guild.id)
 
+        if sid not in self.db:
+            await ctx.send(":anger: This server has no responses.")
+            return
+
         try:
             if "response" not in self.db[sid]:
                 await ctx.send(":anger: This server has no responses.")
@@ -327,6 +331,10 @@ class Custom(commands.Cog):
             return
 
         sid = str(ctx.guild.id)
+
+        if sid not in self.db:
+            await ctx.send(":anger: This server has no script responses.")
+            return
 
         try:
             if "complex" not in self.db[sid]:
