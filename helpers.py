@@ -79,6 +79,8 @@ async def time_parser(span: str, length: int, dt: datetime) -> datetime:
         case = switcher[span]
     elif span + "s" in switcher:
         case = switcher[span + "s"]
+    else:
+        raise KeyError("Time parser length/span is not valid.")
 
     # Calculate and return the time in the future
     future = dt + case()
