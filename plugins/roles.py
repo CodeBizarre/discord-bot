@@ -1,10 +1,11 @@
 import os
 import shutil
+import asyncio
 import json
 
 from datetime import datetime
 from sqlitedict import SqliteDict
-from discord import Role, Member, Embed
+from discord import Role, Member, Embed, Message, Emoji, PartialEmoji
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -12,7 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "2.0b1"
+VERSION = "2.1b1"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -58,6 +59,32 @@ class Roles(commands.Cog):
 
         self.db = self.sql_db["servers"]
 
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        sid = str(payload.guild_id)
+        mid = str(payload.message_id)
+
+        if sid not in self.db:
+            return
+        elif "reacts" not in self.db[sid]:
+            return
+        elif mid not in self.db[sid]["reacts"]:
+            return
+
+        info = self.db[sid]["reacts"][mid]
+        emoji_name = payload.emoji.name
+
+        for role_name, data in info.items():
+            if data["reaction"] == emoji_name:
+                try:
+                    role = payload.member.guild.get_role(int(data["id"]))
+                    await payload.member.add_roles(role, reason="Self-Assign")
+                except Exception as e:
+                    await payload.member.send(
+                        ":anger: There was an error assigning the role. Please let the " \
+                        f"server admin know so this can be fixed: `{e}`"
+                    )
+
     @commands.group(aliases=["roles"])
     @commands.guild_only()
     async def role(self, ctx: Context):
@@ -70,14 +97,21 @@ class Roles(commands.Cog):
 
         sid = str(ctx.guild.id)
 
+        if sid not in self.db:
+            await ctx.send(":anger: Server has no available roles.")
+            return
+        elif "roles" not in self.db[sid]:
+            await ctx.send(":anger: Server has no self-assignable roles.")
+            return
+
         # Get the app info for the embed author
-        if sid in self.db and len(self.db[sid]) > 0:
+        if sid in self.db and len(self.db[sid]["roles"]) > 0:
             embed = Embed(title="Available roles:", color=0x7289DA)
 
             embed.set_author(name=self.bot.user.name, icon_url=self.bot.app_info.icon_url)
 
             # Add an entry for every assignable role
-            for name, info in self.db[sid].items():
+            for name, info in self.db[sid]["roles"].items():
                 embed.add_field(name=name, value=info["description"])
 
             embed.set_footer(
@@ -98,10 +132,10 @@ class Roles(commands.Cog):
             await ctx.send(":anger: This server has no assignable roles.")
             return
 
-        if role_name not in self.db[sid]:
+        if role_name not in self.db[sid]["roles"]:
             await ctx.send(":anger: That is not an assignable role on this server.")
         else:
-            role = ctx.guild.get_role(int(self.db[sid][role_name]["id"]))
+            role = ctx.guild.get_role(int(self.db[sid]["roles"][role_name]["id"]))
 
             if role in ctx.author.roles:
                 await ctx.send(":anger: You already have that role.")
@@ -120,10 +154,10 @@ class Roles(commands.Cog):
             await ctx.send(":anger: This server has no assignable roles.")
             return
 
-        if role_name not in self.db[sid]:
+        if role_name not in self.db[sid]["roles"]:
             await ctx.send(":anger: That is not an assignable role on this server.")
         else:
-            role = ctx.guild.get_role(int(self.db[sid][role_name]["id"]))
+            role = ctx.guild.get_role(int(self.db[sid]["roles"][role_name]["id"]))
 
             if role not in ctx.author.roles:
                 await ctx.send(":anger: You don't have that role.")
@@ -145,13 +179,13 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         # Get the app info for the embed author
-        if sid in self.db and len(self.db[sid]) > 0:
+        if sid in self.db and len(self.db[sid]["roles"]) > 0:
             embed = Embed(title="Available roles:", color=0x7289DA)
 
             embed.set_author(name=self.bot.user.name, icon_url=self.bot.app_info.icon_url)
 
             # Add an entry for every assignable role
-            for name, info in self.db[sid].items():
+            for name, info in self.db[sid]["roles"].items():
                 embed.add_field(name=name, value=info["description"])
 
             embed.set_footer(
@@ -175,9 +209,12 @@ class Roles(commands.Cog):
 
         if sid not in self.db:
             self.db[sid] = {}
+            self.db[sid]["roles"] = {}
+        elif "roles" not in self.db[sid]:
+            self.db[sid]["roles"] = ""
 
         try:
-            self.db[sid][name] = {
+            self.db[sid]["roles"][name] = {
                 "id": rid,
                 "description": description
             }
@@ -200,11 +237,11 @@ class Roles(commands.Cog):
             await ctx.send(":anger: There are no assignable roles on this server.")
             return
 
-        if role_get.name not in self.db[sid]:
+        if role_get.name not in self.db[sid]["roles"]:
             await ctx.send(":anger: That is not an assignable role on this server.")
         else:
             try:
-                del self.db[sid][role_get.name]
+                del self.db[sid]["roles"][role_get.name]
 
                 await ctx.send(
                     f":white_check_mark: Removed {role_get.name} from assignable roles."
@@ -212,6 +249,119 @@ class Roles(commands.Cog):
                 update_db(self.sql_db, self.db, "servers")
             except Exception as e:
                 await ctx.send(f":anger: Error removing role: {e}")
+
+    @role_admin.group(name="react", aliases=["reacts", "reaction"])
+    @is_level(10)
+    @commands.guild_only()
+    async def role_admin_react(self, ctx: Context):
+        """Manage reaction-based roles on your server.
+        Running the command without arguments will display the list of reaction roles.
+        Level 10 required
+        """
+        if ctx.invoked_subcommand is not None: return
+
+        sid = str(ctx.guild.id)
+
+        if sid not in self.db:
+            await ctx.send(":anger: Server has no assignable roles.")
+            return
+        elif "reacts" not in self.db[sid]:
+            await ctx.send(":anger: Server has no reaction roles.")
+            return
+        elif len(self.db[sid]["reacts"]) <= 0:
+            await ctx.send(":anger: Server has no reaction roles.")
+            return
+
+        embed = Embed(name="Reaction Roles", color=0x7289DA)
+
+        for name, data in self.db[sid]["reacts"].items():
+            embed.add_field(name=name, value=f"{data} {data}")
+
+        await ctx.send(embed=embed)
+
+    @role_admin_react.command(name="add", aliases=["create"])
+    @is_level(10)
+    @commands.guild_only()
+    async def role_react_add(
+        self, ctx: Context, message: Message, role_get: Role, *, description: str):
+        """Add a new reaction-based role to a message in your server.
+        This will start a very quick interactive process for you to select the reaction.
+        Level 10 required
+        """
+        sid = str(ctx.guild.id)
+
+        if sid not in self.db:
+            self.db[sid] = {}
+            self.db[sid]["reacts"] = {}
+        elif "reacts" not in self.db[sid]:
+            self.db[sid]["reacts"] = {}
+
+        prompt = await ctx.send("React to this message to set your emoji.")
+
+        def check(reaction, member):
+            return member == ctx.message.author and reaction.message.id == prompt.id
+
+        try:
+            reaction, member = await ctx.bot.wait_for(
+                "reaction_add", timeout=20.0, check=check
+            )
+        except asyncio.TimeoutError:
+            await ctx.send(":anger: You took too long to react!")
+
+        mid = str(message.id)
+
+        if mid not in self.db[sid]["reacts"]:
+            self.db[sid]["reacts"][mid] = {}
+
+        # Convert the reaction emoji to a string if needed
+        if isinstance(reaction.emoji, Emoji) or isinstance(reaction.emoji, PartialEmoji):
+            reaction = reaction.emoji.name
+        else:
+            reaction = reaction.emoji
+
+        self.db[sid]["reacts"][mid][role_get.name] = {
+            "description": description,
+            "id": role_get.id,
+            "reaction": reaction,
+            "channel": message.channel.id,
+            "message": message.id
+        }
+
+        update_db(self.sql_db, self.db, "servers")
+
+        await ctx.send(f":white_check_mark: Role {role_get.name} added with {reaction}.")
+
+    @role_admin_react.command(name="remove", aliases=["delete"])
+    @is_level(10)
+    @commands.guild_only()
+    async def role_react_remove(self, ctx: Context, message: Message, *, role_get: Role):
+        """Remove a reaction role from a message in your server."""
+        sid = str(ctx.guild.id)
+        mid = str(message.id)
+
+        if sid not in self.db:
+            await ctx.send(":anger: Server has no assignable roles.")
+            return
+        elif "reacts" not in self.db[sid]:
+            await ctx.send(":anger: Server has no reaction roles.")
+            return
+        elif mid not in self.db[sid]["reacts"]:
+            await ctx.send(":anger: That message has no reaction roles.")
+            return
+        elif role_get.name not in self.db[sid]["reacts"][mid]:
+            await ctx.send(":anger: That role is not assignable from that message.")
+            return
+
+        try:
+            del self.db[sid]["reacts"][mid][role_get.name]
+            if len(self.db[sid]["reacts"][mid]) <= 0:
+                del self.db[sid]["reacts"][mid]
+
+            await ctx.send(
+                f":white_check_mark: {role_get.name} removed from {message.id}"
+            )
+        except Exception as e:
+            await ctx.send(f":anger: Something went wrong: {e}")
 
 def setup(bot):
     bot.add_cog(Roles(bot))
