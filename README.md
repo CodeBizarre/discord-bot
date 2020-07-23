@@ -118,6 +118,28 @@ move <Message> <Target>:
     Aliases = mv, ->
     Must be message OP or level 5
     Move a Message to Target channel
+
+purge [self | bot | all | member | role]:
+    Purge messages
+
+    self <Count>:
+        purge messages from yourself within the last Count messages
+
+    bot <Count>:
+        Level 5 required
+        purge messages from the bot within the last Count messages
+
+    all <Count>:
+        Level 5 required
+        purge all of the last <Count> messages
+
+    member <Target> <Count>:
+        Level 5 required
+        purge messages from Target within the last Count messages
+
+    role <Role> <Count>:
+        Level 5 required
+        purge messages from Role within the last Count messages
 ```
 ### Xkcd plugin
 ###### Get comics from xkcd
@@ -237,28 +259,6 @@ admin [log | role]:
     ban <Target> <Purge> [Reason]:
         Level 8 required
         Ban Target from the server and delete their messages for Purge days for Reason
-
-    purge [self | bot | all | member | role]:
-        Purge messages
-
-        self <Count>:
-            purge messages from yourself within the last Count messages
-
-        bot <Count>:
-            Level 5 required
-            purge messages from the bot within the last Count messages
-
-        all <Count>:
-            Level 5 required
-            purge all of the last <Count> messages
-
-        member <Target> <Count>:
-            Level 5 required
-            purge messages from Target within the last Count messages
-
-        role <Role> <Count>:
-            Level 5 required
-            purge messages from Role within the last Count messages
 ```
 ### Groups plugin
 ###### Create temporary private groups with a voice and text channel

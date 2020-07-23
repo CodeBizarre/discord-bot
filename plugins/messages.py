@@ -8,8 +8,9 @@ from discord.ext.commands import Context
 
 from discord_bot import DiscordBot
 from helpers import pretty_datetime
+from accounts import is_level
 
-VERSION = "3.0b3"
+VERSION = "3.1b1"
 
 def msg_op_or_level(required=4):
     """
@@ -158,6 +159,98 @@ class Messages(commands.Cog):
             return
 
         await ctx.send(":white_check_mark: Message moved!")
+
+    @commands.group()
+    @commands.guild_only()
+    async def purge(self, ctx: Context):
+        """Purge messages."""
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help("purge")
+
+    @purge.command(name="self", aliases=["me"])
+    @commands.guild_only()
+    @is_level(5)
+    async def purge_self(self, ctx: Context, count: int = 10):
+        """Purge messages from yourself."""
+        result = len(
+            await ctx.channel.purge(limit=count, check=lambda m: m.author == ctx.author)
+        )
+
+        await self.log_to_channel(ctx, ctx.author)
+
+        await ctx.send(
+            f":white_check_mark: Purged {result} messages from you in {count}."
+        )
+
+    @purge.command(name="bot")
+    @commands.guild_only()
+    @is_level(5)
+    async def purge_bot(self, ctx: Context, count: int = 10):
+        """Purge messages sent by the bot.
+        Level 5 required
+        """
+        result = len(
+            await ctx.channel.purge(
+                limit=count,
+                check=lambda m: m.author.id == ctx.bot.user.id
+            )
+        )
+
+        await self.log_to_channel(ctx, ctx.author)
+
+        await ctx.send(
+            f":white_check_mark: Purged {result} messages from the bot in {count}."
+        )
+
+    @purge.command(name="all", aliases=["everyone"])
+    @commands.guild_only()
+    @is_level(5)
+    async def purge_all(self, ctx: Context, count: int = 10):
+        """Purge all messages.
+        Level 5 required
+        """
+        result = len(await ctx.channel.purge(limit=count))
+
+        await self.log_to_channel(ctx, ctx.author)
+
+        await ctx.send(
+            f":white_check_mark: Purged {result} messages."
+        )
+
+    @purge.command(name="member", aliases=["user", "target"])
+    @commands.guild_only()
+    @is_level(5)
+    async def purge_member(self, ctx: Context, target: Member, count: int = 10):
+        """Purge messages from a member.
+        Level 5 required
+        """
+        result = len(
+            await ctx.channel.purge(limit=count, check=lambda m: m.author == target)
+        )
+
+        await self.log_to_channel(ctx, target)
+
+        mention = target.mention
+        await ctx.send(
+            f":white_check_mark: Purged {result} messages from {mention} in {count}."
+        )
+
+    @purge.command(name="role", aliases=["group"])
+    @commands.guild_only()
+    @is_level(5)
+    async def purge_group(self, ctx: Context, role: Role, count: int = 10):
+        """Purge messages from a role.
+        Level 5 required
+        """
+        result = len(
+            await ctx.channel.purge(limit=count,check=lambda m: role in m.author.roles)
+        )
+
+        await self.log_to_channel(ctx, ctx.author)
+
+        await ctx.send(
+            f":white_check_mark: Purged {result} messages from {role.mention} in {count}."
+        )
 
 def setup(bot):
     bot.add_cog(Messages(bot))
