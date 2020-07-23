@@ -171,7 +171,7 @@ class Roles(commands.Cog):
     @commands.guild_only()
     async def role_admin(self, ctx: Context):
         """Admin commands. Running the command without arguments will show all server
-        roles, including timed roles, command roles, and react roles.
+        roles, including command roles, and react roles.
         Level 10 required
         """
         if ctx.invoked_subcommand is not None: return
