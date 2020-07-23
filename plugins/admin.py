@@ -13,7 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import update_db, pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.5b2"
+VERSION = "2.5b3"
 
 async def embed_builder(action: str, member: Member, reason: str,
     td: timedelta = None) -> Embed:
@@ -636,7 +636,7 @@ class Admin(commands.Cog):
     @warns.command(name="remove", aliases=["delete", "del"])
     @commands.guild_only()
     @is_level(4)
-    async def warns_remove(self, ctx: Context, target: Member, number: str):
+    async def warns_remove(self, ctx: Context, target: Member, number: int):
         """Remove a warning from a member.
         Level 4 required
         """
@@ -651,7 +651,7 @@ class Admin(commands.Cog):
             return
 
         for i, w in self.warn_db[sid][tid].items():
-            if i == number:
+            if i == str(number):
                 del self.warn_db[sid][tid][i]
                 await ctx.send(f":white_check_mark: Warn #{i} (`{w['reason']}`) removed.")
                 await target.send(
