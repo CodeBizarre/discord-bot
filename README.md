@@ -201,10 +201,18 @@ admin [log | role]:
         Level 4 required
         Warn Target for Length Span(s) for Reason
 
-    warns [Member]
-        Invoke without arguments to view your own warnings
-        Level 4 required to view Member's warns
-        If Member is provided, display their warns
+    warns <list | remove>:
+        Base command to manage warns
+
+    warns list [Target]:
+        Aliases = find, lookup, member
+        Invoke without arguments to view your own warns
+        Display [Target]'s warns (Level 4 required)
+
+    warns remove <Target> <Number>:
+        Aliases = delete, del
+        Level 4 required
+        Remove warn <Number> from <Target>
 
     mute <Target> <Length> <Span> [Reason]:
         Level 4 required
