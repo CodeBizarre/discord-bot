@@ -247,6 +247,43 @@ groups [create | invite]:
         Aliases = i, inv
         Invite <Target> to a <Group> you are part of.
 ```
+### Custom plugin
+###### Create custom commands for your server
+```
+custom <prefix | text | script>:
+    Base command for managing custom commands
+
+custom prefix [prefix]
+    Running the command without the prefix argument will display the server's current prefix
+    Including the prefix argument will set the server's prefix (Level 10 required)
+
+custom text [create | remove]:
+    Running the command without arguments will display available text commands
+
+custom text create <Name> <Text>:
+    Level 8 required
+    Create a new custom text command <Name> with response <Text>
+
+custom text remove <Name>:
+    Remove the custom text command <Name>
+
+custom script [create | remove]:
+    Running the command without arguments will display available script commands
+
+custom script create <Prefix> <Text>:
+    Level 8 required
+    Create a new script response to <Prefix> with response <Text>. Supports script replacers:
+      - !{id}            - The Discord ID snowflake of the user running the command
+      - !{name}          - The name of the user running the command
+      - !{discriminator} - The discriminator of the user running the command
+      - !{tag}           - The Name#tag (i.e. User#1141) of the user running the command
+      - !{mention}       - A mention of the user running the command
+
+custom script remove <Prefix>:
+    Level 8 required
+    Remove the custom script response to <Prefix>
+```
+
 ## Development
 
 Coding standards:
