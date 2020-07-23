@@ -12,7 +12,7 @@ from discord_bot import DiscordBot
 from helpers import pretty_datetime, update_db
 from accounts import is_level
 
-VERSION = "1.0b5"
+VERSION = "1.1b1"
 
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
@@ -111,37 +111,21 @@ class Custom(commands.Cog):
                 await msg.channel.send(":anger: That command doesn't exist.")
                 return
 
-        # Response or complex commands
-        try:
-            response_cmds = self.db[sid]["response"]
-        except KeyError:
-            response_cmds = None
-
+        # Scripted responses
         try:
             complex_cmds = self.db[sid]["complex"]
         except KeyError:
             complex_cmds = None
 
-        triggers = None
-
         # Nothing to respond to
-        if response_cmds is None and complex_cmds is None:
+        if complex_cmds is None:
             return
-        elif response_cmds is not None:
-            if complex_cmds is not None:
-                # Both are available
-                triggers = list(set().union(response_cmds, complex_cmds))
-            else:
-                triggers = response_cmds
 
-        for trigger in triggers:
-            if msg.content.startswith(trigger):
-                if response_cmds is not None and trigger in response_cmds:
-                    await msg.channel.send(response_cmds[trigger])
-                elif complex_cmds is not None and trigger in complex_cmds:
-                    await msg.channel.send(
-                        self.parse_command(msg.author, complex_cmds[trigger])
-                    )
+        for trigger in complex_cmds:
+            if (msg.content.startswith(trigger)):
+                await msg.channel.send(
+                    self.parse_command(msg.author, complex_cmds[trigger])
+                )
 
     @commands.group()
     @commands.guild_only()
@@ -257,88 +241,6 @@ class Custom(commands.Cog):
         except KeyError:
             await ctx.send(
                 f":anger: There is no command `{name}` registered on this server."
-            )
-
-    @custom.group()
-    @commands.guild_only()
-    async def response(self, ctx: Context):
-        """Create and remove response commands.
-        Running the command without arguments will display all available responses.
-        """
-        if ctx.invoked_subcommand is not None:
-            return
-
-        sid = str(ctx.guild.id)
-
-        if sid not in self.db:
-            await ctx.send(":anger: This server has no responses.")
-            return
-
-        try:
-            if "response" not in self.db[sid]:
-                await ctx.send(":anger: This server has no responses.")
-            elif len(self.db[sid]["response"]) > 0:
-                embed = Embed(title="Responses", color=0x7289DA)
-                for cmd, rsp in self.db[sid]["response"].items():
-                    embed.add_field(name=cmd, value=rsp)
-                    if len(embed.fields) > 5:
-                        length = len(self.db[sid]["response"])
-                        if length == 6: break
-
-                        embed.add_field(
-                            name="...",
-                            value=f"And {length - 6} more.",
-                            inline=False
-                        )
-                        break
-                await ctx.send(embed=embed)
-            else:
-                await ctx.send(":anger: This server has no responses.")
-        except Exception as e:
-            await ctx.send(f":anger: Something went wrong: {e}")
-
-    @response.command(name="create", aliases=["c", "new", "make", "add"])
-    @is_level(8)
-    @commands.guild_only()
-    async def response_create(self, ctx: Context, prefix: str, *, text: str):
-        """Create or update a new custom response.
-        Level 8 required.
-        """
-        sid = str(ctx.guild.id)
-
-        if sid not in self.db:
-            self.db[sid] = {}
-            self.db[sid]["response"] = {}
-        elif "response" not in self.db[sid]:
-            self.db[sid]["response"] = {}
-
-        try:
-            self.db[sid]["response"][prefix] = text
-            update_db(self.sql_db, self.db, "servers")
-            await ctx.send(f":white_check_mark: Response {prefix} added!")
-        except Exception as e:
-            await ctx.send(f":anger: Something went wrong: {e}")
-
-    @response.command(name="remove", aliases=["r", "del", "delete"])
-    @is_level(8)
-    @commands.guild_only()
-    async def response_remove(self, ctx: Context, prefix: str):
-        """Remove a custom response.
-        Level 8 required.
-        """
-        sid = str(ctx.guild.id)
-
-        if sid not in self.db:
-            await ctx.send(":anger: This server has no responses.")
-            return
-
-        try:
-            del self.db[sid]["response"][prefix]
-            update_db(self.sql_db, self.db, "servers")
-            await ctx.send(f":white_check_mark: Response `{prefix}` removed.")
-        except KeyError:
-            await ctx.send(
-                f":anger: There is no response `{prefix}` registered on this server."
             )
 
     @custom.group()
