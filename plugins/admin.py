@@ -13,7 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import update_db, pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.5b3"
+VERSION = "2.5b4"
 
 async def embed_builder(action: str, member: Member, reason: str,
     td: timedelta = None) -> Embed:
@@ -548,6 +548,15 @@ class Admin(commands.Cog):
         # Add the warn to the database
         if uid not in self.warn_db[sid]:
             self.warn_db[sid][uid] = {}
+
+        def db_check(count: int) -> int:
+            if str(count) in self.warn_db[sid][uid]:
+                count += 1
+                return db_check(count)
+            else:
+                return count
+
+        warn_count = db_check(warn_count)
 
         warning = {
             "issued_by": str(ctx.author.id),
