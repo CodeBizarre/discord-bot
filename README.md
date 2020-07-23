@@ -261,16 +261,19 @@ custom text [create | remove]:
     Running the command without arguments will display available text commands
 
 custom text create <Name> <Text>:
+    Aliases = c, new, make, add
     Level 8 required
     Create a new custom text command <Name> with response <Text>
 
 custom text remove <Name>:
+    Aliases = r, del, delete
     Remove the custom text command <Name>
 
 custom script [create | remove]:
     Running the command without arguments will display available script commands
 
 custom script create <Prefix> <Text>:
+    Aliases = c, new, make, add
     Level 8 required
     Create a new script response to <Prefix> with response <Text>. Supports script replacers:
       - !{id}            - The Discord ID snowflake of the user running the command
@@ -280,6 +283,7 @@ custom script create <Prefix> <Text>:
       - !{mention}       - A mention of the user running the command
 
 custom script remove <Prefix>:
+    Aliases = r, del, delete
     Level 8 required
     Remove the custom script response to <Prefix>
 ```
