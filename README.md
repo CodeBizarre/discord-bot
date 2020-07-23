@@ -141,24 +141,44 @@ inspirobot:
 ### Roles plugin
 ###### Add user-assignable roles to your server
 ```
-role [get | lose | add | remove]:
+role [add | remove | admin]:
     Aliases = roles
     Invoke without arguments to display list of assignable roles
 
-    get <Name>:
-        Aliases = g
-        Get the role Name from the assignable roles list
-    lose <Name>:
-        Aliases = l
-        Lose the role Name from the assignable roles list
-    add <Role> <Description>:
-        Aliases = a
+    add <Name>:
+        Aliases = a, get, give, +
+        Give yourself the role Name from the assignable roles list
+
+    remove <Name>:
+        Aliases = r, lose, take, -
+        Remove from yourself the role Name from the assignable roles list
+
+    admin [add | remove | react]:
         Level 10 required
-        Add Role with Description to the assignable roles list, note that the bot cannot assign a role higher than its own highest role even with the administrator permission.
-    remove <Role>L
-        Aliases = r
+        Running the command without arguments will show all server roles, including command roles and react roles.
+
+    admin add <Role> <Description>:
         Level 10 required
-        Remove Role from the assignable roles list
+        Add or update <Role> on the command assignable roles list.
+
+    admin remove <Role>:
+        Level 10 required
+        Remove <Role> from the comand assignable roles list.
+
+    admin react [add | remove]:
+        Level 10 required
+        Running the command without arguments will display all current reaction roles.
+
+    admin react add <Message> <Role> <Description>:
+        Level 10 required
+        Add a new reaction-based <Role> to <Message> with <Description>
+        <Message> should be a Discord message link, it might not work otherwise
+        This will start a very quick interaction where you react to a message from the bot to set the reaction
+
+    admin react remove <Message> <Role>:
+        Level 10 required
+        Remove a reaction-based <Role> from <Message>
+        <Message> should be a Discord message link, it might not work otherwise
 ```
 ### Admin plugin
 ###### Various administration features such as warn, mute, kick, ban, and more
