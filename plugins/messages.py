@@ -1,7 +1,7 @@
 import asyncio
 import json
 
-from discord import TextChannel, Member, Message, Embed
+from discord import TextChannel, Member, Message, Embed, Role
 from discord import HTTPException
 from discord.ext import commands
 from discord.ext.commands import Context
@@ -10,7 +10,7 @@ from discord_bot import DiscordBot
 from helpers import pretty_datetime
 from accounts import is_level
 
-VERSION = "3.1b1"
+VERSION = "3.1b2"
 
 def msg_op_or_level(required=4):
     """
@@ -65,6 +65,17 @@ class Messages(commands.Cog):
         self.bot = bot
         self.name = "messages"
         self.version = VERSION
+        # Try to grab the log to channel function from the admin plugin if it's loaded
+        try:
+            self.log_to_channel = self.bot.cogs["Admin"].log_to_channel
+        except KeyError:
+            # Otherwise create a placeholder lambda that will log to console instead
+            async def ltc(ctx: Context, member: Member, info: str = None):
+                self.bot.log.info(
+                    f"[MESSAGES] [{ctx.guild.name}] <{ctx.author}> " \
+                    f"{ctx.message.content}"
+                )
+            self.log_to_channel = ltc
 
     @commands.command(aliases=["xpost", "x-post"])
     @commands.guild_only()
