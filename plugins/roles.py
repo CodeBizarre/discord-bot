@@ -13,7 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "2.1b1"
+VERSION = "2.2b1"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -34,7 +34,9 @@ class Roles(commands.Cog):
         # Check config and make any required backup
         try:
             with open("config/config.json") as cfg:
-                self.backup = json.load(cfg)["BackupDB"]
+                conf = json.load(cfg)
+                self.backup = conf["BackupDB"]
+                self.delete_cmds = conf["DeleteCommands"]
         except Exception as error:
             self.bot.log.error(f"Error loading prefix from config file.\n    - {error}")
 
@@ -58,6 +60,33 @@ class Roles(commands.Cog):
             self.sql_db["servers"] = {}
 
         self.db = self.sql_db["servers"]
+
+    async def delete_invokes(self, invoke: Message, response: Message):
+        """Delete invoke and response message if neccesary."""
+        sid = str(invoke.guild.id)
+
+        try:
+            remove = self.db[str(invoke.guild.id)]["remove"]
+        except KeyError:
+            # Server hasn't been set
+            return
+
+        if not remove:
+            # Don't delete messages
+            return
+
+        await asyncio.sleep(5)
+
+        if not self.delete_cmds:
+            try:
+                await invoke.delete()
+            except Exception as e:
+                self.bot.log.error(f"[ROLES] Unable to delete invoke: {e}")
+
+        try:
+            await response.delete()
+        except Exception as e:
+            self.bot.log.error(f"[ROLES] Unable to delete response: {e}")
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -129,20 +158,23 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
-            await ctx.send(":anger: This server has no assignable roles.")
+            response = await ctx.send(":anger: This server has no assignable roles.")
             return
 
         if role_name not in self.db[sid]["roles"]:
-            await ctx.send(":anger: That is not an assignable role on this server.")
+            response = await ctx.send(
+                ":anger: That is not an assignable role on this server."
+            )
         else:
             role = ctx.guild.get_role(int(self.db[sid]["roles"][role_name]["id"]))
 
             if role in ctx.author.roles:
-                await ctx.send(":anger: You already have that role.")
+                response = await ctx.send(":anger: You already have that role.")
                 return
 
             await ctx.author.add_roles(role, reason="Self-assign")
-            await ctx.send(":white_check_mark: Role added!")
+            response = await ctx.send(":white_check_mark: Role added!")
+            await self.delete_invokes(ctx.message, response)
 
     @role.command(name="remove", aliases=["r", "lose", "take", "-"])
     @commands.guild_only()
@@ -151,20 +183,23 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
-            await ctx.send(":anger: This server has no assignable roles.")
+            response = await ctx.send(":anger: This server has no assignable roles.")
             return
 
         if role_name not in self.db[sid]["roles"]:
-            await ctx.send(":anger: That is not an assignable role on this server.")
+            response = await ctx.send(
+                ":anger: That is not an assignable role on this server."
+            )
         else:
             role = ctx.guild.get_role(int(self.db[sid]["roles"][role_name]["id"]))
 
             if role not in ctx.author.roles:
-                await ctx.send(":anger: You don't have that role.")
+                response = await ctx.send(":anger: You don't have that role.")
                 return
 
             await ctx.author.remove_roles(role, reason="Self-remove")
-            await ctx.send(":white_check_mark: Role removed!")
+            response = await ctx.send(":white_check_mark: Role removed!")
+            await self.delete_invokes(ctx.message, response)
 
     @role.group(name="admin")
     @is_level(10)
@@ -196,6 +231,28 @@ class Roles(commands.Cog):
         else:
             await ctx.send(":anger: This server has no assignable roles.")
 
+    @role_admin.command(name="invokes")
+    @is_level(10)
+    @commands.guild_only()
+    async def role_admin_invokes(self, ctx: Context, remove: bool = None):
+        """Manage role commands and confirmation messages being deleted on your server.
+        If DeleteCommands is set to True in the bot's config, this will only affect
+        the confirmation messages.
+
+        Running the command without arguments will display the current setting.
+        Level 10 required
+        """
+        sid = str(ctx.guild.id)
+
+        if sid not in self.db:
+            self.db[sid] = { "remove": False }
+
+        if remove is not None:
+            self.db[sid]["remove"] = remove
+
+        update_db(self.sql_db, self.db, "servers")
+        await ctx.send(f"Remove role invokes: `{self.db[sid]['remove']}`")
+
     @role_admin.command(name="add")
     @is_level(10)
     @commands.guild_only()
@@ -211,7 +268,7 @@ class Roles(commands.Cog):
             self.db[sid] = {}
             self.db[sid]["roles"] = {}
         elif "roles" not in self.db[sid]:
-            self.db[sid]["roles"] = ""
+            self.db[sid]["roles"] = {}
 
         try:
             self.db[sid]["roles"][name] = {

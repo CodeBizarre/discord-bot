@@ -175,7 +175,7 @@ role [add | remove | admin]:
         Aliases = r, lose, take, -
         Remove from yourself the role Name from the assignable roles list
 
-    admin [add | remove | react]:
+    admin [add | remove | react | invokes]:
         Level 10 required
         Running the command without arguments will show all server roles, including command roles and react roles.
 
@@ -201,6 +201,10 @@ role [add | remove | admin]:
         Level 10 required
         Remove a reaction-based <Role> from <Message>
         <Message> should be a Discord message link, it might not work otherwise
+
+    admin invokes [Remove]:
+        Level 10 required
+        Set whether to remove invoke and response messages for adding/removing roles on your server
 ```
 ### Admin plugin
 ###### Various administration features such as warn, mute, kick, ban, and more
