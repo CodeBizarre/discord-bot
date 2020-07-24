@@ -16,7 +16,7 @@ def main():
             bot.load_extension("accounts")
             bot.load_extension("plugin_manager")
             # Load all available plugins
-            for p in os.listdir("plugins"):
+            for p in sorted(os.listdir("plugins")):
                 if not p.endswith(".py"):
                     continue
 
