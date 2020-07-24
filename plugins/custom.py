@@ -208,9 +208,10 @@ class Custom(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
-            self.db[sid] = {}
-            self.db[sid]["prefix"] = "_"
-            self.db[sid]["text"] = {}
+            self.db[sid] = {
+                "prefix": "_",
+                "text": {}
+            }
         elif "text" not in self.db[sid]:
             self.db[sid]["text"] = {}
 
@@ -291,8 +292,7 @@ class Custom(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
-            self.db[sid] = {}
-            self.db[sid]["complex"] = {}
+            self.db[sid] = { "complex": {} }
         elif "complex" not in self.db[sid]:
             self.db[sid]["complex"] = {}
 

@@ -13,7 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "2.2b2"
+VERSION = "2.2b3"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -268,8 +268,7 @@ class Roles(commands.Cog):
         name = role_get.name
 
         if sid not in self.db:
-            self.db[sid] = {}
-            self.db[sid]["roles"] = {}
+            self.db[sid] = { "roles": {} }
         elif "roles" not in self.db[sid]:
             self.db[sid]["roles"] = {}
 
@@ -351,8 +350,7 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
-            self.db[sid] = {}
-            self.db[sid]["reacts"] = {}
+            self.db[sid] = { "reacts": {} }
         elif "reacts" not in self.db[sid]:
             self.db[sid]["reacts"] = {}
 
