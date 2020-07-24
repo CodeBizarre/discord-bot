@@ -13,7 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "2.2b1"
+VERSION = "2.2b2"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -108,6 +108,9 @@ class Roles(commands.Cog):
                 try:
                     role = payload.member.guild.get_role(int(data["id"]))
                     await payload.member.add_roles(role, reason="Self-Assign")
+                    await payload.member.send(
+                        f"You have been given {role.name} in {payload.member.guild.name}"
+                    )
                 except Exception as e:
                     await payload.member.send(
                         ":anger: There was an error assigning the role. Please let the " \
