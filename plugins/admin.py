@@ -13,7 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import update_db, pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.6b1"
+VERSION = "2.6b2"
 
 async def embed_builder(action: str, member: Member, reason: str,
     td: timedelta = None) -> Embed:
@@ -159,7 +159,7 @@ class Admin(commands.Cog):
             with open("config/config.json") as cfg:
                 self.backup = json.load(cfg)["BackupDB"]
         except Exception as error:
-            self.bot.log.error(f"Error loading prefix from config file.\n    - {error}")
+            self.bot.log.error(f"Error loading from config file:\n    - {error}")
 
         # Set up the database
         db_file = "db/admin.sql"
