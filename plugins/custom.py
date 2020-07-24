@@ -12,7 +12,7 @@ from discord_bot import DiscordBot
 from helpers import pretty_datetime, update_db
 from accounts import is_level
 
-VERSION = "1.1b1"
+VERSION = "1.2b1"
 
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
@@ -167,12 +167,14 @@ class Custom(commands.Cog):
     @custom.group()
     @commands.guild_only()
     async def text(self, ctx: Context):
-        """Create and remove simple text commands.
-        Running the command without arguments will display all available commands.
-        """
-        if ctx.invoked_subcommand is not None:
-            return
+        """Create and remove simple text commands."""
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help("custom text")
 
+    @text.command(name="list")
+    @commands.guild_only()
+    async def text_list(self, ctx: Context, page: int = 1):
+        """See a paginated list of available text commands."""
         sid = str(ctx.guild.id)
 
         try:
@@ -180,23 +182,30 @@ class Custom(commands.Cog):
                 await ctx.send(":anger: This server has no text commands.")
             elif len(self.db[sid]["text"]) > 0:
                 embed = Embed(title="Text Commands", color=0x7289DA)
-                for cmd, rsp in self.db[sid]["text"].items():
-                    embed.add_field(name=cmd, value=rsp)
-                    if len(embed.fields) > 5:
-                        length = len(self.db[sid]["text"])
-                        if length == 6: break
 
-                        embed.add_field(
-                            name="...",
-                            value=f"And {length - 6} more.",
-                            inline=False
-                        )
-                        break
-                await ctx.send(embed=embed)
+                items = [(cmd, rsp) for cmd, rsp in self.db[sid]["text"].items()]
+
+                start = (page - 1) * 6 if page > 1 else 0
+                for i in items[start:start + 6]:
+                    embed.add_field(name=i[0], value=i[1])
+
+                remaining = (len(items)) - (start + 6)
+                if remaining > 0:
+                    prefix = self.bot.config_prefix
+                    embed.add_field(
+                        name=f"And {remaining} more. ",
+                        value=f"Use `{prefix}custom text list {page + 1}`",
+                        inline=False
+                    )
+
+                if len(embed.fields) > 0:
+                    await ctx.send(embed=embed)
+                else:
+                    await ctx.send(":anger: No more commands.")
             else:
                 await ctx.send(":anger: This server has no script responses.")
         except Exception as e:
-            await ctx.send(f":anger: Something went wrong: {e}")
+            await ctx.send(f':anger: Something went wrong: {e}')
 
     @text.command(name="create", aliases=["c", "new", "make", "add"])
     @is_level(8)
@@ -247,12 +256,14 @@ class Custom(commands.Cog):
     @custom.group()
     @commands.guild_only()
     async def script(self, ctx: Context):
-        """Create and remove scripted replacer responses.
-        Running the command without arguments will display all available responses.
-        """
-        if ctx.invoked_subcommand is not None:
-            return
+        """Create and remove scripted replacer responses."""
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help("custom script")
 
+    @script.command(name="list")
+    @commands.guild_only()
+    async def script_list(self, ctx: Context, page: int = 1):
+        """See a paginated list of available script commands."""
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
@@ -264,19 +275,26 @@ class Custom(commands.Cog):
                 await ctx.send(":anger: This server has no script responses.")
             elif len(self.db[sid]["complex"]) > 0:
                 embed = Embed(title="Script Responses", color=0x7289DA)
-                for cmd, rsp in self.db[sid]["complex"].items():
-                    embed.add_field(name=cmd, value=rsp)
-                    if len(embed.fields) > 5:
-                        length = len(self.db[sid]["complex"])
-                        if length == 6: break
 
-                        embed.add_field(
-                            name="...",
-                            value=f"And {length - 6} more.",
-                            inline=False
-                        )
-                        break
-                await ctx.send(embed=embed)
+                items = [(cmd, rsp) for cmd, rsp in self.db[sid]["complex"].items()]
+
+                start = (page - 1) * 6 if page > 1 else 0
+                for i in items[start:start + 6]:
+                    embed.add_field(name=i[0], value=i[1])
+
+                remaining = (len(items)) - (start + 6)
+                if remaining > 0:
+                    prefix = self.bot.config_prefix
+                    embed.add_field(
+                        name=f"And {remaining} more. ",
+                        value=f"Use `{prefix}custom script list {page + 1}`",
+                        inline=False
+                    )
+
+                if len(embed.fields) > 0:
+                     await ctx.send(embed=embed)
+                else:
+                    await ctx.send(":anger: No more commands.")
             else:
                 await ctx.send(":anger: This server has no script responses.")
         except Exception as e:
