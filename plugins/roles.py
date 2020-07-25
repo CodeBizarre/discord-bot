@@ -13,7 +13,7 @@ from discord_bot import DiscordBot
 from accounts import is_level
 from helpers import pretty_datetime, update_db
 
-VERSION = "2.2b3"
+VERSION = "2.2b4"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -163,6 +163,9 @@ class Roles(commands.Cog):
         if sid not in self.db:
             response = await ctx.send(":anger: This server has no assignable roles.")
             return
+
+        if "roles" not in self.db[sid]:
+            await ctx.send(":anger: Server has no self-assignable roles.")
 
         if role_name not in self.db[sid]["roles"]:
             response = await ctx.send(
