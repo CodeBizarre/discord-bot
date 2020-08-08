@@ -1,5 +1,3 @@
-# Aurexine 2020
-# Helper functions to clean out the main file
 import sys
 import os
 import logging
@@ -52,14 +50,12 @@ async def time_parser(span: str, length: int, dt: datetime) -> datetime:
     }
 
     if span in switcher:
-        # Grab the function from the switcher
         case = switcher[span]
     elif span + "s" in switcher:
         case = switcher[span + "s"]
     else:
         raise KeyError("Time parser length/span is not valid.")
 
-    # Calculate and return the time in the future
     future = dt + case()
     return future
 
@@ -90,7 +86,6 @@ def update_json(db: str, name: str):
         print(e)
         exit()
 
-# Fun fact this saves like 2 characters per use
 def update_db(sql_db: SqliteDict, dict_db: dict, base_key: str):
     """Update the SQLite DB[key] with the in-memory json copy after changes."""
     try:
