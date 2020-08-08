@@ -56,8 +56,7 @@ async def time_parser(span: str, length: int, dt: datetime) -> datetime:
     else:
         raise KeyError("Time parser length/span is not valid.")
 
-    future = dt + case()
-    return future
+    return dt + case()
 
 def get_logger(file_name) -> Logger:
     """Get an instance of Logger and set up log files."""
