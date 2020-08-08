@@ -12,7 +12,7 @@ from discord_bot import DiscordBot
 from helpers import pretty_datetime, update_db
 from accounts import is_level
 
-VERSION = "1.2b1"
+VERSION = "1.2b2"
 
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
@@ -36,14 +36,12 @@ class Custom(commands.Cog):
         self.version = VERSION
         self.backup = True
 
-        # Check config and make a backup if required
         try:
             with open("config/config.json") as cfg:
                 self.backup = json.load(cfg)["BackupDB"]
         except Exception as error:
             self.bot.log.error(f"Error loading prefix from config file.\n    - {error}")
 
-        # Set up the database
         db_file = "db/custom.sql"
 
         if os.path.exists(db_file) and self.backup:
@@ -86,14 +84,11 @@ class Custom(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg: Message):
-        # Don't respond to ourselves
         if msg.author.id == self.bot.user.id: return
-        # Ignore DMs
         if msg.channel.type == ChannelType.private: return
 
         sid = str(msg.guild.id)
 
-        # Load the text prefix
         try:
             prefix = self.db[sid]["prefix"]
         except KeyError:
@@ -115,10 +110,7 @@ class Custom(commands.Cog):
         try:
             complex_cmds = self.db[sid]["complex"]
         except KeyError:
-            complex_cmds = None
-
-        # Nothing to respond to
-        if complex_cmds is None:
+            # Nothing to respond to
             return
 
         for trigger in complex_cmds:
