@@ -1,8 +1,8 @@
 import os
 
-from discord_bot import DiscordBot
+from core.discord_bot import DiscordBot
 
-from helpers import update_db
+from core.db_tools import update_db
 
 def main():
     bot = DiscordBot("Extensible bot based on Discord.py's Cogs")
@@ -12,9 +12,9 @@ def main():
         # If this is the first launch (Not a reconnection from disconnect)
         if bot.first_launch:
             # Load core modules first
-            bot.load_extension("core")
-            bot.load_extension("accounts")
-            bot.load_extension("plugin_manager")
+            bot.load_extension("core.plugins.core")
+            bot.load_extension("core.plugins.accounts")
+            bot.load_extension("core.plugins.plugin_manager")
 
             # Followed by available plugins
             for p in sorted(os.listdir("plugins")):

@@ -9,9 +9,10 @@ from discord import Role, Member, Embed, Message, Emoji, PartialEmoji
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from discord_bot import DiscordBot
-from accounts import is_level
-from helpers import pretty_datetime, update_db
+from core.discord_bot import DiscordBot
+from core.plugins.accounts import is_level
+from core.db_tools import update_db
+from core.time_tools import pretty_datetime
 
 VERSION = "2.2b4"
 

@@ -6,9 +6,9 @@ from discord import HTTPException
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from discord_bot import DiscordBot
-from helpers import pretty_datetime
-from accounts import is_level
+from core.discord_bot import DiscordBot
+from core.time_tools import pretty_datetime
+from core.plugins.accounts import is_level
 
 VERSION = "3.1b2"
 

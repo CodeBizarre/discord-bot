@@ -4,10 +4,10 @@ from discord import Embed
 from discord.ext import commands
 from discord.ext.commands import Context, Cog
 
-from discord_bot import DiscordBot
-from helpers import update_db
-from core import is_botmaster
-from accounts import is_level
+from core.discord_bot import DiscordBot
+from core.db_tools import update_db
+from core.plugins.core import is_botmaster
+from core.plugins.accounts import is_level
 
 VERSION = "1.0b1"
 

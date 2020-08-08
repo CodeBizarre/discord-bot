@@ -2,8 +2,8 @@ from discord import Member, Embed
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from discord_bot import DiscordBot
-from helpers import update_db, get_db_dict
+from core.discord_bot import DiscordBot
+from core.db_tools import update_db, get_db_dict
 
 VERSION = "1.0b1"
 

@@ -4,7 +4,7 @@ import requests
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from discord_bot import DiscordBot
+from core.discord_bot import DiscordBot
 
 VERSION = "1.0b5"
 

@@ -5,8 +5,9 @@ from discord import Game, Message, Guild, Embed, AuditLogAction, Member, User, T
 from discord.ext import commands
 from discord.ext.commands import Context, Cog
 
-from discord_bot import DiscordBot
-from helpers import update_db, pretty_datetime
+from core.discord_bot import DiscordBot
+from core.db_tools import update_db
+from core.time_tools import pretty_datetime
 
 VERSION = "1.1b1"
 

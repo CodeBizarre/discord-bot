@@ -9,8 +9,9 @@ from discord import Embed, PermissionOverwrite, Member
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from discord_bot import DiscordBot
-from helpers import pretty_datetime, update_db
+from core.discord_bot import DiscordBot
+from core.db_tools import update_db
+from core.time_tools import pretty_datetime
 
 VERSION = "1.1b2"
 GP = "Groups plugin."

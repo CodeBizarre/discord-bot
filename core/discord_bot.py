@@ -1,4 +1,6 @@
+import sys
 import os
+import logging
 import shutil
 import json
 
@@ -7,9 +9,27 @@ from sqlitedict import SqliteDict
 from discord import User
 from discord.ext import commands
 
-from helpers import get_logger, pretty_datetime
+from core.time_tools import pretty_datetime
 
-VERSION = "3.0.0b5"
+VERSION = "3.0.1b1"
+
+def get_logger(file_name) -> logging.Logger:
+    """Get an instance of Logger and set up log files."""
+    timestamp = pretty_datetime(datetime.now(), "FILE")
+    log_file = f"logs/{timestamp}_{file_name}"
+
+    if not os.path.exists("logs"):
+        try:
+            os.makedirs("logs")
+        except IOError as e:
+            print(e)
+            exit()
+
+    log = logging.getLogger()
+    log.setLevel(logging.INFO)
+    log.addHandler(logging.FileHandler(filename=log_file, encoding="utf-8"))
+    log.addHandler(logging.StreamHandler(sys.stdout))
+    return log
 
 class DiscordBot(commands.Bot):
     """Extensible bot using Discord.py's Cogs"""
