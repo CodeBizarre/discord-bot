@@ -23,42 +23,19 @@ def pretty_datetime(dt: datetime, display: str = "FULL") -> str:
 def pretty_timedelta(td: timedelta):
     """Format timedeltas for messages."""
     # Expand the timedelta's days and seconds to a full scale
-    years    = td.days // 365
-    rem_days = td.days % 365
-    months   = rem_days // 30
-    rem_days = rem_days % 30
-    weeks    = rem_days // 7
-    rem_days = rem_days % 7
-    days     = rem_days
-    hours    = td.seconds // 3600
-    rem_secs = td.seconds % 3600
-    minutes  = rem_secs // 60
-    rem_secs = rem_secs % 60
-    seconds  = rem_secs
+    years, rem       = divmod(td.days, 365)
+    months, days     = divmod(rem, 30)
+    hours, rem       = divmod(td.seconds, 3600)
+    minutes, seconds = divmod(rem, 60)
 
     final = {
-        "year": years,
-        "month": months,
-        "week": weeks,
-        "day": days,
-        "hour": hours,
-        "minute": minutes,
-        "second": seconds
+        "years": years, "months": months,"days": days,
+        "hours": hours, "minutes": minutes, "seconds": seconds
     }
 
-    result = ""
-
-    # Add the scale to the result if it's greater than 0
-    for key, value in final.items():
-        if value <= 0:
-            continue
-
-        if value > 1:
-            key += "s"
-
-        result += f"{value} {key} "
-
-    return result
+    return "".join(
+        [f"{int(value)} {key} " if value > 0 else "" for key, value in final.items()]
+    ).rstrip()
 
 async def time_parser(span: str, length: int, dt: datetime) -> datetime:
     """Parser to convert length/span combos into a future datetime object"""
