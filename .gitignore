@@ -1,4 +1,5 @@
 /.vscode
+/.VSCodeCounter
 /__pycache__
 /local-plugins/*
 /build
@@ -8,5 +9,4 @@
 *.pyo
 *.zip
 *.pyc
-main-v2.py
 TODO.md
