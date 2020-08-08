@@ -28,10 +28,8 @@ class Roles(commands.Cog):
         self.version = VERSION
         self.backup = True
 
-        # Get the database set up
         db_file = "db/roles.sql"
 
-        # Check config and make any required backup
         try:
             with open("config/config.json") as cfg:
                 conf = json.load(cfg)
@@ -68,7 +66,7 @@ class Roles(commands.Cog):
         try:
             remove = self.db[str(invoke.guild.id)]["remove"]
         except KeyError:
-            # Server hasn't been set
+            # Server hasn't been set up
             return
 
         if not remove:
@@ -136,13 +134,11 @@ class Roles(commands.Cog):
             await ctx.send(":anger: Server has no self-assignable roles.")
             return
 
-        # Get the app info for the embed author
         if sid in self.db and len(self.db[sid]["roles"]) > 0:
             embed = Embed(title="Available roles:", color=0x7289DA)
 
             embed.set_author(name=self.bot.user.name, icon_url=self.bot.app_info.icon_url)
 
-            # Add an entry for every assignable role
             for name, info in self.db[sid]["roles"].items():
                 embed.add_field(name=name, value=info["description"])
 
@@ -219,13 +215,11 @@ class Roles(commands.Cog):
 
         sid = str(ctx.guild.id)
 
-        # Get the app info for the embed author
         if sid in self.db and len(self.db[sid]["roles"]) > 0:
             embed = Embed(title="Available roles:", color=0x7289DA)
 
             embed.set_author(name=self.bot.user.name, icon_url=self.bot.app_info.icon_url)
 
-            # Add an entry for every assignable role
             for name, info in self.db[sid]["roles"].items():
                 embed.add_field(name=name, value=info["description"])
 

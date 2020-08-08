@@ -19,8 +19,8 @@ class Xkcd(commands.Cog):
         self.name = "xkcd"
         self.version = VERSION
 
-    # Helper function for getting comics
     async def get_comic(self, comic, number = None) -> Embed:
+        """Helper function to get comics"""
         case = {
             "latest": lambda: xkcd.getLatestComic(),
             "random": lambda: xkcd.getRandomComic(),
@@ -50,7 +50,6 @@ class Xkcd(commands.Cog):
             embed.add_field(name="Details", value=str(error))
             return embed
 
-    # XKCD command
     @commands.group()
     async def xkcd(self, ctx: Context):
         """Get XKCD comics!

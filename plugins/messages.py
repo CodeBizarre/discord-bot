@@ -69,7 +69,7 @@ class Messages(commands.Cog):
         try:
             self.log_to_channel = self.bot.cogs["Admin"].log_to_channel
         except KeyError:
-            # Otherwise create a placeholder lambda that will log to console instead
+            # Otherwise create a placeholder function that will log to console instead
             async def ltc(ctx: Context, member: Member, info: str = None):
                 self.bot.log.info(
                     f"[MESSAGES] [{ctx.guild.name}] <{ctx.author}> " \
@@ -91,14 +91,12 @@ class Messages(commands.Cog):
             await ctx.send(":anger: Target must be a different channel.")
             return
 
-        # Image only messages
         content = message.content
 
-        # Add placeholder content if the message was only an image
+        # Add placeholder content if the message was only an embed
         if len(content) <= 1:
             content = "-"
 
-        # Set up the embed
         embed = Embed(
             title=f"X-Post from #{message.channel.name}",
             url=message.jump_url,
@@ -134,10 +132,9 @@ class Messages(commands.Cog):
         if message.channel == target:
             await ctx.send(":anger: Target must be a different channel.")
 
-        # Image only messages
         content = message.content
 
-        # Add placeholder content if the message was only an image
+        # Add placeholder content if the message was only an embed
         if len(content) <= 1:
             content = "-"
 

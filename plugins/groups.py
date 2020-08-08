@@ -23,21 +23,18 @@ class Groups(commands.Cog):
     """
     # Background task to check and remove old groups
     async def group_check(self):
-        # No servers registered
         if len(self.db) <= 0:
             return
 
         for sid in self.db:
-            # No groups on this server
             if len(self.db[sid]) <= 0:
                 continue
 
-            # Each group in the server
             for group, data in self.db[sid].items():
                 info = data["info"]
                 guild = self.bot.get_guild(int(sid))
 
-                # Instance the channels and roles
+                # Get the related channels and roles
                 category = guild.get_channel(int(info["category"]))
                 text_channel = guild.get_channel(int(info["text_channel"]))
                 voice_channel = guild.get_channel(int(info["voice_channel"]))
@@ -53,6 +50,8 @@ class Groups(commands.Cog):
                     self.bot.log.error(f"[ERROR]\n    - {e}")
                     break
 
+                # The bot will always send a message to the channel, if its not there
+                # somthing is very wrong and probably can't be saved here.
                 if last_message is None:
                     return
 
@@ -74,7 +73,7 @@ class Groups(commands.Cog):
                         update_db(self.sql_db, self.db, "servers")
                     except Exception as e:
                         self.bot.log.error(f"[ERROR]:\n    - {e}")
-    # Background task scheduler
+
     async def task_scheduler(self):
         while True:
             try:
@@ -92,14 +91,12 @@ class Groups(commands.Cog):
 
         self.backup = True
 
-        # Check config and make a backup if required
         try:
             with open("config/config.json") as cfg:
                 self.backup = json.load(cfg)["BackupDB"]
         except Exception as error:
             self.bot.log.error(f"Error loading prefix from config file.\n    - {error}")
 
-        # Set up database
         db_file = "db/groups.sql"
 
         if os.path.exists(db_file) and self.backup:
@@ -139,7 +136,6 @@ class Groups(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid in self.db and len(self.db[sid]) > 0:
-            # Build an embed showing all groups the member is part of
             embed = Embed(title="Your groups:", color=0x7289DA)
 
             embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
@@ -173,7 +169,6 @@ class Groups(commands.Cog):
             role = await ctx.guild.create_role(
                 name=name, reason=GP
             )
-            # Set overwrites for the category
             ow = {
                 ctx.guild.default_role: PermissionOverwrite(read_messages=False),
                 role: PermissionOverwrite(read_messages=True)
@@ -234,7 +229,6 @@ class Groups(commands.Cog):
             )
             return
 
-        # Get the group role
         role = ctx.guild.get_role(int(self.db[sid][group]["info"]["role"]))
 
         if role not in ctx.author.roles:
@@ -245,7 +239,6 @@ class Groups(commands.Cog):
                 return
 
             try:
-                # Add the role to the target, and send confirmation in both chanels
                 await target.add_roles(role, reason="Group invite")
                 await ctx.send(
                     f":white_check_mark: Invited {target.name}#{target.discriminator}!"

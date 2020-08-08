@@ -53,14 +53,11 @@ class Accounts(commands.Cog):
             sid = str(ctx.guild.id)
 
             if sid not in self.bot.accounts:
-                # Server hasn't been set up
                 await ctx.send(":anger: Server has no accounts.")
                 await ctx.send_help("account genesis")
             elif uid not in self.bot.accounts[sid]:
-                # User has no account
                 await ctx.send(":anger: You do not have an account for this server.")
             else:
-                # Send an embed with account information
                 embed = await account_embed(ctx.author, self.bot.accounts[sid][uid])
 
                 await ctx.send(embed=embed)
@@ -89,7 +86,6 @@ class Accounts(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in self.bot.accounts:
-            # Server hasn't been set up
             await ctx.send(":anger: Server has no accounts.")
             return
 
