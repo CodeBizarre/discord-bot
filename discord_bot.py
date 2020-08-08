@@ -9,7 +9,7 @@ from discord.ext import commands
 
 from helpers import get_logger, pretty_datetime
 
-VERSION = "3.0.0b4"
+VERSION = "3.0.0b5"
 
 class DiscordBot(commands.Bot):
     """Extensible bot using Discord.py's Cogs"""
@@ -52,15 +52,12 @@ class DiscordBot(commands.Bot):
             raise json.JSONDecodeError(f"Unable to parse json file: {e}")
 
     def __init__(self, description, *args, **kwargs):
-        # Base init
         self.version = VERSION
         self.description = description
         self._filesystem_setup()
 
-        # Discord library
         self.app_info = None
 
-        # Config
         with open("config/config.json") as cfg:
             config = json.load(cfg)
             self.database       = config["Database"]
@@ -77,7 +74,6 @@ class DiscordBot(commands.Bot):
             self.log_commands   = config["LogCommands"]
             self.botmasters     = config["Botmasters"]
 
-        # Non-config init
         self.log = get_logger(self.log_file)
         self.db = None
         self.blocklist = []
@@ -86,7 +82,6 @@ class DiscordBot(commands.Bot):
         self.accounts = {}
         self.first_launch = True
 
-        # Database init
         db_file = f"db/{self.database}"
 
         if os.path.exists(db_file) and self.backup_db:
@@ -137,7 +132,6 @@ class DiscordBot(commands.Bot):
             *args, **kwargs
         )
 
-    # Return current information
     def mission_control(self) -> list:
         if self.guilds is None:
             return ["Bot not initialized."]
