@@ -116,6 +116,38 @@ class Roles(commands.Cog):
                         f"server admin know so this can be fixed: `{e}`"
                     )
 
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload):
+        sid = str(payload.guild_id)
+        mid = str(payload.message_id)
+
+        if sid not in self.db:
+            return
+        elif "reacts" not in self.db[sid]:
+            return
+        elif mid not in self.db[sid]["reacts"]:
+            return
+
+        info = self.db[sid]["reacts"][mid]
+        emoji_name = payload.emoji.name
+
+        for role_name, data in info.items():
+            if data["reaction"] == emoji_name:
+                guild = self.bot.get_guild(payload.guild_id)
+                member = guild.get_member(payload.user_id)
+
+                try:
+                    role = member.guild.get_role(int(data["id"]))
+                    await member.remove_roles(role, reason="Self-Assign")
+                    await member.send(
+                        f"You no longer have {role.name} in {member.guild.name}"
+                    )
+                except Exception as e:
+                    await member.send(
+                        ":anger: There was an error removing the role. Please let the " \
+                        f"server admin know so this can be fixed: `{e}`"
+                    )
+
     @commands.group(aliases=["roles"])
     @commands.guild_only()
     async def role(self, ctx: Context):
