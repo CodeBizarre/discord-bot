@@ -68,6 +68,9 @@ class Core(commands.Cog):
 
     @Cog.listener()
     async def on_message_edit(self, former: Message, latter: Message):
+        if former.author.id == self.bot.user.id:
+            return
+
         sid = str(former.guild.id) if former.guild is not None else None
 
         # Embeds cause message edit events even if the user didn't edit them
@@ -95,22 +98,19 @@ class Core(commands.Cog):
                 # This server is not configured.
                 report_ghosts = False
 
-            if report_ghosts and former.author.id is not self.bot.user.id:
+            if report_ghosts:
                 title = f"A message from {former.author.mention} was edited removing"
-                difference = former.mentions
 
-                if difference != latter.mentions:
-                    for mention in latter.mentions:
-                        if mention in difference:
-                            difference.remove(mention)
+                difference = [m for m in former.mentions if m not in latter.mentions]
+                mentions = [f"{m.name}#{m.discriminator}" for m in difference]
 
-                    mentions = [f"{m.name}#{m.discriminator}" for m in difference]
+                if difference:
                     await former.channel.send(f"{title} mention(s) from: {mentions}")
                 elif former.mention_everyone and not latter.mention_everyone:
                     await former.channel.send(f"{title} an Everyone or Here mention")
                 elif former.role_mentions != latter.role_mentions:
-                    difference = former.role_mentions - latter.role_mentions
-                    mentions = [f"{r.name}" for r in difference]
+                    former.mentions = former.role_mentions - latter.role_mentions
+                    mentions = [f"{r.name}" for r in former.mentions]
                     await former.channel.send(f"{title} role mention(s): {mentions}")
 
             # Log the edit to a channel if the server has it set up
