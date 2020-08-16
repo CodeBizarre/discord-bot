@@ -62,8 +62,6 @@ class Roles(commands.Cog):
 
     async def delete_invokes(self, invoke: Message, response: Message):
         """Delete invoke and response message if neccesary."""
-        sid = str(invoke.guild.id)
-
         try:
             remove = self.db[str(invoke.guild.id)]["remove"]
         except KeyError:
