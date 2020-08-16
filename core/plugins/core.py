@@ -121,8 +121,8 @@ class Core(commands.Cog):
 
                     embed = Embed(title="Message Edited", color=0xff0000)
                     embed.add_field(
-                        name=f"Edited by {former.author.name}#{former.author.discriminator}",
-                        value=f"Edited in {former.channel.mention}. UID: {former.author.id}"
+                        name=f"By {former.author.name}#{former.author.discriminator}",
+                        value=f"In {former.channel.mention}. UID: {former.author.id}"
                     )
                     embed.add_field(name="Before", value=former.content, inline=False)
                     embed.add_field(name="After", value=latter.content, inline=False)
@@ -187,7 +187,7 @@ class Core(commands.Cog):
                     )
                     embed.add_field(
                         name=f"Author - {msg.author.name}#{msg.author.discriminator}",
-                        value=f"Deleted from {msg.channel.mention} - UID: {msg.author.id}"
+                        value=f"From {msg.channel.mention} - UID: {msg.author.id}"
                     )
                     embed.add_field(name="Message", value=msg.content, inline=False)
 
