@@ -5,7 +5,7 @@ import json
 
 from datetime import datetime
 from sqlitedict import SqliteDict
-from discord import Role, Member, Embed, Message, Emoji, PartialEmoji
+from discord import Role, Embed, Message, Emoji, PartialEmoji
 from discord.ext import commands
 from discord.ext.commands import Context
 
