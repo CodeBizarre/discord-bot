@@ -292,7 +292,7 @@ class Core(commands.Cog):
                 icon_url=self.bot.app_info.icon_url
             )
 
-        embed.set_footer(text="https://github.com/Aurexine/discord-bot")
+        embed.set_footer(text="https://github.com/CodeBizarre/discord-bot")
 
         await ctx.send(embed=embed)
 
