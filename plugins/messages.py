@@ -8,7 +8,7 @@ from discord.ext.commands import Context
 from core.discord_bot import DiscordBot
 from core.plugins.accounts import is_level
 
-VERSION = "3.1b3"
+VERSION = "3.1b4"
 
 def msg_op_or_level(required=4):
     """
@@ -157,6 +157,7 @@ class Messages(commands.Cog):
 
         try:
             await target.send(embed=embed)
+            await ctx.send(":white_check_mark: Message moved!")
         except Exception as error:
             await ctx.send(f":anger: Unable to send message: {error}")
             return
@@ -165,8 +166,6 @@ class Messages(commands.Cog):
         except Exception as error:
             await ctx.send(f":anger: Unable to delete message: {error}")
             return
-
-        await ctx.send(":white_check_mark: Message moved!")
 
     @commands.group()
     @commands.guild_only()
