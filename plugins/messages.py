@@ -1,5 +1,4 @@
 import asyncio
-import json
 
 from discord import TextChannel, Member, Message, Embed, Role
 from discord import HTTPException
@@ -7,7 +6,6 @@ from discord.ext import commands
 from discord.ext.commands import Context
 
 from core.discord_bot import DiscordBot
-from core.time_tools import pretty_datetime
 from core.plugins.accounts import is_level
 
 VERSION = "3.1b3"
@@ -73,7 +71,7 @@ class Messages(commands.Cog):
             # Otherwise create a placeholder function that will log to console instead
             async def ltc(ctx: Context, member: Member, info: str = None):
                 self.bot.log.info(
-                    f"[MESSAGES] [{ctx.guild.name}] <{ctx.author}> " \
+                    f"[MESSAGES] [{ctx.guild.name}] <{ctx.author}> "
                     f"{ctx.message.content}"
                 )
             self.log_to_channel = ltc
@@ -252,7 +250,7 @@ class Messages(commands.Cog):
         Level 5 required
         """
         result = len(
-            await ctx.channel.purge(limit=count,check=lambda m: role in m.author.roles)
+            await ctx.channel.purge(limit=count, check=lambda m: role in m.author.roles)
         )
 
         await self.log_to_channel(ctx, ctx.author)

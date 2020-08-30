@@ -17,7 +17,7 @@ from core.time_tools import pretty_datetime, pretty_timedelta, time_parser
 VERSION = "2.6b2"
 
 async def embed_builder(action: str, member: Member, reason: str,
-    td: timedelta = None) -> Embed:
+                        td: timedelta = None) -> Embed:
     embed = Embed(title=action, color=0xff0000)
 
     embed.add_field(name="From", value=member.guild.name)
@@ -55,7 +55,7 @@ class Admin(commands.Cog):
 
                 if ts >= float(info["expires"]):
                     guild = self.bot.get_guild(int(sid))
-                    await guild.unban(bot.get_user(uid))
+                    await guild.unban(self.bot.get_user(uid))
 
                     del self.tempban_db[sid][uid]
                     update_db(self.sql_db, self.tempban_db, "temp_bans")
@@ -323,7 +323,7 @@ class Admin(commands.Cog):
     @commands.command(aliases=["sban"])
     @is_level(7)
     async def softban(self, ctx: Context, target: Member, purge: int = 1,
-        *, reason: str = None):
+                      *, reason: str = None):
         """Softban (kick and purge messages) a member from the server.
         Level 7 required
         """
@@ -341,7 +341,7 @@ class Admin(commands.Cog):
     @commands.command()
     @is_level(8)
     async def ban(self, ctx: Context, target: Member, purge: int = 7,
-        *, reason: str = None):
+                  *, reason: str = None):
         """Ban a member from the server.
         Level 8 required
         """
@@ -358,7 +358,7 @@ class Admin(commands.Cog):
     @commands.command(aliases=["tban"])
     @is_level(8)
     async def tempban(self, ctx: Context, target: Member, length: int, span: str,
-        *, reason: str = None):
+                      *, reason: str = None):
         """Temporarily ban a member from the server.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
         Use "max" as the span for psuedo-permanence (10 years).
@@ -396,7 +396,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(4)
     async def warn(self, ctx: Context, target: Member, length: int, span: str,
-        *, reason: str):
+                   *, reason: str):
         """Warn a member.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
         Use "max" as the span for psuedo-permanence (10 years).
@@ -550,7 +550,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @is_level(4)
     async def mute(self, ctx: Context, target: Member, length: int, span: str,
-        *, reason: str):
+                   *, reason: str):
         """Set a member to the mute role.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
         Use "max" as the span for psuedo-permanence (10 years).

@@ -4,7 +4,7 @@ import json
 
 from datetime import datetime
 from sqlitedict import SqliteDict
-from discord import Member, Embed, Message, TextChannel, ChannelType
+from discord import Member, Embed, Message, ChannelType
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -124,8 +124,6 @@ class Custom(commands.Cog):
     @commands.guild_only()
     async def custom(self, ctx: Context):
         """Create and manage custom commands on your server."""
-        sid = str(ctx.guild.id)
-
         if ctx.invoked_subcommand is None:
             await ctx.send_help(self)
 
@@ -285,7 +283,7 @@ class Custom(commands.Cog):
                     )
 
                 if len(embed.fields) > 0:
-                     await ctx.send(embed=embed)
+                    await ctx.send(embed=embed)
                 else:
                     await ctx.send(":anger: No more commands.")
             else:

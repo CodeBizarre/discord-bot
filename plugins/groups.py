@@ -3,7 +3,7 @@ import shutil
 import asyncio
 import json
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from sqlitedict import SqliteDict
 from discord import Embed, PermissionOverwrite, Member
 from discord.ext import commands
