@@ -218,7 +218,7 @@ class Core(commands.Cog):
     @Cog.listener()
     async def on_command_error(self, ctx: Context, error):
         if isinstance(error, commands.NoPrivateMessage):
-            await ctx.send(f":anger: This command is not available in DMs.")
+            await ctx.send(":anger: This command is not available in DMs.")
         elif isinstance(error, commands.CommandNotFound):
             # Ignore commands that don't exist
             pass
@@ -234,7 +234,7 @@ class Core(commands.Cog):
             await ctx.send(":anger: I don't have permission to do that.")
         elif isinstance(error, commands.CheckFailure):
             await ctx.send(
-                f":anger: You do not meet one or more requirements to use this command."
+                ":anger: You do not meet one or more requirements to use this command."
             )
         elif isinstance(error, AttributeError):
             raise AttributeError from error

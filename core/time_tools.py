@@ -20,7 +20,7 @@ def pretty_timedelta(td: timedelta):
     minutes, seconds = divmod(rem, 60)
 
     final = {
-        "years": years, "months": months,"days": days,
+        "years": years, "months": months, "days": days,
         "hours": hours, "minutes": minutes, "seconds": seconds
     }
 
@@ -37,8 +37,8 @@ async def time_parser(span: str, length: int, dt: datetime) -> datetime:
         "hours": lambda: timedelta(hours=length),
         "days": lambda: timedelta(days=length),
         "weeks": lambda: timedelta(weeks=length),
-        "months": lambda: timedelta(days=length*30),
-        "years": lambda: timedelta(days=length*365),
+        "months": lambda: timedelta(days=length * 30),
+        "years": lambda: timedelta(days=length * 365),
         "max": lambda: timedelta(days=3650)
     }
 

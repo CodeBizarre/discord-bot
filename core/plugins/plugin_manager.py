@@ -130,7 +130,6 @@ class PluginManager(Cog):
                     f":anger: Error reloading {name}.py:\n```py\n{exc}\n```"
                 )
 
-
     @cmd_plugins.command(name="enable")
     @is_level(10)
     async def cmd_plugins_enable(self, ctx: Context, name: str):
