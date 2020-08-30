@@ -110,7 +110,7 @@ class Roles(commands.Cog):
                     )
                 except Exception as e:
                     await payload.member.send(
-                        ":anger: There was an error assigning the role. Please let the " \
+                        ":anger: There was an error assigning the role. Please let the "
                         f"server admin know so this can be fixed: `{e}`"
                     )
 
@@ -142,7 +142,7 @@ class Roles(commands.Cog):
                     )
                 except Exception as e:
                     await member.send(
-                        ":anger: There was an error removing the role. Please let the " \
+                        ":anger: There was an error removing the role. Please let the "
                         f"server admin know so this can be fixed: `{e}`"
                     )
 
@@ -370,7 +370,7 @@ class Roles(commands.Cog):
     @is_level(10)
     @commands.guild_only()
     async def role_react_add(
-        self, ctx: Context, message: Message, role_get: Role, *, description: str):
+            self, ctx: Context, message: Message, role_get: Role, *, description: str):
         """Add a new reaction-based role to a message in your server.
         This will start a very quick interactive process for you to select the reaction.
         Level 10 required
