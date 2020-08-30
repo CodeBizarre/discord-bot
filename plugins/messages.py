@@ -130,6 +130,7 @@ class Messages(commands.Cog):
         # Avoid posting to the same channel
         if message.channel == target:
             await ctx.send(":anger: Target must be a different channel.")
+            return
 
         content = message.content
 
