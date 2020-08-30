@@ -10,7 +10,7 @@ from core.discord_bot import DiscordBot
 from core.time_tools import pretty_datetime
 from core.plugins.accounts import is_level
 
-VERSION = "3.1b2"
+VERSION = "3.1b3"
 
 def msg_op_or_level(required=4):
     """
@@ -30,7 +30,8 @@ def msg_op_or_level(required=4):
         arguments = ctx.message.content.split(" ")[1:]
 
         # Ensure that the first argument is a Discord message link
-        if not arguments[0].startswith("https://discordapp.com/channels/"):
+        prefaces = ["discord.com/channels/", "discordapp.com/channels/"]
+        if any(item not in arguments[0] for item in prefaces):
             raise commands.BadArgument("Message must be a Discord message link.")
 
         # Split the link and grab the channel and message ids
