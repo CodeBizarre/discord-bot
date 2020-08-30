@@ -6,21 +6,20 @@ from discord.ext import commands
 from discord.ext.commands import Context
 
 from core.discord_bot import DiscordBot
-from core.plugins.accounts import is_level
 
-VERSION = "3.1b4"
+VERSION = "3.2b1"
 
-def msg_op_or_level(required=4):
+def msg_op_or_permission():
     """
-    Check if a user is either high enough level, or the original poster of the message.
+    Check if a user either is the original poster of the message, or has permission.
     """
     async def predicate(ctx: Context):
         # Always show the command as available in help
         if ctx.invoked_with == "help": return True
 
-        # First check if the user is a high enough level to bypass the check
+        # First check if the user has the manage messages permission
         # This is far more efficient than the previous method
-        if ctx.bot.accounts[str(ctx.guild.id)][str(ctx.author.id)] >= required:
+        if ctx.author.permissions_in(ctx.channel).manage_messages:
             return True
 
         # Otherwise, start the process of checking if the command author is the OP
@@ -77,13 +76,13 @@ class Messages(commands.Cog):
             self.log_to_channel = ltc
 
     @commands.command(aliases=["xpost", "x-post"])
+    @msg_op_or_permission()
     @commands.guild_only()
-    @msg_op_or_level(4)
     async def crosspost(self, ctx: Context, message: Message, target: TextChannel):
         """Cross-post <message> to <target>.
         Message must be a Discord message link.
 
-        Must be the message OP or level 5
+        Must be the message OP or have manage messages permission.
         """
         # Avoid posting to the same channel
         if message.channel == target:
@@ -119,13 +118,13 @@ class Messages(commands.Cog):
             await ctx.send(f":anger: Unable to crosspost: {error}")
 
     @commands.command(aliases=["mv", "->"])
+    @msg_op_or_permission()
     @commands.guild_only()
-    @msg_op_or_level(4)
     async def move(self, ctx: Context, message: Message, target: TextChannel):
         """Move a <message> to a different channel.
         Message must be a Discord message link.
 
-        Must be the message OP or level 5
+        Must be the message OP or have manage messages permission.
         """
         # Avoid posting to the same channel
         if message.channel == target:
@@ -168,6 +167,7 @@ class Messages(commands.Cog):
             return
 
     @commands.group()
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def purge(self, ctx: Context):
         """Purge messages."""
@@ -175,10 +175,12 @@ class Messages(commands.Cog):
             await ctx.send_help("purge")
 
     @purge.command(name="self", aliases=["me"])
+    @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
-    @is_level(5)
     async def purge_self(self, ctx: Context, count: int = 10):
-        """Purge messages from yourself."""
+        """Purge messages from yourself.
+        Manage messages permission required.
+        """
         result = len(
             await ctx.channel.purge(limit=count, check=lambda m: m.author == ctx.author)
         )
@@ -190,11 +192,11 @@ class Messages(commands.Cog):
         )
 
     @purge.command(name="bot")
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
-    @is_level(5)
     async def purge_bot(self, ctx: Context, count: int = 10):
         """Purge messages sent by the bot.
-        Level 5 required
+        Manage messages permission required.
         """
         result = len(
             await ctx.channel.purge(
@@ -210,11 +212,11 @@ class Messages(commands.Cog):
         )
 
     @purge.command(name="all", aliases=["everyone"])
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
-    @is_level(5)
     async def purge_all(self, ctx: Context, count: int = 10):
         """Purge all messages.
-        Level 5 required
+        Manage messages permission required.
         """
         result = len(await ctx.channel.purge(limit=count))
 
@@ -225,11 +227,11 @@ class Messages(commands.Cog):
         )
 
     @purge.command(name="member", aliases=["user", "target"])
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
-    @is_level(5)
     async def purge_member(self, ctx: Context, target: Member, count: int = 10):
         """Purge messages from a member.
-        Level 5 required
+        Manage messages permission required.
         """
         result = len(
             await ctx.channel.purge(limit=count, check=lambda m: m.author == target)
@@ -243,11 +245,11 @@ class Messages(commands.Cog):
         )
 
     @purge.command(name="role", aliases=["group"])
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
-    @is_level(5)
     async def purge_group(self, ctx: Context, role: Role, count: int = 10):
         """Purge messages from a role.
-        Level 5 required
+        Manage messages permission required.
         """
         result = len(
             await ctx.channel.purge(limit=count, check=lambda m: role in m.author.roles)

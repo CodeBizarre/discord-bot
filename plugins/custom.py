@@ -11,9 +11,8 @@ from discord.ext.commands import Context
 from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime
-from core.plugins.accounts import is_level
 
-VERSION = "1.2b2"
+VERSION = "1.2b3"
 
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
@@ -128,12 +127,12 @@ class Custom(commands.Cog):
             await ctx.send_help(self)
 
     @custom.command(name="prefix")
-    @is_level(10)
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def custom_prefix(self, ctx: Context, prefix: str = None):
         """Set your server's custom command prefix.
         Running the command without arguments will display the current prefix.
-        Level 10 required.
+        Server administrator permission required.
         """
         sid = str(ctx.guild.id)
 
@@ -199,11 +198,11 @@ class Custom(commands.Cog):
             await ctx.send(f':anger: Something went wrong: {e}')
 
     @text.command(name="create", aliases=["c", "new", "make", "add"])
-    @is_level(8)
+    @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
     async def text_create(self, ctx: Context, name: str, *, text: str):
         """Create or update a new custom text command.
-        Level 8 required.
+        Manage messages permission required.
         """
         sid = str(ctx.guild.id)
 
@@ -223,11 +222,11 @@ class Custom(commands.Cog):
             await ctx.send(f":anger: Something went wrong: {e}")
 
     @text.command(name="remove", aliases=["r", "del", "delete"])
-    @is_level(8)
+    @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
     async def text_remove(self, ctx: Context, name: str):
         """Remove a custom text command.
-        Level 8 required.
+        Manage messages permission required.
         """
         sid = str(ctx.guild.id)
 
@@ -292,11 +291,11 @@ class Custom(commands.Cog):
             await ctx.send(f":anger: Something went wrong: {e}")
 
     @script.command(name="create", aliases=["c", "new", "make", "add"])
-    @is_level(8)
+    @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
     async def script_create(self, ctx: Context, prefix: str, *, text: str):
         """Create or update a new script response.
-        Level 8 required.
+        Manage messages permission required.
         """
         sid = str(ctx.guild.id)
 
@@ -313,11 +312,11 @@ class Custom(commands.Cog):
             await ctx.send(f":anger: Something went wrong: {e}")
 
     @script.command(name="remove", aliases=["r", "del", "delete"])
-    @is_level(8)
+    @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
     async def script_remove(self, ctx: Context, prefix: str):
         """Remove a custom response.
-        Level 8 required.
+        Manage messages permission required.
         """
         sid = str(ctx.guild.id)
 

@@ -7,9 +7,8 @@ from discord.ext.commands import Context, Cog
 from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.plugins.core import is_botmaster
-from core.plugins.accounts import is_level
 
-VERSION = "1.0b1"
+VERSION = "1.0b2"
 
 class PluginManager(Cog):
     """Plugin management system."""
@@ -131,10 +130,10 @@ class PluginManager(Cog):
                 )
 
     @cmd_plugins.command(name="enable")
-    @is_level(10)
+    @commands.has_permissions(administrator=True)
     async def cmd_plugins_enable(self, ctx: Context, name: str):
         """Enable a loaded plugin (Cog) on the current server.
-        Level 10 required.
+        Server administrator permission required.
         """
         sid = str(ctx.guild.id)
 
@@ -150,10 +149,10 @@ class PluginManager(Cog):
             await ctx.send(f":white_check_mark: Plugin {name} enabled on your server.")
 
     @cmd_plugins.command(name="disable")
-    @is_level(10)
+    @commands.has_permissions(administrator=True)
     async def cmd_plugins_disable(self, ctx: Context, name: str):
         """Disable a loaded plugin (Cog) on the current server.
-        Level 10 required.
+        Server administrator permission required.
         """
         sid = str(ctx.guild.id)
 

@@ -10,11 +10,10 @@ from discord.ext import commands
 from discord.ext.commands import Context
 
 from core.discord_bot import DiscordBot
-from core.plugins.accounts import is_level
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime
 
-VERSION = "2.2b4"
+VERSION = "2.2b5"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -235,12 +234,12 @@ class Roles(commands.Cog):
             await self.delete_invokes(ctx.message, response)
 
     @role.group(name="admin")
-    @is_level(10)
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def role_admin(self, ctx: Context):
         """Admin commands. Running the command without arguments will show all server
         roles, including command roles, and react roles.
-        Level 10 required
+        Server administrator permission required.
         """
         if ctx.invoked_subcommand is not None: return
 
@@ -263,7 +262,7 @@ class Roles(commands.Cog):
             await ctx.send(":anger: This server has no assignable roles.")
 
     @role_admin.command(name="invokes")
-    @is_level(10)
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def role_admin_invokes(self, ctx: Context, remove: bool = None):
         """Manage role commands and confirmation messages being deleted on your server.
@@ -271,7 +270,7 @@ class Roles(commands.Cog):
         the confirmation messages.
 
         Running the command without arguments will display the current setting.
-        Level 10 required
+        Server administrator permission required.
         """
         sid = str(ctx.guild.id)
 
@@ -285,11 +284,11 @@ class Roles(commands.Cog):
         await ctx.send(f"Remove role invokes: `{self.db[sid]['remove']}`")
 
     @role_admin.command(name="add")
-    @is_level(10)
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def role_admin_add(self, ctx: Context, role_get: Role, *, description: str):
         """Add or update a role on the assignable roles list.
-        Level 10 required
+        Server administrator permission required.
         """
         sid = str(ctx.guild.id)
         rid = str(role_get.id)
@@ -312,11 +311,11 @@ class Roles(commands.Cog):
             await ctx.send(f":anger: Error adding role: {e}")
 
     @role_admin.command(name="remove")
-    @is_level(10)
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def role_admin_remove(self, ctx: Context, *, role_get: Role):
         """Remove a role from the assignable roles list.
-        Level 10 required
+        Server administrator permission required.
         """
         sid = str(ctx.guild.id)
 
@@ -338,12 +337,12 @@ class Roles(commands.Cog):
                 await ctx.send(f":anger: Error removing role: {e}")
 
     @role_admin.group(name="react", aliases=["reacts", "reaction"])
-    @is_level(10)
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def role_admin_react(self, ctx: Context):
         """Manage reaction-based roles on your server.
         Running the command without arguments will display the list of reaction roles.
-        Level 10 required
+        Server administrator permission required.
         """
         if ctx.invoked_subcommand is not None: return
 
@@ -367,13 +366,13 @@ class Roles(commands.Cog):
         await ctx.send(embed=embed)
 
     @role_admin_react.command(name="add", aliases=["create"])
-    @is_level(10)
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def role_react_add(
             self, ctx: Context, message: Message, role_get: Role, *, description: str):
         """Add a new reaction-based role to a message in your server.
         This will start a very quick interactive process for you to select the reaction.
-        Level 10 required
+        Server administrator permission required.
         """
         sid = str(ctx.guild.id)
 
@@ -418,10 +417,12 @@ class Roles(commands.Cog):
         await ctx.send(f":white_check_mark: Role {role_get.name} added with {reaction}.")
 
     @role_admin_react.command(name="remove", aliases=["delete"])
-    @is_level(10)
+    @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def role_react_remove(self, ctx: Context, message: Message, *, role_get: Role):
-        """Remove a reaction role from a message in your server."""
+        """Remove a reaction role from a message in your server.
+        Server administrator permission required.
+        """
         sid = str(ctx.guild.id)
         mid = str(message.id)
 

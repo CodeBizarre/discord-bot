@@ -49,36 +49,6 @@ whois [Member]:
     Invoke without arguments to display information about yourself.
 
 ```
-### Account plugin
-###### Create and manager user accounts on a per-server basis to control access to moderation commands
-```
-accounts [search | add | remove | update | genesis]:
-    Aliases = accs
-    Invoke without arguments to display current level if available
-
-    search <Member>:
-        Aliases = lookup, find
-        Display Member's account level for the the current server
-
-    add <Member> <Level>:
-        Aliases = create, new
-        Level 10 required
-        Create a new account for Member at Level on the current server
-
-    remove <Member>:
-        Aliases = delete, destroy
-        Level 10 required
-        Remove the account of Member on the current server
-
-    update <Member> <Level>:
-        Aliases = change, modify
-        Level 10 required
-        Update the level of Member to Level on the current server
-
-    genesis:
-        MUST HAVE DISCORD ADMINISTRATOR PERMISSION
-        Create yourself an account with the highest level (10) on the current server
-```
 ### Plugin manager
 ###### Manage loaded plugins, and enable/disable them on a per-server basis
 ```
@@ -99,11 +69,11 @@ plugins [load | unload | enable | disable]:
         Shorthand for running `plugins unload Name` followed by `plugins load Name`
 
     enable <Name>:
-        Level 10 required
+        Server administrator permission required
         Enable the plugin Name on your server (Name will be the same as it displays in the loaded plugins list)
 
     disable <Name>:
-        Level 10 required
+        Server administrator permission required
         Disable the plugin Name on your server (Name will be the same as it displays in the loaded plugins list)
 ```
 ### Messages plugin
@@ -111,12 +81,12 @@ plugins [load | unload | enable | disable]:
 ```
 crosspost <Message> <Target>:
     Aliases = xpost, x-post
-    Must be message OP or level 5
+    Must be message OP or have manage messages permission
     Cross-post a Message to Target channel
 
 move <Message> <Target>:
     Aliases = mv, ->
-    Must be message OP or level 5
+    Must be message OP or have manage messages permission
     Move a Message to Target channel
 
 purge [self | bot | all | member | role]:
@@ -126,19 +96,19 @@ purge [self | bot | all | member | role]:
         purge messages from yourself within the last Count messages
 
     bot <Count>:
-        Level 5 required
+        Manage messages permission required
         purge messages from the bot within the last Count messages
 
     all <Count>:
-        Level 5 required
+        Manage messages permission required
         purge all of the last <Count> messages
 
     member <Target> <Count>:
-        Level 5 required
+        Manage messages permission required
         purge messages from Target within the last Count messages
 
     role <Role> <Count>:
-        Level 5 required
+        Manage messages permission required
         purge messages from Role within the last Count messages
 ```
 ### Xkcd plugin
@@ -176,34 +146,34 @@ role [add | remove | admin]:
         Remove from yourself the role Name from the assignable roles list
 
     admin [add | remove | react | invokes]:
-        Level 10 required
+        Server administrator permission required
         Running the command without arguments will show all server roles, including command roles and react roles.
 
     admin add <Role> <Description>:
-        Level 10 required
+        Server administrator permission required
         Add or update <Role> on the command assignable roles list.
 
     admin remove <Role>:
-        Level 10 required
+        Server administrator permission required
         Remove <Role> from the comand assignable roles list.
 
     admin react [add | remove]:
-        Level 10 required
+        Server administrator permission required
         Running the command without arguments will display all current reaction roles.
 
     admin react add <Message> <Role> <Description>:
-        Level 10 required
+        Server administrator permission required
         Add a new reaction-based <Role> to <Message> with <Description>
         <Message> should be a Discord message link, it might not work otherwise
         This will start a very quick interaction where you react to a message from the bot to set the reaction
 
     admin react remove <Message> <Role>:
-        Level 10 required
+        Server administrator permission required
         Remove a reaction-based <Role> from <Message>
         <Message> should be a Discord message link, it might not work otherwise
 
     admin invokes [Remove]:
-        Level 10 required
+        Server administrator permission required
         Set whether to remove invoke and response messages for adding/removing roles on your server
 ```
 ### Admin plugin
@@ -224,7 +194,7 @@ admin [log | role]:
         Set the mute role that the mute/unmute commands will use
 
     warn <Target> <Length> <Span> [Reason]:
-        Level 4 required
+        Kick member permission required
         Warn Target for Length Span(s) for Reason
 
     warns <list | remove>:
@@ -233,35 +203,35 @@ admin [log | role]:
     warns list [Target]:
         Aliases = find, lookup, member
         Invoke without arguments to view your own warns
-        Display [Target]'s warns (Level 4 required)
+        Display [Target]'s warns (Kick member permission required)
 
     warns remove <Target> <Number>:
         Aliases = delete, del
-        Level 4 required
+        Kick member permission required
         Remove warn <Number> from <Target>
 
     mute <Target> <Length> <Span> [Reason]:
-        Level 4 required
+        Kick member permission required
         Mute Target for Length Span(s) for Reason
 
     unmute <Target>:
-        Level 4 required
+        Kick member permission required
         Unmute Target early
 
     kick <Target> [Reason]:
-        Level 6 required
+        Kick member permission required
         Kick Target from the server for Reason
 
     softban <Target> <Purge> [Reason]:
-        Level 7 required
+        Ban member permission required
         Softban (Ban then unban) Target from the server and delete their messages for Purge days for Reason
 
     tempban <Target> <Length> <Span> [Reason]:
-        Level 8 required
+        Ban member permission required
         Temporarily ban Target for Length Span(s) for Reason
 
     ban <Target> <Purge> [Reason]:
-        Level 8 required
+        Ban member permission required
         Ban Target from the server and delete their messages for Purge days for Reason
 ```
 ### Groups plugin
@@ -287,18 +257,19 @@ custom <prefix | text | script>:
 
 custom prefix [prefix]
     Running the command without the prefix argument will display the server's current prefix
-    Including the prefix argument will set the server's prefix (Level 10 required)
+    Including the prefix argument will set the server's prefix (Server administrator permission required)
 
 custom text [create | remove]:
     Running the command without arguments will display available text commands
 
 custom text create <Name> <Text>:
     Aliases = c, new, make, add
-    Level 8 required
+    Manage messages permission required
     Create a new custom text command <Name> with response <Text>
 
 custom text remove <Name>:
     Aliases = r, del, delete
+    Manage messages permission required
     Remove the custom text command <Name>
 
 custom script [create | remove]:
@@ -306,7 +277,7 @@ custom script [create | remove]:
 
 custom script create <Prefix> <Text>:
     Aliases = c, new, make, add
-    Level 8 required
+    Manage messages permission required
     Create a new script response to <Prefix> with response <Text>. Supports script replacers:
       - !{id}            - The Discord ID snowflake of the user running the command
       - !{name}          - The name of the user running the command
@@ -316,7 +287,7 @@ custom script create <Prefix> <Text>:
 
 custom script remove <Prefix>:
     Aliases = r, del, delete
-    Level 8 required
+    Manage messages permission required
     Remove the custom script response to <Prefix>
 ```
 

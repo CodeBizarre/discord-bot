@@ -10,11 +10,10 @@ from discord.ext import commands
 from discord.ext.commands import Context
 
 from core.discord_bot import DiscordBot
-from core.plugins.accounts import is_level
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.6b2"
+VERSION = "2.6b3"
 
 async def embed_builder(action: str, member: Member, reason: str,
                         td: timedelta = None) -> Embed:
@@ -224,8 +223,8 @@ class Admin(commands.Cog):
         await channel.send(embed=embed)
 
     @commands.group()
-    @commands.guild_only()
     @commands.has_permissions(administrator=True)
+    @commands.guild_only()
     async def admin(self, ctx: Context):
         """Base command for server administrators.
 
@@ -258,8 +257,8 @@ class Admin(commands.Cog):
         await ctx.send(embed=embed)
 
     @admin.command(name="log")
-    @commands.guild_only()
     @commands.has_permissions(administrator=True)
+    @commands.guild_only()
     async def admin_log(self, ctx: Context, enabled: bool, channel: TextChannel = None):
         """Enable/disable to-channel logging and set the log channel.
         MUST HAVE SERVER ADMINISTRATOR PERMISSION
@@ -287,8 +286,8 @@ class Admin(commands.Cog):
         await ctx.send(embed=embed)
 
     @admin.command(name="role")
-    @commands.guild_only()
     @commands.has_permissions(administrator=True)
+    @commands.guild_only()
     async def admin_role(self, ctx: Context, role: Role):
         """Set the mute role for the server.
         MUST HAVE SERVER ADMINISTRATOR PERMISSION
@@ -305,10 +304,11 @@ class Admin(commands.Cog):
         await ctx.send(f":white_check_mark: Mute role set to: {role.name}.")
 
     @commands.command()
-    @is_level(6)
+    @commands.has_permissions(kick_members=True)
+    @commands.guild_only()
     async def kick(self, ctx: Context, target: Member, *, reason: str = None):
         """Kick a member from the server.
-        Level 6 required
+        Kick member permission required.
         """
         embed = await embed_builder("Kicked", target, reason)
 
@@ -321,11 +321,12 @@ class Admin(commands.Cog):
         await self.log_to_channel(ctx, target, reason)
 
     @commands.command(aliases=["sban"])
-    @is_level(7)
+    @commands.has_permissions(ban_members=True)
+    @commands.guild_only()
     async def softban(self, ctx: Context, target: Member, purge: int = 1,
                       *, reason: str = None):
         """Softban (kick and purge messages) a member from the server.
-        Level 7 required
+        Ban member permission required.
         """
         embed = await embed_builder("Kicked", target, reason)
 
@@ -339,11 +340,12 @@ class Admin(commands.Cog):
         await self.log_to_channel(ctx, target, reason)
 
     @commands.command()
-    @is_level(8)
+    @commands.has_permissions(ban_members=True)
+    @commands.guild_only()
     async def ban(self, ctx: Context, target: Member, purge: int = 7,
                   *, reason: str = None):
         """Ban a member from the server.
-        Level 8 required
+        Ban member permission required.
         """
         embed = await embed_builder("Permanently Banned", target, reason)
 
@@ -356,13 +358,14 @@ class Admin(commands.Cog):
         await self.log_to_channel(ctx, target, reason)
 
     @commands.command(aliases=["tban"])
-    @is_level(8)
+    @commands.has_permissions(ban_members=True)
+    @commands.guild_only()
     async def tempban(self, ctx: Context, target: Member, length: int, span: str,
                       *, reason: str = None):
         """Temporarily ban a member from the server.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
         Use "max" as the span for psuedo-permanence (10 years).
-        Level 8 required
+        Ban member permission required.
         """
         sid = str(ctx.guild.id)
 
@@ -393,14 +396,14 @@ class Admin(commands.Cog):
         await self.log_to_channel(ctx, target, reason)
 
     @commands.command()
+    @commands.has_permissions(kick_members=True)
     @commands.guild_only()
-    @is_level(4)
     async def warn(self, ctx: Context, target: Member, length: int, span: str,
                    *, reason: str):
         """Warn a member.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
         Use "max" as the span for psuedo-permanence (10 years).
-        Level 4 required
+        Kick member permission required.
         """
         sid = str(ctx.guild.id)
         uid = str(target.id)
@@ -460,7 +463,7 @@ class Admin(commands.Cog):
     async def warns_list(self, ctx: Context, target: Member = None):
         """List all active warns of yourself or another member.
         Invoke without argument to view your own warns.
-        Level 4 required to view other Members' warns
+        Kick member permission required to view other Members' warns
         """
         sid = str(ctx.guild.id)
 
@@ -477,15 +480,11 @@ class Admin(commands.Cog):
             await ctx.send(":anger: Member has no warns.")
             return
 
-        if target is not ctx.author:
-            try:
-                level = self.bot.accounts[sid][str(ctx.author.id)]
-            except KeyError:
-                await ctx.send(":anger: You must have an account on this server.")
-                return
-            if level < 4:
-                await ctx.send(":anger: Must be level 4 to view other users' warns.")
-                return
+        # This is ugly but it's 4am and I don't care
+        if (target is not ctx.author and not ctx.channel.permissions_for(
+            target
+        ).kick_members):
+            return
 
         embed = Embed(
             title=f"{target.name}#{target.discriminator}'s Warns",
@@ -521,11 +520,11 @@ class Admin(commands.Cog):
         await ctx.send(embed=embed)
 
     @warns.command(name="remove", aliases=["delete", "del"])
+    @commands.has_permissions(kick_members=True)
     @commands.guild_only()
-    @is_level(4)
     async def warns_remove(self, ctx: Context, target: Member, number: int):
         """Remove a warning from a member.
-        Level 4 required
+        Kick member permission required.
         """
         sid = str(ctx.guild.id)
         tid = str(target.id)
@@ -547,14 +546,14 @@ class Admin(commands.Cog):
                 break
 
     @commands.command()
+    @commands.has_permissions(kick_members=True)
     @commands.guild_only()
-    @is_level(4)
     async def mute(self, ctx: Context, target: Member, length: int, span: str,
                    *, reason: str):
         """Set a member to the mute role.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
         Use "max" as the span for psuedo-permanence (10 years).
-        Level 4 required
+        Kick member permission required.
         """
         sid = str(ctx.guild.id)
         uid = str(target.id)
@@ -596,11 +595,11 @@ class Admin(commands.Cog):
         await self.log_to_channel(ctx, target, reason)
 
     @commands.command()
+    @commands.has_permissions(kick_members=True)
     @commands.guild_only()
-    @is_level(4)
     async def unmute(self, ctx: Context, target: Member):
         """Unmute a member early.
-        Level 4 required
+        Kick member permission required.
         """
         sid = str(ctx.guild.id)
         uid = str(target.id)

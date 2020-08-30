@@ -10,7 +10,7 @@ from discord.ext import commands
 
 from core.time_tools import pretty_datetime
 
-VERSION = "3.0.1b2"
+VERSION = "3.1.0b1"
 
 def get_logger(file_name) -> logging.Logger:
     """Get an instance of Logger and set up log files."""
@@ -98,7 +98,6 @@ class DiscordBot(commands.Bot):
         self.blocklist = []
         self.plugins = []
         self.servers = {}
-        self.accounts = {}
         self.first_launch = True
 
         db_file = f"db/{self.database}"
@@ -125,12 +124,8 @@ class DiscordBot(commands.Bot):
         if "servers" not in self.db:
             self.db["servers"] = {}
 
-        if "accounts" not in self.db:
-            self.db["accounts"] = {}
-
         self.blocklist = self.db["blocklist"]
         self.servers = self.db["servers"]
-        self.accounts = self.db["accounts"]
 
         if self.mention_cmds:
             self.mode = commands.when_mentioned_or(self.config_prefix)

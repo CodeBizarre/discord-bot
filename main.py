@@ -13,7 +13,6 @@ def main():
         if bot.first_launch:
             # Load core modules first
             bot.load_extension("core.plugins.core")
-            bot.load_extension("core.plugins.accounts")
             bot.load_extension("core.plugins.plugin_manager")
 
             # Followed by available plugins
