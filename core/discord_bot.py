@@ -6,12 +6,11 @@ import json
 
 from datetime import datetime
 from sqlitedict import SqliteDict
-from discord import User
 from discord.ext import commands
 
 from core.time_tools import pretty_datetime
 
-VERSION = "3.0.1b1"
+VERSION = "3.0.1b2"
 
 def get_logger(file_name) -> logging.Logger:
     """Get an instance of Logger and set up log files."""
@@ -143,10 +142,10 @@ class DiscordBot(commands.Bot):
             description=description,
             help_command=commands.MinimalHelpCommand(
                 paginator=commands.Paginator(
-                        max_size=800,
-                        prefix=None,
-                        suffix=None
-                    ),
+                    max_size=800,
+                    prefix=None,
+                    suffix=None
+                ),
                 sort_commands=False
             ),
             *args, **kwargs
@@ -158,12 +157,12 @@ class DiscordBot(commands.Bot):
         else:
             server_names = [i.name for i in self.guilds]
             return [
-                f"[------------------------STATUS------------------------]",
+                "[------------------------STATUS------------------------]",
                 "Source: https://github.com/Aurexine/discord-bot",
                 f"Time: {datetime.now()}",
                 f"Version: {self.version}",
                 f"Logged in as {self.user} ({self.user.id})",
                 f"Loaded plugins - {self.plugins}",
                 f"Joined {len(self.guilds)} server(s) - {server_names}",
-                f"[------------------------STATUS------------------------]",
+                "[------------------------STATUS------------------------]",
             ]
