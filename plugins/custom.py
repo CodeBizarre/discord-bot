@@ -331,7 +331,8 @@ class Custom(commands.Cog):
             await ctx.send(f":white_check_mark: Script response `{prefix}` removed.")
         except KeyError:
             await ctx.send(
-                f":anger: There is no script response `{prefix}` registered on this server."
+                f":anger: There is no script response `{prefix}` "
+                "registered on this server."
             )
 
 def setup(bot):
