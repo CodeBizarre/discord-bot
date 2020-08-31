@@ -7,7 +7,7 @@ from discord.ext.commands import Context
 
 from core.discord_bot import DiscordBot
 
-VERSION = "3.2b1"
+VERSION = "3.2b2"
 
 def msg_op_or_permission():
     """
@@ -27,14 +27,14 @@ def msg_op_or_permission():
         arguments = ctx.message.content.split(" ")[1:]
 
         # Ensure that the first argument is a Discord message link
-        prefaces = ["discord.com/channels/", "discordapp.com/channels/"]
-        if any(item not in arguments[0] for item in prefaces):
+        prefaces = ("https://discord.com/channels/", "https://discordapp.com/channels/")
+        if not arguments[0].startswith(prefaces):
             raise commands.BadArgument("Message must be a Discord message link.")
 
         # Split the link and grab the channel and message ids
         split = arguments[0].split("/")
-        channel = int(split[4])
-        message = int(split[5])
+        channel = int(split[5])
+        message = int(split[6])
 
         # Run a threadsafe coroutine to get the target message from the link
         exc = asyncio.run_coroutine_threadsafe(
