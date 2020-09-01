@@ -1,12 +1,11 @@
-import asyncio
-import requests
+import aiohttp
 
 from discord.ext import commands
 from discord.ext.commands import Context
 
 from core.discord_bot import DiscordBot
 
-VERSION = "1.0b5"
+VERSION = "1.1b1"
 
 class Inspirobot(commands.Cog):
     """Get inspirational images from the Inspirobot."""
@@ -18,17 +17,11 @@ class Inspirobot(commands.Cog):
     @commands.command(aliases=["ib", "inspire"])
     async def inspirobot(self, ctx: Context):
         """Get an image from the inspirobot."""
-        req = self.bot.loop.run_in_executor(
-            None,
-            lambda: requests.get("http://inspirobot.me/api?generate=true")
-        )
+        async with aiohttp.ClientSession() as session:
+            response = await session.get("http://inspirobot.me/api?generate=true")
+            url = await response.text()
 
-        while not req.done():
-            await asyncio.sleep(0.25)
-
-        image = req.result()
-
-        await ctx.send(image.text)
+        await ctx.send(url)
 
 def setup(bot):
     bot.add_cog(Inspirobot(bot))
