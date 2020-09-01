@@ -447,6 +447,10 @@ class Core(commands.Cog):
             value=f"{pretty_datetime(target.joined_at)}"
         )
         embed.add_field(
+            name="Created At",
+            value=f"{pretty_datetime(target.created_at)}"
+        )
+        embed.add_field(
             name="Nickname",
             value=f"{target.nick}"
         )
