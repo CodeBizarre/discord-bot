@@ -13,7 +13,7 @@ from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime
 
-VERSION = "2.2b5"
+VERSION = "2.2b6"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -186,14 +186,13 @@ class Roles(commands.Cog):
         """Get a role from the assignable roles list."""
         sid = str(ctx.guild.id)
 
+        response = None
+
         if sid not in self.db:
             response = await ctx.send(":anger: This server has no assignable roles.")
-            return
-
-        if "roles" not in self.db[sid]:
-            await ctx.send(":anger: Server has no self-assignable roles.")
-
-        if role_name not in self.db[sid]["roles"]:
+        elif "roles" not in self.db[sid]:
+            response = await ctx.send(":anger: Server has no self-assignable roles.")
+        elif role_name not in self.db[sid]["roles"]:
             response = await ctx.send(
                 ":anger: That is not an assignable role on this server."
             )
@@ -202,10 +201,11 @@ class Roles(commands.Cog):
 
             if role in ctx.author.roles:
                 response = await ctx.send(":anger: You already have that role.")
-                return
+            else:
+                await ctx.author.add_roles(role, reason="Self-assign")
+                response = await ctx.send(":white_check_mark: Role added!")
 
-            await ctx.author.add_roles(role, reason="Self-assign")
-            response = await ctx.send(":white_check_mark: Role added!")
+        if response is not None:
             await self.delete_invokes(ctx.message, response)
 
     @role.command(name="remove", aliases=["r", "lose", "take", "-"])
@@ -214,11 +214,11 @@ class Roles(commands.Cog):
         """Remove an assignable role from yourself."""
         sid = str(ctx.guild.id)
 
+        response = None
+
         if sid not in self.db:
             response = await ctx.send(":anger: This server has no assignable roles.")
-            return
-
-        if role_name not in self.db[sid]["roles"]:
+        elif role_name not in self.db[sid]["roles"]:
             response = await ctx.send(
                 ":anger: That is not an assignable role on this server."
             )
@@ -227,10 +227,11 @@ class Roles(commands.Cog):
 
             if role not in ctx.author.roles:
                 response = await ctx.send(":anger: You don't have that role.")
-                return
+            else:
+                await ctx.author.remove_roles(role, reason="Self-remove")
+                response = await ctx.send(":white_check_mark: Role removed!")
 
-            await ctx.author.remove_roles(role, reason="Self-remove")
-            response = await ctx.send(":white_check_mark: Role removed!")
+        if response is not None:
             await self.delete_invokes(ctx.message, response)
 
     @role.group(name="admin")
