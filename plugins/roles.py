@@ -13,7 +13,7 @@ from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime
 
-VERSION = "2.2b6"
+VERSION = "2.2b7"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -105,7 +105,8 @@ class Roles(commands.Cog):
                     role = payload.member.guild.get_role(int(data["id"]))
                     await payload.member.add_roles(role, reason="Self-Assign")
                     await payload.member.send(
-                        f"You have been given {role.name} in {payload.member.guild.name}"
+                        f"You have been the role {role.name} in "
+                        f"{payload.member.guild.name}"
                     )
                 except Exception as e:
                     await payload.member.send(
@@ -137,7 +138,8 @@ class Roles(commands.Cog):
                     role = member.guild.get_role(int(data["id"]))
                     await member.remove_roles(role, reason="Self-Assign")
                     await member.send(
-                        f"You no longer have {role.name} in {member.guild.name}"
+                        f"You no longer have the role {role.name} in "
+                        f"{member.guild.name}"
                     )
                 except Exception as e:
                     await member.send(
