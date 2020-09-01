@@ -1,13 +1,10 @@
-import asyncio
-
 from discord import TextChannel, Member, Message, Embed, Role
-from discord import HTTPException
 from discord.ext import commands
 from discord.ext.commands import Context
 
 from core.discord_bot import DiscordBot
 
-VERSION = "3.2b2"
+VERSION = "3.2b3"
 
 def msg_op_or_permission():
     """
@@ -17,13 +14,18 @@ def msg_op_or_permission():
         # Always show the command as available in help
         if ctx.invoked_with == "help": return True
 
-        # First check if the user has the manage messages permission
-        # This is far more efficient than the previous method
-        if ctx.author.permissions_in(ctx.channel).manage_messages:
+        # Grab the destination channel by its #mention
+        try:
+            dest_channel = ctx.message.channel_mentions[0]
+        except IndexError:
+            raise commands.BadArgument("Invalid target channel.")
+
+        # Now check if the user has the manage messages permission in the destination
+        if ctx.author.permissions_in(dest_channel).manage_messages:
+            # If so we can skip any farther checks
             return True
 
-        # Otherwise, start the process of checking if the command author is the OP
-        # Split the message into arguments
+        # Otherwise split the message into arguments
         arguments = ctx.message.content.split(" ")[1:]
 
         # Ensure that the first argument is a Discord message link
@@ -31,26 +33,21 @@ def msg_op_or_permission():
         if not arguments[0].startswith(prefaces):
             raise commands.BadArgument("Message must be a Discord message link.")
 
-        # Split the link and grab the channel and message ids
+        # Split the link and grab the destination channel and message id
         split = arguments[0].split("/")
-        channel = int(split[5])
-        message = int(split[6])
-
-        # Run a threadsafe coroutine to get the target message from the link
-        exc = asyncio.run_coroutine_threadsafe(
-            ctx.guild.get_channel(channel).fetch_message(message),
-            ctx.bot.loop
-        )
-
-        while not exc.done():
-            await asyncio.sleep(0.1)
+        orig_channel = ctx.guild.get_channel(int(split[5]))
+        message_id = int(split[6])
 
         try:
-            target = exc.result()
-        except HTTPException:
-            return False
+            target_message = await orig_channel.fetch_message(message_id)
+        except Exception as e:
+            await ctx.send(f":anger: Unable to process: {e}")
 
-        return target.author == ctx.author
+        author = target_message.author
+
+        return (
+            author == ctx.author and author.permissions_in(dest_channel).send_messages
+        )
 
     return commands.check(predicate)
 
