@@ -13,7 +13,7 @@ from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime
 
-VERSION = "2.2b7"
+VERSION = "2.3b1"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -160,19 +160,19 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
-            await ctx.send(":anger: Server has no available roles.")
+            await ctx.send(":anger: Server has no self-available roles.")
             return
         elif "roles" not in self.db[sid]:
             await ctx.send(":anger: Server has no self-assignable roles.")
             return
 
-        if sid in self.db and len(self.db[sid]["roles"]) > 0:
+        if len(self.db[sid]["roles"]) > 0:
             embed = Embed(title="Available roles:", color=0x7289DA)
 
             embed.set_author(name=self.bot.user.name, icon_url=self.bot.app_info.icon_url)
 
             for name, info in self.db[sid]["roles"].items():
-                embed.add_field(name=name, value=info["description"])
+                embed.add_field(name=name.capitalize(), value=info["description"])
 
             embed.set_footer(
                 text="For more information use the `help roles` command."
@@ -180,7 +180,7 @@ class Roles(commands.Cog):
 
             await ctx.send(embed=embed)
         else:
-            await ctx.send(":anger: This server has no assignable roles.")
+            await ctx.send(":anger: Server has no self-assignable roles.")
 
     @role.command(name="add", aliases=["a", "get", "give", "+"])
     @commands.guild_only()
@@ -189,6 +189,8 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         response = None
+
+        role_name = role_name.lower()
 
         if sid not in self.db:
             response = await ctx.send(":anger: This server has no assignable roles.")
@@ -217,6 +219,8 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         response = None
+
+        role_name = role_name.lower()
 
         if sid not in self.db:
             response = await ctx.send(":anger: This server has no assignable roles.")
@@ -295,12 +299,22 @@ class Roles(commands.Cog):
         """
         sid = str(ctx.guild.id)
         rid = str(role_get.id)
-        name = role_get.name
+        name = role_get.name.lower()
 
         if sid not in self.db:
             self.db[sid] = { "roles": {} }
         elif "roles" not in self.db[sid]:
             self.db[sid]["roles"] = {}
+        elif name in self.db[sid]["roles"]:
+            if self.db[sid]["roles"][name]["id"] != rid:
+                await ctx.send(
+                    ":anger: There is already a role with the same name in the "
+                    "assignable roles list."
+                )
+            else:
+                await ctx.send(":anger: That roles ia already assignable.")
+
+            return
 
         try:
             self.db[sid]["roles"][name] = {
@@ -321,16 +335,17 @@ class Roles(commands.Cog):
         Server administrator permission required.
         """
         sid = str(ctx.guild.id)
+        name = role_get.name.lower()
 
         if sid not in self.db:
             await ctx.send(":anger: There are no assignable roles on this server.")
             return
 
-        if role_get.name not in self.db[sid]["roles"]:
+        if name not in self.db[sid]["roles"]:
             await ctx.send(":anger: That is not an assignable role on this server.")
         else:
             try:
-                del self.db[sid]["roles"][role_get.name]
+                del self.db[sid]["roles"][name]
 
                 await ctx.send(
                     f":white_check_mark: Removed {role_get.name} from assignable roles."
