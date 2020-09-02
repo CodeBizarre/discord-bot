@@ -482,7 +482,7 @@ class Admin(commands.Cog):
 
         # This is ugly but it's 4am and I don't care
         if (target is not ctx.author and not ctx.channel.permissions_for(
-            target
+            ctx.author
         ).kick_members):
             return
 
