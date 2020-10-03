@@ -42,6 +42,7 @@ def msg_op_or_permission():
             target_message = await orig_channel.fetch_message(message_id)
         except Exception as e:
             await ctx.send(f":anger: Unable to process: {e}")
+            return
 
         author = target_message.author
 
