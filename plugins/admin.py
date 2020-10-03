@@ -5,7 +5,7 @@ import json
 
 from datetime import datetime, timedelta, timezone
 from sqlitedict import SqliteDict
-from discord import Member, Role, TextChannel, Embed
+from discord import Member, Role, TextChannel, Embed, Object
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -13,7 +13,7 @@ from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.6b4"
+VERSION = "2.7b1"
 
 async def embed_builder(action: str, member: Member, reason: str,
                         td: timedelta = None) -> Embed:
@@ -356,6 +356,17 @@ class Admin(commands.Cog):
         tag = f"{target.name}#{target.discriminator}"
         await ctx.send(f":white_check_mark: Banned {tag} for {reason}")
         await self.log_to_channel(ctx, target, reason)
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    @commands.guild_only()
+    async def banid(self, ctx: Context, tid: str, purge: int = 7, *, reason: str = None):
+        """Ban a member from the server by UID. This allows banning of members who have
+        left, or are otherwise not currently a member of the server.
+        Ban member permission required.
+        """
+        await ctx.guild.ban(Object(int(tid)), reason=reason, delete_message_days=purge)
+        await ctx.send(f":white_check_mark: Banned {tid} for {reason}")
 
     @commands.command(aliases=["tban"])
     @commands.has_permissions(ban_members=True)
