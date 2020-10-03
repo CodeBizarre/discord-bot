@@ -1,10 +1,13 @@
+from datetime import datetime
+
 from discord import TextChannel, Member, Message, Embed, Role
 from discord.ext import commands
 from discord.ext.commands import Context
 
 from core.discord_bot import DiscordBot
+from core.time_tools import pretty_datetime
 
-VERSION = "3.2b3"
+VERSION = "3.3b1"
 
 def msg_op_or_permission():
     """
@@ -61,17 +64,47 @@ class Messages(commands.Cog):
         self.bot = bot
         self.name = "messages"
         self.version = VERSION
-        # Try to grab the log to channel function from the admin plugin if it's loaded
-        try:
-            self.log_to_channel = self.bot.cogs["Admin"].log_to_channel
-        except KeyError:
-            # Otherwise create a placeholder function that will log to console instead
-            async def ltc(ctx: Context, member: Member, info: str = None):
-                self.bot.log.info(
-                    f"[MESSAGES] [{ctx.guild.name}] <{ctx.author}> "
-                    f"{ctx.message.content}"
-                )
-            self.log_to_channel = ltc
+
+    # Due to some really weird circular import errors, I'm just doing a paste of this here
+    async def log_to_channel(self, ctx: Context, target: Member, info: str = None):
+        """Send an embed-formatted log of an event to a channel."""
+        sid = str(ctx.guild.id)
+        channel = None
+        enabled = True
+        action = ctx.message.content
+
+        if sid in self.db:
+            try:
+                channel = ctx.guild.get_channel(int(self.db[sid]["log_channel"]))
+            except KeyError:
+                channel = None
+            try:
+                enabled = self.db[sid]["log"]
+            except KeyError:
+                enabled = False
+        else:
+            channel = ctx.channel
+            enabled = False
+
+        if not enabled:
+            return
+
+        if info is None:
+            info = "No extra information"
+
+        tag = f"{target.name}#{target.discriminator} ({target.id})"
+
+        embed = Embed(
+            title=f"{ctx.author.name}#{ctx.author.discriminator} {ctx.command.name}",
+            color=0xff0000
+        )
+        embed.set_thumbnail(url=str(ctx.author.avatar_url))
+        embed.add_field(name="Action", value=action, inline=False)
+        embed.add_field(name="Target", value=tag)
+        embed.add_field(name="Info", value=info)
+        embed.set_footer(text=pretty_datetime(datetime.now()))
+
+        await channel.send(embed=embed)
 
     @commands.command(aliases=["xpost", "x-post"])
     @msg_op_or_permission()
