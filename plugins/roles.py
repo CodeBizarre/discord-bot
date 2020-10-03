@@ -13,7 +13,7 @@ from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime
 
-VERSION = "2.3b1"
+VERSION = "2.3b2"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -410,6 +410,7 @@ class Roles(commands.Cog):
             )
         except asyncio.TimeoutError:
             await ctx.send(":anger: You took too long to react!")
+            return
 
         mid = str(message.id)
 
