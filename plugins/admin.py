@@ -13,7 +13,7 @@ from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.6b3"
+VERSION = "2.6b4"
 
 async def embed_builder(action: str, member: Member, reason: str,
                         td: timedelta = None) -> Embed:
@@ -93,33 +93,33 @@ class Admin(commands.Cog):
             if len(self.mute_db[sid]) <= 0:
                 continue
 
-        for uid, info in self.mute_db[sid].items():
-            if ts >= float(info["expires"]):
-                guild = self.bot.get_guild(int(sid))
+            for uid, info in self.mute_db[sid].items():
+                if ts >= float(info["expires"]):
+                    guild = self.bot.get_guild(int(sid))
 
-                try:
-                    role = guild.get_role(int(self.db[sid]["mute_role"]))
-                # Delete the mute from the database if we're unable to get the mute role
-                except KeyError:
+                    try:
+                        role = guild.get_role(int(self.db[sid]["mute_role"]))
+                    # Delete the mute from the database if we're unable to get the mute role
+                    except KeyError:
+                        del self.mute_db[sid][uid]
+                        break
+
+                    target = guild.get_member(int(uid))
+
+                    if role in target.roles:
+                        await target.remove_roles(role, reason="Auto mute remove.")
+                        await target.send(
+                            f":speaking_head: Your mute in {guild.name} has expired."
+                        )
+                    else:
+                        del self.mute_db[sid][uid]
+                        break
+
                     del self.mute_db[sid][uid]
-                    break
-
-                target = guild.get_member(int(uid))
-
-                if role in target.roles:
-                    await target.remove_roles(role, reason="Auto mute remove.")
-                    await target.send(
-                        f":speaking_head: Your mute in {guild.name} has expired."
+                    update_db(self.sql_db, self.mute_db, "mutes")
+                    self.bot.log.info(
+                        f"[ADMIN][MUTE][REMOVE] {target.id} in <{guild.name}>"
                     )
-                else:
-                    del self.mute_db[sid][uid]
-                    break
-
-                del self.mute_db[sid][uid]
-                update_db(self.sql_db, self.mute_db, "mutes")
-                self.bot.log.info(
-                    f"[ADMIN][MUTE][REMOVE] {target.id} in <{guild.name}>"
-                )
 
     async def task_scheduler(self):
         while True:
