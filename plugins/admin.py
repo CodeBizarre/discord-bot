@@ -99,7 +99,7 @@ class Admin(commands.Cog):
 
                     try:
                         role = guild.get_role(int(self.db[sid]["mute_role"]))
-                    # Delete the mute from the database if we're unable to get the mute role
+                    # Delete the mute from the database if we're unable to get the role
                     except KeyError:
                         del self.mute_db[sid][uid]
                         break
