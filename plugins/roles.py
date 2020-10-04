@@ -13,7 +13,7 @@ from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime
 
-VERSION = "2.3b2"
+VERSION = "2.3b3"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -83,6 +83,14 @@ class Roles(commands.Cog):
             await response.delete()
         except Exception as e:
             self.bot.log.error(f"[ROLES] Unable to delete response: {e}")
+
+    @commands.Cog.listener()
+    async def on_raw_message_delete(self, payload):
+        try:
+            del self.db[str(payload.guild_id)]["reacts"][str(payload.message_id)]
+            update_db(self.sql_db, self.db, "servers")
+        except KeyError:
+            pass
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
