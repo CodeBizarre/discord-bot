@@ -13,7 +13,7 @@ from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.7b1"
+VERSION = "2.7b2"
 
 async def embed_builder(action: str, member: Member, reason: str,
                         td: timedelta = None) -> Embed:
@@ -477,10 +477,6 @@ class Admin(commands.Cog):
         Kick member permission required to view other Members' warns
         """
         sid = str(ctx.guild.id)
-
-        if sid not in self.warn_db:
-            await ctx.send(":anger: Server has no warns.")
-            return
 
         if target is None:
             target = ctx.author

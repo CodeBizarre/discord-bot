@@ -12,7 +12,7 @@ from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime
 
-VERSION = "1.2b3"
+VERSION = "1.2b4"
 
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
@@ -72,8 +72,7 @@ class Custom(commands.Cog):
         for i, word in enumerate(cmd):
             # Argument is a replacer
             if word.startswith("!{") and word.endswith("}"):
-                key = word.lstrip("!{")
-                key = key.rstrip("}")
+                key = word[2:-1]
                 try:
                     cmd[i] = user.obj[key]
                 except KeyError:
@@ -230,10 +229,6 @@ class Custom(commands.Cog):
         """
         sid = str(ctx.guild.id)
 
-        if sid not in self.db:
-            await ctx.send(":anger: This server has no text commands.")
-            return
-
         try:
             del self.db[sid]["text"][name]
             update_db(self.sql_db, self.db, "servers")
@@ -319,10 +314,6 @@ class Custom(commands.Cog):
         Manage messages permission required.
         """
         sid = str(ctx.guild.id)
-
-        if sid not in self.db:
-            await ctx.send(":anger: This server has no script responses.")
-            return
 
         try:
             del self.db[sid]["complex"][prefix]
