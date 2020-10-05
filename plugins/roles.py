@@ -13,7 +13,7 @@ from core.discord_bot import DiscordBot
 from core.db_tools import update_db
 from core.time_tools import pretty_datetime
 
-VERSION = "2.3b3"
+VERSION = "2.4b1"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -59,6 +59,14 @@ class Roles(commands.Cog):
 
         self.db = self.sql_db["servers"]
 
+    async def roles_check(self, ctx: Context) -> bool:
+        try:
+            assert "roles" in self.db[str(ctx.guild.id)]
+            return True
+        except AssertionError:
+            await ctx.send(":anger: Server has no assignable roles.")
+            return False
+
     async def delete_invokes(self, invoke: Message, response: Message):
         """Delete invoke and response message if neccesary."""
         try:
@@ -97,63 +105,62 @@ class Roles(commands.Cog):
         sid = str(payload.guild_id)
         mid = str(payload.message_id)
 
-        if sid not in self.db:
-            return
-        elif "reacts" not in self.db[sid]:
-            return
-        elif mid not in self.db[sid]["reacts"]:
-            return
+        try:
+            info = self.db[sid]["reacts"]
 
-        info = self.db[sid]["reacts"][mid]
-        emoji_name = payload.emoji.name
+            if mid not in info:
+                return
+            else:
+                info = info[mid]
 
-        for role_name, data in info.items():
-            if data["reaction"] == emoji_name:
-                try:
+            emoji_name = payload.emoji.name
+
+            for _, data in info.items():
+                if data["reaction"] == emoji_name:
                     role = payload.member.guild.get_role(int(data["id"]))
+
                     await payload.member.add_roles(role, reason="Self-Assign")
                     await payload.member.send(
                         f"You have been the role {role.name} in "
                         f"{payload.member.guild.name}"
                     )
-                except Exception as e:
-                    await payload.member.send(
-                        ":anger: There was an error assigning the role. Please let the "
-                        f"server admin know so this can be fixed: `{e}`"
-                    )
+        except Exception as e:
+            await payload.member.send(
+                ":anger: There was an error assigning the role. Please let the "
+                f"server admin know so this can be fixed: `{e}`"
+            )
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         sid = str(payload.guild_id)
         mid = str(payload.message_id)
 
-        if sid not in self.db:
-            return
-        elif "reacts" not in self.db[sid]:
-            return
-        elif mid not in self.db[sid]["reacts"]:
-            return
+        try:
+            info = self.db[sid]["reacts"]
 
-        info = self.db[sid]["reacts"][mid]
-        emoji_name = payload.emoji.name
+            if mid not in info:
+                return
+            else:
+                info = info[mid]
 
-        for role_name, data in info.items():
-            if data["reaction"] == emoji_name:
-                guild = self.bot.get_guild(payload.guild_id)
-                member = guild.get_member(payload.user_id)
+            emoji_name = payload.emoji.name
 
-                try:
+            for _, data in info.items():
+                if data["reaction"] == emoji_name:
+                    guild = self.bot.get_guild(payload.guild_id)
+                    member = guild.get_member(payload.user_id)
                     role = member.guild.get_role(int(data["id"]))
+
                     await member.remove_roles(role, reason="Self-Assign")
                     await member.send(
                         f"You no longer have the role {role.name} in "
                         f"{member.guild.name}"
                     )
-                except Exception as e:
-                    await member.send(
-                        ":anger: There was an error removing the role. Please let the "
-                        f"server admin know so this can be fixed: `{e}`"
-                    )
+        except Exception as e:
+            await self.bot.get_channel(payload.channel_id).send(
+                ":anger: There was an error removing the role. Please let the "
+                f"server admin know so this can be fixed: `{e}`"
+            )
 
     @commands.group(aliases=["roles"])
     @commands.guild_only()
@@ -167,12 +174,7 @@ class Roles(commands.Cog):
 
         sid = str(ctx.guild.id)
 
-        if sid not in self.db:
-            await ctx.send(":anger: Server has no self-available roles.")
-            return
-        elif "roles" not in self.db[sid]:
-            await ctx.send(":anger: Server has no self-assignable roles.")
-            return
+        if not await self.roles_check(ctx): return
 
         if len(self.db[sid]["roles"]) > 0:
             embed = Embed(title="Available roles:", color=0x7289DA)
@@ -200,11 +202,9 @@ class Roles(commands.Cog):
 
         role_name = role_name.lower()
 
-        if sid not in self.db:
-            response = await ctx.send(":anger: This server has no assignable roles.")
-        elif "roles" not in self.db[sid]:
-            response = await ctx.send(":anger: Server has no self-assignable roles.")
-        elif role_name not in self.db[sid]["roles"]:
+        if not await self.roles_check(ctx): return
+
+        if role_name not in self.db[sid]["roles"]:
             response = await ctx.send(
                 ":anger: That is not an assignable role on this server."
             )
@@ -230,8 +230,8 @@ class Roles(commands.Cog):
 
         role_name = role_name.lower()
 
-        if sid not in self.db:
-            response = await ctx.send(":anger: This server has no assignable roles.")
+        if not await self.roles_check(ctx):
+            return
         elif role_name not in self.db[sid]["roles"]:
             response = await ctx.send(
                 ":anger: That is not an assignable role on this server."
@@ -345,9 +345,7 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
         name = role_get.name.lower()
 
-        if sid not in self.db:
-            await ctx.send(":anger: There are no assignable roles on this server.")
-            return
+        if not await self.roles_check(ctx): return
 
         if name not in self.db[sid]["roles"]:
             await ctx.send(":anger: That is not an assignable role on this server.")
@@ -374,13 +372,9 @@ class Roles(commands.Cog):
 
         sid = str(ctx.guild.id)
 
-        if sid not in self.db:
-            await ctx.send(":anger: Server has no assignable roles.")
+        if not await self.roles_check(ctx):
             return
-        elif "reacts" not in self.db[sid]:
-            await ctx.send(":anger: Server has no reaction roles.")
-            return
-        elif len(self.db[sid]["reacts"]) <= 0:
+        elif "reacts" not in self.db[sid] or len(self.db[sid]["reacts"]) <= 0:
             await ctx.send(":anger: Server has no reaction roles.")
             return
 
@@ -453,8 +447,7 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
         mid = str(message.id)
 
-        if sid not in self.db:
-            await ctx.send(":anger: Server has no assignable roles.")
+        if not await self.roles_check(ctx):
             return
         elif "reacts" not in self.db[sid]:
             await ctx.send(":anger: Server has no reaction roles.")
