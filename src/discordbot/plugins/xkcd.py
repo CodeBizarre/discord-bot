@@ -5,7 +5,7 @@ from discord import Embed
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from core.discord_bot import DiscordBot
+from discordbot.core.discord_bot import DiscordBot
 
 # Uncomment the following line to fly
 #import antigravity

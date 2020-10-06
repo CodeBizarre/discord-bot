@@ -9,9 +9,9 @@ from discord import Role, Embed, Message, Emoji, PartialEmoji
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from core.discord_bot import DiscordBot
-from core.db_tools import update_db
-from core.time_tools import pretty_datetime
+from discordbot.core.discord_bot import DiscordBot
+from discordbot.core.db_tools import update_db
+from discordbot.core.time_tools import pretty_datetime
 
 VERSION = "2.4b1"
 

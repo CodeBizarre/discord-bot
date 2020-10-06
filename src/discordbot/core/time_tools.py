@@ -11,7 +11,7 @@ def pretty_datetime(dt: datetime, display: str = "FULL") -> str:
     else:
         return f"Unknown/incorrect display argument for pretty_datetime(): {display}"
 
-def pretty_timedelta(td: timedelta):
+def pretty_timedelta(td: timedelta) -> str:
     """Format timedeltas for messages."""
     # Expand the timedelta's days and seconds to a full scale
     years, rem       = divmod(td.days, 365)

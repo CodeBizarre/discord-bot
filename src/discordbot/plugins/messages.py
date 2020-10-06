@@ -4,8 +4,8 @@ from discord import TextChannel, Member, Message, Embed, Role
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from core.discord_bot import DiscordBot
-from core.time_tools import pretty_datetime
+from discordbot.core.discord_bot import DiscordBot
+from discordbot.core.time_tools import pretty_datetime
 
 VERSION = "3.3b1"
 

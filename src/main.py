@@ -1,8 +1,8 @@
 import os
 
-from core.discord_bot import DiscordBot
+from discordbot.core.discord_bot import DiscordBot
 
-from core.db_tools import update_db
+from discordbot.core.db_tools import update_db
 
 def main():
     bot = DiscordBot("Extensible bot based on Discord.py's Cogs")

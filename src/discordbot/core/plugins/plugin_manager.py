@@ -4,9 +4,9 @@ from discord import Embed
 from discord.ext import commands
 from discord.ext.commands import Context, Cog
 
-from core.discord_bot import DiscordBot
-from core.db_tools import update_db
-from core.plugins.core import is_botmaster
+from discordbot.core.discord_bot import DiscordBot
+from discordbot.core.db_tools import update_db
+from discordbot.core.plugins.core import is_botmaster
 
 VERSION = "1.0b2"
 

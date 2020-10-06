@@ -8,7 +8,7 @@ from datetime import datetime
 from sqlitedict import SqliteDict
 from discord.ext import commands
 
-from core.time_tools import pretty_datetime
+from discordbot.core.time_tools import pretty_datetime
 
 VERSION = "3.1.0b1"
 

@@ -9,9 +9,9 @@ from discord import Member, Role, TextChannel, Embed, Object
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from core.discord_bot import DiscordBot
-from core.db_tools import update_db
-from core.time_tools import pretty_datetime, pretty_timedelta, time_parser
+from discordbot.core.discord_bot import DiscordBot
+from discordbot.core.db_tools import update_db
+from discordbot.core.time_tools import pretty_datetime, pretty_timedelta, time_parser
 
 VERSION = "2.7b2"
 

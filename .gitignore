@@ -2,7 +2,7 @@
 /.vscode
 /.VSCodeCounter
 /__pycache__
-/local-plugins/*
+/src/discordbot/local-plugins
 /build
 /dist
 *.code-workspace
@@ -11,3 +11,4 @@
 *.zip
 *.pyc
 TODO.md
+*.egg-info

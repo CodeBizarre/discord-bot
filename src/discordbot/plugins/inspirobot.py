@@ -3,7 +3,7 @@ import aiohttp
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from core.discord_bot import DiscordBot
+from discordbot.core.discord_bot import DiscordBot
 
 VERSION = "1.1b1"
 
