@@ -8,7 +8,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.plugins.core import is_botmaster
 
-VERSION = "1.0b2"
+VERSION = "1.0b3"
 
 class PluginManager(Cog):
     """Plugin management system."""
@@ -29,7 +29,7 @@ class PluginManager(Cog):
             return True
 
         try:
-            return ctx.bot.servers[sid][ctx.cog.name]
+            return ctx.bot.servers[sid][ctx.cog.__class__.__name__.lower()]
         except KeyError:
             # Plugin will default to enabled if not set by a server admin
             return True
