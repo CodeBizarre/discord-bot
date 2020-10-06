@@ -385,7 +385,7 @@ class Admin(commands.Cog):
 
         # Get the current UTC time, a future time from time_parser, and the difference
         now = datetime.now(tz=timezone.utc)
-        future = await time_parser(span, length, now)
+        future = time_parser(span, length, now)
         length = future - now
 
         embed = await embed_builder("Temporarily Banned", target, reason, length)
@@ -429,7 +429,7 @@ class Admin(commands.Cog):
 
         # Get the current UTC time, a future time from time_parser, and the difference
         now = datetime.now(tz=timezone.utc)
-        future = await time_parser(span, length, now)
+        future = time_parser(span, length, now)
         length = future - now
 
         embed = await embed_builder("Warned", target, reason, length)
@@ -577,7 +577,7 @@ class Admin(commands.Cog):
 
         # Get the current UTC time, a future time from time_parser, and the difference
         now = datetime.now(tz=timezone.utc)
-        future = await time_parser(span, length, now)
+        future = time_parser(span, length, now)
         length = future - now
         time = pretty_timedelta(length)
 
