@@ -40,17 +40,25 @@ class PluginManager(Cog):
 
         Running the command without arguments will list loaded plugins.
         """
-        if ctx.invoked_subcommand is None:
-            embed = Embed(title="Loaded Plugins", color=0x7289DA)
-            for i in range(len(self.bot.plugins)):
-                plugin = self.bot.plugins[i].capitalize()
-                cog = self.bot.cogs[plugin]
-                embed.add_field(
-                    name=str(i + 1),
-                    value=f"{plugin} v{cog.version}"
-                )
+        if ctx.invoked_subcommand is not None:
+            return
 
-            await ctx.send(embed=embed)
+        embed = Embed(title="Loaded Plugins", color=0x7289DA)
+        for i in range(len(self.bot.plugins)):
+            plugin = self.bot.plugins[i].capitalize()
+            cog = self.bot.cogs[plugin]
+
+            try:
+                version = cog.version
+            except AttributeError:
+                version = "-"
+
+            embed.add_field(
+                name=str(i + 1),
+                value=f"{plugin} v{version}"
+            )
+
+        await ctx.send(embed=embed)
 
     @cmd_plugins.command(name="load")
     @is_botmaster()
