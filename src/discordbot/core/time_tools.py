@@ -28,7 +28,7 @@ def pretty_timedelta(td: timedelta) -> str:
         [f"{int(value)} {key} " if value > 0 else "" for key, value in final.items()]
     ).rstrip()
 
-async def time_parser(span: str, length: int, dt: datetime) -> datetime:
+def time_parser(span: str, length: int, dt: datetime) -> datetime:
     """Parser to convert length/span combos into a future datetime object"""
     # Psuedo switch/case to return a lambda function for the timedelta
     switcher = {
