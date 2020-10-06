@@ -6,7 +6,6 @@
 /src/discordbot/build
 /src/discordbot/dist
 *.code-workspace
-*.spec
 *.pyo
 *.zip
 *.pyc
