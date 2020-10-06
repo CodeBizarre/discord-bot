@@ -3,8 +3,8 @@
 /.VSCodeCounter
 /__pycache__
 /src/discordbot/local-plugins
-/build
-/dist
+/src/discordbot/build
+/src/discordbot/dist
 *.code-workspace
 *.spec
 *.pyo
