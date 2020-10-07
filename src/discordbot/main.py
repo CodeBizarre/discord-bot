@@ -37,7 +37,6 @@ def main():
 
                 if app_dir:
                     # Copy plugins from the local directory to the temporary directory
-                    print(app_dir)
                     shutil.copy(f"plugins/{p}", f"{app_dir}/plugins/{p}")
 
                 try:
