@@ -3,7 +3,7 @@ ifeq ($(OS),Windows_NT)
 	CLEARS = cls
 	RM = rmdir /s /q
 
-	CREATE = if not exist env ( pyython -m venv env )
+	CREATE = if not exist env ( python -m venv env )
 	ACTIVATE = env\Scripts\activate
 	FixPath = $(subst /,\,$1)
 else
