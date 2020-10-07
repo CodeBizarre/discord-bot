@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-from src.discordbot.core.discord_bot import VERSION
+from discordbot.core.discord_bot import VERSION
 
 setup(
     name="discordbot",

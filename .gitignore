@@ -5,6 +5,7 @@
 /src/discordbot/local-plugins
 /src/discordbot/build
 /src/discordbot/dist
+/src/env
 *.code-workspace
 *.pyo
 *.zip
