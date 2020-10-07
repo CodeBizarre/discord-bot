@@ -143,14 +143,14 @@ class PluginManager(Cog):
         """Enable a loaded plugin (Cog) on the current server.
         Server administrator permission required.
         """
-        sid = str(ctx.guild.id)
-
         if name not in self.bot.plugins:
             # There is a distinction between server-loaded and bot-loaded plugins
             # therefore I do not include the .py extension here purposefully
             await ctx.send(f":anger: No plugin {name} is loaded.")
             return
         else:
+            sid = str(ctx.guild.id)
+
             self.bot.servers[sid][name] = True
 
             update_db(self.bot.db, self.bot.servers, "servers")
@@ -162,12 +162,12 @@ class PluginManager(Cog):
         """Disable a loaded plugin (Cog) on the current server.
         Server administrator permission required.
         """
-        sid = str(ctx.guild.id)
-
         if name not in self.bot.plugins:
             await ctx.send(f":anger: No plugin {name} is loaded.")
             return
         else:
+            sid = str(ctx.guild.id)
+
             self.bot.servers[sid][name] = False
 
             update_db(self.bot.db, self.bot.servers, "servers")
