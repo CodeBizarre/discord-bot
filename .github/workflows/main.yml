@@ -1,0 +1,24 @@
+name: PyInstaller
+
+on:
+  push:
+    branches: [ release ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8 
+      - name: Run makefile
+        run: |
+          cd src
+          make package
+      - name: Upload executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: discord-bot
+          path: src/discordbot/dist/discord-bot
