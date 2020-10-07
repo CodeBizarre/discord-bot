@@ -25,7 +25,7 @@ ifeq ($(PYTHON_VERSION_OK),0)
 endif
 
 help:
-	echo "Usage: `make <dev | package | package-dev | clean>`"
+	echo "Usage: make <dev | package | package-dev | clean>"
 
 env:
 	$(CREATE)
