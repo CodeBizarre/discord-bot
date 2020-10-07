@@ -1,4 +1,8 @@
+import sys
 import os
+import shutil
+
+from os import path
 
 from discord import Embed
 from discord.ext import commands
@@ -8,7 +12,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.plugins.core import is_botmaster
 
-VERSION = "1.0b3"
+VERSION = "1.1b1"
 
 class PluginManager(Cog):
     """Plugin management system."""
@@ -33,6 +37,17 @@ class PluginManager(Cog):
         except KeyError:
             # Plugin will default to enabled if not set by a server admin
             return True
+
+    def copy_plugin_if_needed(_, name: str):
+        # Check if this is running from a pyinstaller executable
+        if getattr(sys, "frozen", False):
+            app_dir = getattr(sys, '_MEIPASS', path.abspath(path.dirname(__file__)))
+        else:
+            app_dir = False
+
+        if app_dir:
+            # Copy plugin from the local directory to the temporary directory
+            shutil.copy(f"plugins/{name}.py", f"{app_dir}/plugins/{name}.py")
 
     @commands.group(name="plugins", aliases=["pl", "cogs"])
     async def cmd_plugins(self, ctx: Context):
@@ -74,6 +89,8 @@ class PluginManager(Cog):
             await ctx.send(f":anger: Cannot find plugins/{name}.py")
         else:
             try:
+                self.copy_plugin_if_needed(name)
+
                 self.bot.load_extension(f"plugins.{name}")
                 self.bot.plugins.append(name)
 
@@ -116,6 +133,8 @@ class PluginManager(Cog):
             await ctx.send(f":anger: Plugin {name}.py is not loaded.")
         else:
             try:
+                self.copy_plugin_if_needed(name)
+
                 self.bot.unload_extension(f"plugins.{name}")
                 self.bot.plugins.remove(name)
 
