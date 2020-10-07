@@ -10,7 +10,7 @@ else
 	CLEARS = clear
 	RM = rm -rf
 
-	CREATE = if [ ! -d "env" ]; then python3 -m venv env fi
+	CREATE = if [ ! -d "env" ]; then python3 -m venv env; fi
 	ACTIVATE = . env/bin/activate
 	FixPath = $1
 endif
