@@ -1,4 +1,8 @@
+import sys
 import os
+import shutil
+
+from os import path
 
 from discordbot.core.discord_bot import DiscordBot
 
@@ -11,7 +15,13 @@ def main():
     async def on_ready():
         # If this is the first launch (Not a reconnection from disconnect)
         if bot.first_launch:
-            # Load core modules first
+            # Check if this is running from a pyinstaller executable
+            if getattr(sys, "frozen", False):
+                app_dir = getattr(sys, '_MEIPASS', path.abspath(path.dirname(__file__)))
+            else:
+                app_dir = False
+
+            # Then load core modules first
             bot.load_extension("core.plugins.core")
             bot.load_extension("core.plugins.plugin_manager")
 
@@ -24,6 +34,11 @@ def main():
 
                 if plugin == "__pycache__":
                     return
+
+                if app_dir:
+                    # Copy plugins from the local directory to the temporary directory
+                    print(app_dir)
+                    shutil.copy(f"plugins/{p}", f"{app_dir}/plugins/{p}")
 
                 try:
                     bot.load_extension(f"plugins.{plugin}")
