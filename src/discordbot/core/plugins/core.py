@@ -9,7 +9,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "1.1b1"
+VERSION = "1.1b2"
 
 # Exportable check for if the user is a botmaster
 def is_botmaster():
@@ -216,7 +216,7 @@ class Core(commands.Cog):
                 self.bot.log.warning(f"Unable to delete command message:\n    - {e}")
 
     @Cog.listener()
-    async def on_command_error(self, ctx: Context, error):
+    async def on_command_error(_, ctx: Context, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.send(":anger: This command is not available in DMs.")
         elif isinstance(error, commands.CommandNotFound):
@@ -253,7 +253,7 @@ class Core(commands.Cog):
         await self.bot.logout()
 
     @commands.command()
-    async def ping(self, ctx: Context):
+    async def ping(_, ctx: Context):
         """Ping/pong test."""
         await ctx.send(f":ping_pong: Pong {ctx.author.mention}")
 
@@ -432,7 +432,7 @@ class Core(commands.Cog):
 
     @commands.command(aliases=["who", "identify"])
     @commands.guild_only()
-    async def whois(self, ctx: Context, target: Member = None):
+    async def whois(_, ctx: Context, target: Member = None):
         """Display basic information about <target>.
 
         Running the command without arguments will show information about you.

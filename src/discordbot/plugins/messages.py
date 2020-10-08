@@ -7,7 +7,7 @@ from discord.ext.commands import Context
 from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "3.3b1"
+VERSION = "3.3b2"
 
 def msg_op_or_permission():
     """
@@ -109,7 +109,7 @@ class Messages(commands.Cog):
     @commands.command(aliases=["xpost", "x-post"])
     @msg_op_or_permission()
     @commands.guild_only()
-    async def crosspost(self, ctx: Context, message: Message, target: TextChannel):
+    async def crosspost(_, ctx: Context, message: Message, target: TextChannel):
         """Cross-post <message> to <target>.
         Message must be a Discord message link.
 
@@ -151,7 +151,7 @@ class Messages(commands.Cog):
     @commands.command(aliases=["mv", "->"])
     @msg_op_or_permission()
     @commands.guild_only()
-    async def move(self, ctx: Context, message: Message, target: TextChannel):
+    async def move(_, ctx: Context, message: Message, target: TextChannel):
         """Move a <message> to a different channel.
         Message must be a Discord message link.
 
@@ -197,10 +197,10 @@ class Messages(commands.Cog):
             await ctx.send(f":anger: Unable to delete message: {error}")
             return
 
-    @commands.group()
+    @commands.group(aliases=["clear"])
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
-    async def purge(self, ctx: Context):
+    async def purge(_, ctx: Context):
         """Purge messages."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help("purge")

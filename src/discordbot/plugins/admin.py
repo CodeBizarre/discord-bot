@@ -13,7 +13,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.7b2"
+VERSION = "2.7b4"
 
 async def embed_builder(action: str, member: Member, reason: str,
                         td: timedelta = None) -> Embed:
@@ -360,7 +360,7 @@ class Admin(commands.Cog):
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.guild_only()
-    async def banid(self, ctx: Context, tid: str, purge: int = 7, *, reason: str = None):
+    async def banid(_, ctx: Context, tid: str, purge: int = 7, *, reason: str = None):
         """Ban a member from the server by UID. This allows banning of members who have
         left, or are otherwise not currently a member of the server.
         Ban member permission required.
@@ -464,7 +464,7 @@ class Admin(commands.Cog):
 
     @commands.group()
     @commands.guild_only()
-    async def warns(self, ctx: Context):
+    async def warns(_, ctx: Context):
         """Base command to manage warns."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help("warns")

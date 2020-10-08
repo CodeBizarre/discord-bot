@@ -12,7 +12,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.plugins.core import is_botmaster
 
-VERSION = "1.1b1"
+VERSION = "1.1b2"
 
 class PluginManager(Cog):
     """Plugin management system."""
@@ -21,7 +21,7 @@ class PluginManager(Cog):
         self.name = "plugins"
         self.version = VERSION
 
-    async def bot_check(self, ctx: Context):
+    async def bot_check(_, ctx: Context):
         try:
             sid = str(ctx.guild.id)
         except AttributeError:
