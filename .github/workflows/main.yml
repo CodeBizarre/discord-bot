@@ -17,8 +17,8 @@ jobs:
         run: |
           cd src
           make package
-      - name: Upload executable
+      - name: Upload packaged zip
         uses: actions/upload-artifact@v2
         with:
           name: discord-bot
-          path: src/discordbot/dist/discord-bot
+          path: src/discordbot/dist/discord-bot/discord-bot-linux64.zip
