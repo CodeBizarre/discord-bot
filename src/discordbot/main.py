@@ -4,6 +4,8 @@ import shutil
 
 from os import path
 
+from discord.errors import LoginFailure
+
 from discordbot.core.discord_bot import DiscordBot
 
 from discordbot.core.db_tools import update_db
@@ -61,7 +63,15 @@ def main():
 
         update_db(bot.db, bot.servers, "servers")
 
-    bot.run(bot.config_token)
+    try:
+        bot.run(bot.config_token)
+    except LoginFailure as e:
+        reason = e.args[0]
+
+        bot.log.error(f"Login failure: {reason}")
+
+        if reason == "Improper token has been passed.":
+            bot.log.warning("Please set your token in config/config.json")
 
 if __name__ == "__main__":
     main()
