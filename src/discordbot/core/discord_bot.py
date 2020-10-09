@@ -10,7 +10,7 @@ from discord.ext import commands
 
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "3.1.0b1"
+VERSION = "3.2.0b1"
 
 def get_logger(file_name) -> logging.Logger:
     """Get an instance of Logger and set up log files."""
