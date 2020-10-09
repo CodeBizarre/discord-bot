@@ -2,17 +2,21 @@ ifeq ($(OS),Windows_NT)
 	SHELL = CMD
 	CLEARS = cls
 	RM = rmdir /s /q
+	CP = xcopy /E /I /Y
 
 	CREATE = if not exist env ( python -m venv env )
 	ACTIVATE = env\Scripts\activate
 	FixPath = $(subst /,\,$1)
+	ZIP = pwsh -Command "Compress-Archive * discord-bot-win64.zip"
 else
 	CLEARS = clear
 	RM = rm -rf
+	CP = cp -r
 
 	CREATE = if [ ! -d "env" ]; then python3 -m venv env; fi
 	ACTIVATE = . env/bin/activate
 	FixPath = $1
+	ZIP = tar -zcf discord-bot-linux64.zip *
 endif
 
 PYTHON_VERSION_MIN=3.8
@@ -25,25 +29,32 @@ ifeq ($(PYTHON_VERSION_OK),0)
 endif
 
 help:
-	echo "Usage: make <dev | package | package-dev | clean>"
+	echo "Usage: make <dev | package | package-dev | clean | clear-package>"
 
-env:
-	$(CREATE)
-
-pyinstaller: env
-	$(ACTIVATE) && pip install pyinstaller
-
-dev: env
-	$(ACTIVATE) && pip install -r requirements.txt && pip install -e .
-
-package: dev pyinstaller
-	$(ACTIVATE) && cd discordbot && pyinstaller --onefile discord-bot.spec
-
-install: help ;
+clear-package:
+	-$(RM) $(call FixPath,discordbot/dist)
+	$(CLEARS)
 
 clean:
 	-deactivate
 	-$(RM) $(call FixPath,env)
 	-$(RM) $(call FixPath,discordbot/build)
 	-$(RM) $(call FixPath,discordbot/dist)
-	-$(CLEARS)
+	$(CLEARS)
+
+env:
+	$(CREATE)
+
+dev: env
+	$(ACTIVATE) && pip install -r requirements.txt && pip install -e .
+
+pyinstaller: env
+	$(ACTIVATE) && pip install pyinstaller
+
+package: clear-package dev pyinstaller
+	$(ACTIVATE) && cd discordbot && pyinstaller --onefile discord-bot.spec
+	$(CP) $(call FixPath,discordbot/plugins discordbot/dist/plugins)
+	$(CP) $(call FixPath,discordbot/config discordbot/dist/config)
+	cd $(call FixPath,discordbot/dist) && $(ZIP)
+
+install: help ;
