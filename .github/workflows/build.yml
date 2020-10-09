@@ -25,4 +25,49 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: discord-bot
-          path: src/discordbot/dist/discord-bot/discord-bot-linux64.zip
+          path: src/discordbot/dist/discord-bot-linux64.zip
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Run makefile
+        run: |
+          cd src
+          make package
+
+      - name: Upload packaged zip
+        uses: actions/upload-artifact@v2
+        with:
+          name: discord-bot
+          path: src/discordbot/dist/discord-bot-win64.zip
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Run makefile
+        run: |
+          cd src
+          make package
+          mv discordbot/dist/discord-bot-linux64.zip discordbot/dist/discord-bot-mac64.zip
+
+      - name: Upload packaged zip
+        uses: actions/upload-artifact@v2
+        with:
+          name: discord-bot
+          path: src/discordbot/dist/discord-bot-linux64.zip
