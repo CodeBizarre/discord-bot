@@ -33,14 +33,14 @@ help:
 
 clear-package:
 	-$(RM) $(call FixPath,discordbot/dist)
-	$(CLEARS)
+	-$(CLEARS)
 
 clean:
 	-deactivate
 	-$(RM) $(call FixPath,env)
 	-$(RM) $(call FixPath,discordbot/build)
 	-$(RM) $(call FixPath,discordbot/dist)
-	$(CLEARS)
+	-$(CLEARS)
 
 env:
 	$(CREATE)
