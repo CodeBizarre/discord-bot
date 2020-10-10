@@ -46,10 +46,10 @@ env:
 	$(CREATE)
 
 dev: env
-	$(ACTIVATE) && pip install -r requirements.txt && pip install -e .
+	$(ACTIVATE) && pip install --ignore-installed --no-cache-dir -r requirements.txt && pip install -e .
 
 pyinstaller: env
-	$(ACTIVATE) && pip install pyinstaller
+	$(ACTIVATE) && pip install --ignore-installed --no-cache-dir pyinstaller
 
 package: clear-package dev pyinstaller
 	$(ACTIVATE) && cd discordbot && pyinstaller --onefile discord-bot.spec
