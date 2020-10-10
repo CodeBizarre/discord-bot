@@ -49,7 +49,7 @@ dev: env
 	$(ACTIVATE) && pip install --ignore-installed --no-cache-dir -r requirements.txt && pip install -e .
 
 pyinstaller: env
-	$(ACTIVATE) && pip install --ignore-installed --no-cache-dir pyinstaller
+	$(ACTIVATE) && pip install --ignore-installed --no-cache-dir pyinstaller==4.0
 
 package: clear-package dev pyinstaller
 	$(ACTIVATE) && cd discordbot && pyinstaller --onefile discord-bot.spec
