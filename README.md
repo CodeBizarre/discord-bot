@@ -1,4 +1,5 @@
-![Run tests](https://github.com/CodeBizarre/discord-bot/workflows/Run%20tests/badge.svg?branch=master&event=push)
+![Tests](https://github.com/CodeBizarre/discord-bot/workflows/Tests/badge.svg)
+![Package](https://github.com/CodeBizarre/discord-bot/workflows/Package/badge.svg?branch=release)
 
 # Multipurpose Discord bot extensible using Discord.py's cogs with extra custom features.
 
