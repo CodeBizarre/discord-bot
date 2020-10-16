@@ -2,6 +2,8 @@ import sys
 import os
 import shutil
 
+import discord
+
 from os import path
 
 from discord.errors import LoginFailure
@@ -11,7 +13,11 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 
 def main():
-    bot = DiscordBot("Extensible bot based on Discord.py's Cogs")
+    intents = discord.Intents.default()
+    # Requires priviledged intent "Members"
+    intents.members = True
+
+    bot = DiscordBot("Extensible bot based on Discord.py's Cogs", intents=intents)
 
     @bot.event
     async def on_ready():
