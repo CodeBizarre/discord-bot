@@ -12,7 +12,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "1.2b5"
+VERSION = "1.2b6"
 
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
@@ -102,7 +102,6 @@ class Custom(commands.Cog):
                 await msg.channel.send(cmd_result)
                 return
             except KeyError:
-                await msg.channel.send(":anger: That command doesn't exist.")
                 return
 
         # Scripted responses
