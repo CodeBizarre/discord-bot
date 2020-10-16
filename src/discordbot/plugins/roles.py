@@ -60,12 +60,11 @@ class Roles(commands.Cog):
         self.db = self.sql_db["servers"]
 
     async def roles_check(self, ctx: Context) -> bool:
-        try:
-            assert "roles" in self.db[str(ctx.guild.id)]
-            return True
-        except AssertionError:
+        if "roles" not in self.db[str(ctx.guild.id)]:
             await ctx.send(":anger: Server has no assignable roles.")
             return False
+        else:
+            return True
 
     async def delete_invokes(self, invoke: Message, response: Message):
         """Delete invoke and response message if neccesary."""
