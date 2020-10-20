@@ -10,7 +10,7 @@ from discord.ext import commands
 
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "3.2.1b1"
+VERSION = "3.2.1b2"
 
 def get_logger(file_name) -> logging.Logger:
     """Get an instance of Logger and set up log files."""
@@ -153,7 +153,7 @@ class DiscordBot(commands.Bot):
             server_names = [i.name for i in self.guilds]
             return [
                 "[------------------------STATUS------------------------]",
-                "Source: https://github.com/Aurexine/discord-bot",
+                "Source: https://github.com/CodeBizarre/discord-bot",
                 f"Time: {datetime.now()}",
                 f"Version: {self.version}",
                 f"Logged in as {self.user} ({self.user.id})",
