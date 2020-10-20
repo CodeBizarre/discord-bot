@@ -12,7 +12,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "1.2b6"
+VERSION = "1.2b7"
 
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
@@ -112,10 +112,11 @@ class Custom(commands.Cog):
             return
 
         for trigger in complex_cmds:
-            if (msg.content.startswith(trigger)):
+            if msg.content.split(" ")[0] == trigger:
                 await msg.channel.send(
                     self.parse_command(msg.author, complex_cmds[trigger])
                 )
+                return
 
     @commands.group()
     @commands.guild_only()
