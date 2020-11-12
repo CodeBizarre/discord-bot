@@ -29,6 +29,8 @@ def main():
             else:
                 app_dir = False
 
+            bot.log.info(f"_MEIPASS: {app_dir}")
+
             # Then load core modules first
             bot.load_extension("core.plugins.core")
             bot.load_extension("core.plugins.plugin_manager")
@@ -59,7 +61,7 @@ def main():
 
             bot.first_launch = False
 
-        bot.log.info("\n".join(bot.mission_control()))
+        bot.log.info(bot.mission_control())
 
         # Ensure all currently joined severs are registered
         for server in bot.guilds:
