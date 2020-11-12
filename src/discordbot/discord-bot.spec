@@ -6,7 +6,7 @@ block_cipher = None
 
 # Note that the hidden import "xkcd" is required here, not entirely sure why as no other
 # import had an issue
-analysys = Analysis(
+analysis = Analysis(
     ['main.py'],
     pathex=[os.path.abspath(SPECPATH)],
     binaries=[],
@@ -28,14 +28,14 @@ analysys = Analysis(
     noarchive=False
 )
 
-pyz = PYZ(analysys.pure, analysys.zipped_data, cipher=block_cipher)
+pyz = PYZ(analysis.pure, analysis.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
-    analysys.scripts,
-    analysys.binaries,
-    analysys.zipfiles,
-    analysys.datas,
+    analysis.scripts,
+    analysis.binaries,
+    analysis.zipfiles,
+    analysis.datas,
     [],
     name='discord-bot',
     debug=False,
