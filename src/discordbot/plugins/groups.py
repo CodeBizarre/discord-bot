@@ -150,7 +150,7 @@ class Groups(commands.Cog):
     @commands.guild_only()
     async def groups_create(self, ctx: Context, name: str, *, description: str):
         """Create a group for you and your friends!
-        Name must NOT include spaces!
+        Name must NOT include spaces and is CaSe SeNsItIvE!
         """
         if len(name) > 48:
             await ctx.send(":anger: Please use a name shorter than 48 characters.")
@@ -214,7 +214,9 @@ class Groups(commands.Cog):
     @groups.command(name="invite", aliases=["inv", "i", "add", "a"])
     @commands.guild_only()
     async def groups_invite(self, ctx: Context, target: Member, group: str):
-        """Invite someone to your group!"""
+        """Invite someone to your group!
+        Note: Group name is CaSe SeNsItIvE!
+        """
         sid = str(ctx.guild.id)
 
         if sid not in self.db or group not in self.db[sid]:
@@ -249,7 +251,7 @@ class Groups(commands.Cog):
     @groups.command(name="leave", aliases=["exit", "l"])
     @commands.guild_only()
     async def groups_leave(self, ctx: Context, group: str):
-        """Leave a group."""
+        """Leave a group, CaSe SeNsItIvE."""
         sid = str(ctx.guild.id)
 
         if sid not in self.db or group not in self.db[sid]:
