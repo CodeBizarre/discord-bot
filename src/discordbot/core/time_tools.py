@@ -30,7 +30,7 @@ def pretty_timedelta(td: timedelta) -> str:
 
 def time_parser(span: str, length: int, dt: datetime) -> datetime:
     """Parser to convert length/span combos into a future datetime object"""
-    # Psuedo switch/case to return a lambda function for the timedelta
+    # Pseudo switch/case to return a lambda function for the timedelta
     switcher = {
         "seconds": lambda: timedelta(seconds=length),
         "minutes": lambda: timedelta(minutes=length),
