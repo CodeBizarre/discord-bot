@@ -9,7 +9,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "1.1b3"
+VERSION = "1.1b4"
 
 # Exportable check for if the user is a botmaster
 def is_botmaster():
@@ -153,7 +153,7 @@ class Core(commands.Cog):
                 # This server is not configured.
                 report_ghosts = False
 
-            if report_ghosts and msg.author.id is not self.bot.user.id:
+            if report_ghosts and msg.author.id != self.bot.user.id:
                 title = f"A message from {msg.author.mention} was removed mentioning"
 
                 if len(msg.mentions) > 0:
