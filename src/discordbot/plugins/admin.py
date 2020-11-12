@@ -13,7 +13,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime, pretty_timedelta, time_parser
 
-VERSION = "2.7b4"
+VERSION = "2.7b5"
 
 async def embed_builder(action: str, member: Member, reason: str,
                         td: timedelta = None) -> Embed:
@@ -375,7 +375,7 @@ class Admin(commands.Cog):
                       *, reason: str = None):
         """Temporarily ban a member from the server.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
-        Use "max" as the span for psuedo-permanence (10 years).
+        Use "max" as the span for pseudo-permanence (10 years).
         Ban member permission required.
         """
         sid = str(ctx.guild.id)
@@ -413,7 +413,7 @@ class Admin(commands.Cog):
                    *, reason: str):
         """Warn a member.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
-        Use "max" as the span for psuedo-permanence (10 years).
+        Use "max" as the span for pseudo-permanence (10 years).
         Kick member permission required.
         """
         sid = str(ctx.guild.id)
@@ -559,7 +559,7 @@ class Admin(commands.Cog):
                    *, reason: str):
         """Set a member to the mute role.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
-        Use "max" as the span for psuedo-permanence (10 years).
+        Use "max" as the span for pseudo-permanence (10 years).
         Kick member permission required.
         """
         sid = str(ctx.guild.id)
