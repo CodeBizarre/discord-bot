@@ -14,7 +14,7 @@ from discordbot.core.db_tools import update_db
 
 def main():
     intents = discord.Intents.default()
-    # Requires priviledged intent "Members"
+    # Requires privileged intent "Members"
     intents.members = True
 
     bot = DiscordBot("Extensible bot based on Discord.py's Cogs", intents=intents)
