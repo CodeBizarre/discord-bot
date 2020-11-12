@@ -13,9 +13,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "1.1b2"
-GP = "Groups plugin."
-IA = "Inactivity."
+VERSION = "2.0b1"
 
 class Groups(commands.Cog):
     """Dynamic group management plugin.
@@ -29,6 +27,7 @@ class Groups(commands.Cog):
 
         for sid in self.db:
             if len(self.db[sid]) <= 0:
+                del self.db[sid]
                 continue
 
             for group, data in self.db[sid].items():
@@ -47,33 +46,26 @@ class Groups(commands.Cog):
                         text_channel.last_message_id
                     )
                 except Exception as e:
-                    # No message found, or there was some error
-                    self.bot.log.error(f"[ERROR]\n    - {e}")
-                    break
+                    # No message found, or there was some other error
+                    self.bot.log.error(f"[ERROR][GROUPS]\n    - {e}")
 
-                # The bot will always send a message to the channel, if its not there
-                # somthing is very wrong and probably can't be saved here.
-                if last_message is None:
-                    return
-
-                last_datetime = last_message.created_at.replace(tzinfo=timezone.utc)
-                delta = datetime.now(tz=timezone.utc) - last_datetime
-
-                since_sent = int(delta.total_seconds())
+                try:
+                    last_datetime = last_message.created_at.replace(tzinfo=timezone.utc)
+                    delta = datetime.now(tz=timezone.utc) - last_datetime
+                    since_sent = int(delta.total_seconds())
+                except Exception as e:
+                    self.bot.log.error(f"[ERROR][GROUPS]\n    - {e}")
+                    since_sent = 1801
 
                 if not voice_channel.members and since_sent >= 1800:
                     try:
-                        await voice_channel.delete(reason=IA)
-                        await text_channel.delete(reason=IA)
-                        await category.delete(reason=IA)
-                        await role.delete(reason=IA)
-                        self.db[sid].pop(
-                            group,
-                            f"Unable to remove {group} from database."
-                        )
+                        for chan in (text_channel, voice_channel, category, role):
+                            await chan.delete(reason="Groups Plugin (Inactivity)")
+
+                        del self.db[sid][group]
                         update_db(self.sql_db, self.db, "servers")
                     except Exception as e:
-                        self.bot.log.error(f"[ERROR]:\n    - {e}")
+                        self.bot.log.error(f"[ERROR][GROUPS]:\n    - {e}")
 
     async def task_scheduler(self):
         while True:
@@ -160,6 +152,10 @@ class Groups(commands.Cog):
         """Create a group for you and your friends!
         Name must NOT include spaces!
         """
+        if len(name) > 48:
+            await ctx.send(":anger: Please use a name shorter than 48 characters.")
+            return
+
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
@@ -168,7 +164,7 @@ class Groups(commands.Cog):
         # Try to make a role, text, and voice channel for the group
         try:
             role = await ctx.guild.create_role(
-                name=name, reason=GP
+                name=name, reason="Groups plugin"
             )
             ow = {
                 ctx.guild.default_role: PermissionOverwrite(read_messages=False),
@@ -176,23 +172,24 @@ class Groups(commands.Cog):
             }
             category = await ctx.guild.create_category(
                 name=name,
-                reason=GP,
+                reason="Groups plugin",
                 overwrites=ow
             )
             text = await ctx.guild.create_text_channel(
                 name=name.lower(),
-                reason=GP,
+                reason="Groups plugin",
                 category=category,
                 topic=description
             )
             voice = await ctx.guild.create_voice_channel(
                 name=name,
-                reason=GP,
+                reason="Groups plugin",
                 category=category
             )
 
             self.db[sid][name] = {
                 "info": {
+                    "leader": str(ctx.author.id),
                     "description": description,
                     "category": str(category.id),
                     "text_channel": str(text.id),
@@ -214,17 +211,13 @@ class Groups(commands.Cog):
             f"Welcome to your group {ctx.author.mention}! Try the `group invite` command!"
         )
 
-    @groups.command(name="invite", aliases=["inv", "i"])
+    @groups.command(name="invite", aliases=["inv", "i", "add", "a"])
     @commands.guild_only()
     async def groups_invite(self, ctx: Context, target: Member, group: str):
         """Invite someone to your group!"""
         sid = str(ctx.guild.id)
 
-        if sid not in self.db:
-            await ctx.send(":anger: This server has no groups, try `group create`!")
-            return
-
-        if group not in self.db[sid]:
+        if sid not in self.db or group not in self.db[sid]:
             await ctx.send(
                 f":anger: That group doesn't exist, try `group create {group}`!"
             )
@@ -252,6 +245,47 @@ class Groups(commands.Cog):
 
             except Exception as e:
                 await ctx.send(f":anger: Error during invite: {e}")
+
+    @groups.command(name="leave", aliases=["exit", "l"])
+    @commands.guild_only()
+    async def groups_leave(self, ctx: Context, group: str):
+        """Leave a group."""
+        sid = str(ctx.guild.id)
+
+        if sid not in self.db or group not in self.db[sid]:
+            await ctx.send(":anger: That group doesn't exist!")
+            return
+
+        try:
+            await ctx.author.remove_roles(int(self.db[sid][group]["info"]["role"]))
+        except Exception as e:
+            await ctx.send(f":anger: Error removing role: {e}")
+
+    @groups.command(name="kick")
+    @commands.guild_only()
+    async def groups_kick(self, ctx: Context, target: Member):
+        """Kick a member from your group.
+        Must be the group leader, and the command must be issued from within
+        the group channel.
+        """
+        sid = str(ctx.guild.id)
+
+        try:
+            info = self.db[sid][ctx.channel.category.name]["info"]
+            role = ctx.guild.get_role(int(info["role"]))
+        except KeyError:
+            await ctx.send(f":anger: Unable to get info for {ctx.channel.category.name}")
+            return
+
+        if ctx.author.id != int(info["leader"]):
+            await ctx.send(":anger: You are not the group leader!")
+            return
+
+        try:
+            await target.remove_roles(role, reason=f"Groups-Plugin Kick [{ctx.author.id}]")
+            await ctx.send(":white_check_mark: Member kicked!")
+        except Exception as e:
+            await ctx.send(f":anger: Something went wrong: {e}")
 
 def setup(bot):
     bot.add_cog(Groups(bot))
