@@ -1,6 +1,7 @@
 import asyncio
 
-import xkcd
+import xkcd as comics
+
 from discord import Embed
 from discord.ext import commands
 from discord.ext.commands import Context
@@ -10,7 +11,7 @@ from discordbot.core.discord_bot import DiscordBot
 # Uncomment the following line to fly
 #import antigravity
 
-VERSION = "1.2b3"
+VERSION = "1.3b1"
 
 class Xkcd(commands.Cog):
     """A plugin to retrieve XKCD comics."""
@@ -22,9 +23,9 @@ class Xkcd(commands.Cog):
     async def get_comic(self, comic, number = None) -> Embed:
         """Helper function to get comics"""
         case = {
-            "latest": lambda: xkcd.getLatestComic(),
-            "random": lambda: xkcd.getRandomComic(),
-            "number": lambda: xkcd.getComic(number)
+            "latest": lambda: comics.getLatestComic(),
+            "random": lambda: comics.getRandomComic(),
+            "number": lambda: comics.getComic(number)
         }
 
         function = case.get(comic, None)
