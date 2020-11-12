@@ -12,6 +12,8 @@ from discordbot.core.discord_bot import DiscordBot
 
 from discordbot.core.db_tools import update_db
 
+app_dir = None
+
 def main():
     intents = discord.Intents.default()
     # Requires privileged intent "Members"
@@ -24,6 +26,8 @@ def main():
         # If this is the first launch (Not a reconnection from disconnect)
         if bot.first_launch:
             # Check if this is running from a pyinstaller executable
+            global app_dir
+
             if getattr(sys, "frozen", False):
                 app_dir = getattr(sys, '_MEIPASS', path.abspath(path.dirname(__file__)))
             else:
@@ -80,6 +84,11 @@ def main():
 
         if reason == "Improper token has been passed.":
             bot.log.warning("Please set your token in config/config.json")
+    finally:
+        global app_dir
+
+        if app_dir and os.path.isdir(app_dir):
+            shutil.rmtree(app_dir)
 
 if __name__ == "__main__":
     main()
