@@ -13,7 +13,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "2.4b1"
+VERSION = "2.4b2"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -60,14 +60,14 @@ class Roles(commands.Cog):
         self.db = self.sql_db["servers"]
 
     async def roles_check(self, ctx: Context) -> bool:
-        if "roles" not in self.db[str(ctx.guild.id)]:
-            await ctx.send(":anger: Server has no assignable roles.")
-            return False
-        else:
+        if "roles" in self.db[str(ctx.guild.id)]:
             return True
 
+        await ctx.send(":anger: Server has no assignable roles.")
+        return False
+
     async def delete_invokes(self, invoke: Message, response: Message):
-        """Delete invoke and response message if neccesary."""
+        """Delete invoke and response message if necessary."""
         try:
             remove = self.db[str(invoke.guild.id)]["remove"]
         except KeyError:
@@ -166,7 +166,7 @@ class Roles(commands.Cog):
     async def role(self, ctx: Context):
         """Base role management commands.
 
-        Running ther command without arguments will display the list of available roles
+        Running the command without arguments will display the list of available roles
         in the current server.
         """
         if ctx.invoked_subcommand is not None: return
@@ -402,12 +402,11 @@ class Roles(commands.Cog):
 
         prompt = await ctx.send("React to this message to set your emoji.")
 
-        def check(reaction, member):
-            return member == ctx.message.author and reaction.message.id == prompt.id
-
         try:
-            reaction, member = await ctx.bot.wait_for(
-                "reaction_add", timeout=20.0, check=check
+            reaction, _ = await ctx.bot.wait_for(
+                "reaction_add",
+                timeout=20.0,
+                check=lambda r, m: m == ctx.message.author and r.message.id == prompt.id
             )
         except asyncio.TimeoutError:
             await ctx.send(":anger: You took too long to react!")
@@ -419,7 +418,7 @@ class Roles(commands.Cog):
             self.db[sid]["reacts"][mid] = {}
 
         # Convert the reaction emoji to a string if needed
-        if isinstance(reaction.emoji, Emoji) or isinstance(reaction.emoji, PartialEmoji):
+        if isinstance(reaction.emoji, (Emoji, PartialEmoji)):
             reaction = reaction.emoji.name
         else:
             reaction = reaction.emoji
