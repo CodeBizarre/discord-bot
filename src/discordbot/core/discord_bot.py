@@ -68,7 +68,8 @@ class DiscordBot(commands.Bot):
         except IOError as e:
             raise IOError(f"Unable to read a config file: {e}") from e
         except json.JSONDecodeError as e:
-            raise json.JSONDecodeError(f"Unable to parse json file: {e}")
+            self.log.error(f"Unable to parse JSON file: {e}")
+            exit()
 
     def __init__(self, description, *args, **kwargs):
         self.version = VERSION
@@ -146,18 +147,16 @@ class DiscordBot(commands.Bot):
             *args, **kwargs
         )
 
-    def mission_control(self) -> list:
+    def mission_control(self) -> str:
         if self.guilds is None:
-            return ["Bot not initialized."]
-        else:
-            server_names = [i.name for i in self.guilds]
-            return [
-                "[------------------------STATUS------------------------]",
-                "Source: https://github.com/CodeBizarre/discord-bot",
-                f"Time: {datetime.now()}",
-                f"Version: {self.version}",
-                f"Logged in as {self.user} ({self.user.id})",
-                f"Loaded plugins - {self.plugins}",
-                f"Joined {len(self.guilds)} server(s) - {server_names}",
-                "[------------------------STATUS------------------------]",
-            ]
+            return "Bot not initialized."
+
+        server_names = [i.name for i in self.guilds]
+        return "[------------------------STATUS------------------------]\n" \
+               "Source: https://github.com/CodeBizarre/discord-bot\n" \
+               f"Time: {datetime.now()}\n" \
+               f"Version: {self.version}\n" \
+               f"Logged in as {self.user} ({self.user.id})\n" \
+               f"Loaded plugins - {self.plugins}\n" \
+               f"Joined {len(self.guilds)} server(s) - {server_names}\n" \
+               "[------------------------STATUS------------------------]"
