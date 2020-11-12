@@ -12,7 +12,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "1.2b7"
+VERSION = "1.2b8"
 
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
@@ -65,7 +65,7 @@ class Custom(commands.Cog):
 
         self.db = self.sql_db["servers"]
 
-    def parse_command(_, member: Member, command: str) -> str:
+    def parse_command(self, member: Member, command: str) -> str:
         user = CommandUser(member)
 
         cmd = command.split(" ")
@@ -155,7 +155,7 @@ class Custom(commands.Cog):
 
     @custom.group()
     @commands.guild_only()
-    async def text(_, ctx: Context):
+    async def text(self, ctx: Context):
         """Create and remove simple text commands."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help("custom text")
@@ -240,7 +240,7 @@ class Custom(commands.Cog):
 
     @custom.group()
     @commands.guild_only()
-    async def script(_, ctx: Context):
+    async def script(self, ctx: Context):
         """Create and remove scripted replacer responses."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help("custom script")
