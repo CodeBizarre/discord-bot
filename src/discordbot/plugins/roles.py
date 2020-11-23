@@ -13,7 +13,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "2.4b2"
+VERSION = "2.4b3"
 
 class Roles(commands.Cog):
     """Add assignable roles to your server.
@@ -123,6 +123,9 @@ class Roles(commands.Cog):
                         f"You have been the role {role.name} in "
                         f"{payload.member.guild.name}"
                     )
+        except KeyError:
+            # We want to ignore KeyErrors as this means there are no reactions set
+            pass
         except Exception as e:
             await payload.member.send(
                 ":anger: There was an error assigning the role. Please let the "
@@ -155,6 +158,8 @@ class Roles(commands.Cog):
                         f"You no longer have the role {role.name} in "
                         f"{member.guild.name}"
                     )
+        except KeyError:
+            pass
         except Exception as e:
             await self.bot.get_channel(payload.channel_id).send(
                 ":anger: There was an error removing the role. Please let the "
