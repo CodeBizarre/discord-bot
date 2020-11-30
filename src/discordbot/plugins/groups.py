@@ -13,7 +13,7 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "2.0b1"
+VERSION = "2.0b2"
 
 class Groups(commands.Cog):
     """Dynamic group management plugin.
@@ -48,6 +48,7 @@ class Groups(commands.Cog):
                 except Exception as e:
                     # No message found, or there was some other error
                     self.bot.log.error(f"[ERROR][GROUPS]\n    - {e}")
+                    last_message = None
 
                 try:
                     last_datetime = last_message.created_at.replace(tzinfo=timezone.utc)
