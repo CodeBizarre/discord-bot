@@ -285,7 +285,10 @@ class Groups(commands.Cog):
             return
 
         try:
-            await target.remove_roles(role, reason=f"Groups-Plugin Kick [{ctx.author.id}]")
+            await target.remove_roles(
+                role,
+                reason=f"Groups-Plugin Kick [{ctx.author.id}]"
+            )
             await ctx.send(":white_check_mark: Member kicked!")
         except Exception as e:
             await ctx.send(f":anger: Something went wrong: {e}")
