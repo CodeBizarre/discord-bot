@@ -9,23 +9,25 @@ from discord.ext.commands import Context
 from discordbot.core.discord_bot import DiscordBot
 
 # Uncomment the following line to fly
-#import antigravity
+# import antigravity
 
 VERSION = "1.3b1"
 
+
 class Xkcd(commands.Cog):
     """A plugin to retrieve XKCD comics."""
+
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "xkcd"
         self.version = VERSION
 
-    async def get_comic(self, comic, number = None) -> Embed:
+    async def get_comic(self, comic, number=None) -> Embed:
         """Helper function to get comics"""
         case = {
             "latest": lambda: comics.getLatestComic(),
             "random": lambda: comics.getRandomComic(),
-            "number": lambda: comics.getComic(number)
+            "number": lambda: comics.getComic(number),
         }
 
         function = case.get(comic, None)
@@ -47,7 +49,7 @@ class Xkcd(commands.Cog):
 
             return embed
         except AttributeError as error:
-            embed = Embed(title="Error", color=0xff0000)
+            embed = Embed(title="Error", color=0xFF0000)
             embed.add_field(name="Details", value=str(error))
             return embed
 
@@ -82,6 +84,7 @@ class Xkcd(commands.Cog):
             await ctx.send(embed=comic)
         else:
             await ctx.send(f"Module {module} imported.")
+
 
 def setup(bot):
     bot.add_cog(Xkcd(bot))

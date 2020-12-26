@@ -10,7 +10,8 @@ from discord.ext import commands
 
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "3.3.0b1"
+VERSION = "3.3.0b2"
+
 
 def get_logger(file_name) -> logging.Logger:
     """Get an instance of Logger and set up log files."""
@@ -30,8 +31,10 @@ def get_logger(file_name) -> logging.Logger:
     log.addHandler(logging.StreamHandler(sys.stdout))
     return log
 
+
 class DiscordBot(commands.Bot):
     """Extensible bot using Discord.py's Cogs"""
+
     def _filesystem_setup(self):
         """Ensure all config and database files and folders exist."""
         try:
@@ -52,7 +55,7 @@ class DiscordBot(commands.Bot):
                         "LogMessages": True,
                         "LogEdits": True,
                         "LogDeletes": True,
-                        "LogCommands": True
+                        "LogCommands": True,
                     }
                     gen.write(json.dumps(default_config, indent=4))
 
@@ -80,19 +83,19 @@ class DiscordBot(commands.Bot):
 
         with open("config/config.json") as cfg:
             config = json.load(cfg)
-            self.database       = config["Database"]
-            self.backup_db      = config["BackupDB"]
-            self.config_prefix  = config["Prefix"]
-            self.mention_cmds   = config["MentionCommands"]
-            self.config_token   = config["Token"]
-            self.cmd_on_edit    = config["CommandsOnEdit"]
-            self.delete_cmds    = config["DeleteCommands"]
-            self.log_file       = config["LogFile"]
-            self.log_messages   = config["LogMessages"]
-            self.log_edits      = config["LogEdits"]
-            self.log_deletes    = config["LogDeletes"]
-            self.log_commands   = config["LogCommands"]
-            self.botmasters     = config["Botmasters"]
+            self.database = config["Database"]
+            self.backup_db = config["BackupDB"]
+            self.config_prefix = config["Prefix"]
+            self.mention_cmds = config["MentionCommands"]
+            self.config_token = config["Token"]
+            self.cmd_on_edit = config["CommandsOnEdit"]
+            self.delete_cmds = config["DeleteCommands"]
+            self.log_file = config["LogFile"]
+            self.log_messages = config["LogMessages"]
+            self.log_edits = config["LogEdits"]
+            self.log_deletes = config["LogDeletes"]
+            self.log_commands = config["LogCommands"]
+            self.botmasters = config["Botmasters"]
 
         self.log = get_logger(self.log_file)
         self.db = None
@@ -116,7 +119,7 @@ class DiscordBot(commands.Bot):
             tablename="discord-bot",
             encode=json.dumps,
             decode=json.loads,
-            autocommit=True
+            autocommit=True,
         )
 
         if "blocklist" not in self.db:
@@ -137,14 +140,11 @@ class DiscordBot(commands.Bot):
             self.mode,
             description=description,
             help_command=commands.MinimalHelpCommand(
-                paginator=commands.Paginator(
-                    max_size=800,
-                    prefix=None,
-                    suffix=None
-                ),
-                sort_commands=False
+                paginator=commands.Paginator(max_size=800, prefix=None, suffix=None),
+                sort_commands=False,
             ),
-            *args, **kwargs
+            *args,
+            **kwargs,
         )
 
     def mission_control(self) -> str:
@@ -152,11 +152,13 @@ class DiscordBot(commands.Bot):
             return "Bot not initialized."
 
         server_names = [i.name for i in self.guilds]
-        return "[------------------------STATUS------------------------]\n" \
-               "Source: https://github.com/CodeBizarre/discord-bot\n" \
-               f"Time: {datetime.now()}\n" \
-               f"Version: {self.version}\n" \
-               f"Logged in as {self.user} ({self.user.id})\n" \
-               f"Loaded plugins - {self.plugins}\n" \
-               f"Joined {len(self.guilds)} server(s) - {server_names}\n" \
-               "[------------------------STATUS------------------------]"
+        return (
+            "[------------------------STATUS------------------------]\n"
+            "Source: https://github.com/CodeBizarre/discord-bot\n"
+            f"Time: {datetime.now()}\n"
+            f"Version: {self.version}\n"
+            f"Logged in as {self.user} ({self.user.id})\n"
+            f"Loaded plugins - {self.plugins}\n"
+            f"Joined {len(self.guilds)} server(s) - {server_names}\n"
+            "[------------------------STATUS------------------------]"
+        )

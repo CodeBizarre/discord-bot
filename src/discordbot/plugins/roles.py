@@ -15,6 +15,7 @@ from discordbot.core.time_tools import pretty_datetime
 
 VERSION = "2.4b3"
 
+
 class Roles(commands.Cog):
     """Add assignable roles to your server.
 
@@ -22,6 +23,7 @@ class Roles(commands.Cog):
     There are also time-based roles to give users after they have been in the server a
     certain amount of time.
     """
+
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "roles"
@@ -51,7 +53,7 @@ class Roles(commands.Cog):
             tablename="roles",
             autocommit=True,
             encode=json.dumps,
-            decode=json.loads
+            decode=json.loads,
         )
 
         if "servers" not in self.sql_db:
@@ -174,11 +176,13 @@ class Roles(commands.Cog):
         Running the command without arguments will display the list of available roles
         in the current server.
         """
-        if ctx.invoked_subcommand is not None: return
+        if ctx.invoked_subcommand is not None:
+            return
 
         sid = str(ctx.guild.id)
 
-        if not await self.roles_check(ctx): return
+        if not await self.roles_check(ctx):
+            return
 
         if len(self.db[sid]["roles"]) > 0:
             embed = Embed(title="Available roles:", color=0x7289DA)
@@ -188,9 +192,7 @@ class Roles(commands.Cog):
             for name, info in self.db[sid]["roles"].items():
                 embed.add_field(name=name.capitalize(), value=info["description"])
 
-            embed.set_footer(
-                text="For more information use the `help roles` command."
-            )
+            embed.set_footer(text="For more information use the `help roles` command.")
 
             await ctx.send(embed=embed)
         else:
@@ -206,7 +208,8 @@ class Roles(commands.Cog):
 
         role_name = role_name.lower()
 
-        if not await self.roles_check(ctx): return
+        if not await self.roles_check(ctx):
+            return
 
         if role_name not in self.db[sid]["roles"]:
             response = await ctx.send(
@@ -260,7 +263,8 @@ class Roles(commands.Cog):
         roles, including command roles, and react roles.
         Server administrator permission required.
         """
-        if ctx.invoked_subcommand is not None: return
+        if ctx.invoked_subcommand is not None:
+            return
 
         sid = str(ctx.guild.id)
 
@@ -272,9 +276,7 @@ class Roles(commands.Cog):
             for name, info in self.db[sid]["roles"].items():
                 embed.add_field(name=name, value=info["description"])
 
-            embed.set_footer(
-                text="For more information use the `help roles` command."
-            )
+            embed.set_footer(text="For more information use the `help roles` command.")
 
             await ctx.send(embed=embed)
         else:
@@ -294,7 +296,7 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
-            self.db[sid] = { "remove": False }
+            self.db[sid] = {"remove": False}
 
         if remove is not None:
             self.db[sid]["remove"] = remove
@@ -314,7 +316,7 @@ class Roles(commands.Cog):
         name = role_get.name.lower()
 
         if sid not in self.db:
-            self.db[sid] = { "roles": {} }
+            self.db[sid] = {"roles": {}}
         elif "roles" not in self.db[sid]:
             self.db[sid]["roles"] = {}
         elif name in self.db[sid]["roles"]:
@@ -329,10 +331,7 @@ class Roles(commands.Cog):
             return
 
         try:
-            self.db[sid]["roles"][name] = {
-                "id": rid,
-                "description": description
-            }
+            self.db[sid]["roles"][name] = {"id": rid, "description": description}
 
             await ctx.send(f":white_check_mark: Added {name} to assignable roles.")
             update_db(self.sql_db, self.db, "servers")
@@ -349,7 +348,8 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
         name = role_get.name.lower()
 
-        if not await self.roles_check(ctx): return
+        if not await self.roles_check(ctx):
+            return
 
         if name not in self.db[sid]["roles"]:
             await ctx.send(":anger: That is not an assignable role on this server.")
@@ -372,7 +372,8 @@ class Roles(commands.Cog):
         Running the command without arguments will display the list of reaction roles.
         Server administrator permission required.
         """
-        if ctx.invoked_subcommand is not None: return
+        if ctx.invoked_subcommand is not None:
+            return
 
         sid = str(ctx.guild.id)
 
@@ -393,7 +394,8 @@ class Roles(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def role_react_add(
-            self, ctx: Context, message: Message, role_get: Role, *, description: str):
+        self, ctx: Context, message: Message, role_get: Role, *, description: str
+    ):
         """Add a new reaction-based role to a message in your server.
         This will start a very quick interactive process for you to select the reaction.
         Server administrator permission required.
@@ -401,7 +403,7 @@ class Roles(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
-            self.db[sid] = { "reacts": {} }
+            self.db[sid] = {"reacts": {}}
         elif "reacts" not in self.db[sid]:
             self.db[sid]["reacts"] = {}
 
@@ -411,7 +413,7 @@ class Roles(commands.Cog):
             reaction, _ = await ctx.bot.wait_for(
                 "reaction_add",
                 timeout=20.0,
-                check=lambda r, m: m == ctx.message.author and r.message.id == prompt.id
+                check=lambda r, m: m == ctx.message.author and r.message.id == prompt.id,
             )
         except asyncio.TimeoutError:
             await ctx.send(":anger: You took too long to react!")
@@ -433,7 +435,7 @@ class Roles(commands.Cog):
             "id": role_get.id,
             "reaction": reaction,
             "channel": message.channel.id,
-            "message": message.id
+            "message": message.id,
         }
 
         update_db(self.sql_db, self.db, "servers")
@@ -473,8 +475,10 @@ class Roles(commands.Cog):
         except Exception as e:
             await ctx.send(f":anger: Something went wrong: {e}")
 
+
 def setup(bot):
     bot.add_cog(Roles(bot))
+
 
 def teardown(bot):
     bot.cogs["Roles"].sql_db.close()

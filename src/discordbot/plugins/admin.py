@@ -15,9 +15,11 @@ from discordbot.core.time_tools import pretty_datetime, pretty_timedelta, time_p
 
 VERSION = "2.7b6"
 
-async def embed_builder(action: str, member: Member, reason: str,
-                        td: timedelta = None) -> Embed:
-    embed = Embed(title=action, color=0xff0000)
+
+async def embed_builder(
+    action: str, member: Member, reason: str, td: timedelta = None
+) -> Embed:
+    embed = Embed(title=action, color=0xFF0000)
 
     embed.add_field(name="From", value=member.guild.name)
     embed.add_field(name="Reason", value=reason, inline=False)
@@ -34,11 +36,13 @@ async def embed_builder(action: str, member: Member, reason: str,
 
     return embed
 
+
 class Admin(commands.Cog):
     """General purpose administration plugin.
 
     Features warning, kicking, banning, soft bans, timed bans, and message purging.
     """
+
     async def tempban_check(self):
         ts = datetime.now(tz=timezone.utc).timestamp()
 
@@ -58,9 +62,7 @@ class Admin(commands.Cog):
 
                     del self.tempban_db[sid][uid]
                     update_db(self.sql_db, self.tempban_db, "temp_bans")
-                    self.bot.log.info(
-                        f"[ADMIN][TEMPBAN][REMOVE] {uid} in <{guild.name}>"
-                    )
+                    self.bot.log.info(f"[ADMIN][TEMPBAN][REMOVE] {uid} in <{guild.name}>")
 
     async def warn_check(self):
         ts = datetime.now(tz=timezone.utc).timestamp()
@@ -160,7 +162,7 @@ class Admin(commands.Cog):
             tablename="admin",
             autocommit=True,
             encode=json.dumps,
-            decode=json.loads
+            decode=json.loads,
         )
 
         if "admin" not in self.sql_db:
@@ -212,7 +214,7 @@ class Admin(commands.Cog):
 
         embed = Embed(
             title=f"{ctx.author.name}#{ctx.author.discriminator} {ctx.command.name}",
-            color=0xff0000
+            color=0xFF0000,
         )
         embed.set_thumbnail(url=str(ctx.author.avatar_url))
         embed.add_field(name="Action", value=action, inline=False)
@@ -279,7 +281,7 @@ class Admin(commands.Cog):
 
         update_db(self.sql_db, self.db, "admin")
 
-        embed = Embed(title="Log Settings", color=0xff0000)
+        embed = Embed(title="Log Settings", color=0xFF0000)
         embed.add_field(name="Enabled", value=str(enabled))
         embed.add_field(name="Log Channel", value=channel.mention)
 
@@ -323,8 +325,9 @@ class Admin(commands.Cog):
     @commands.command(aliases=["sban"])
     @commands.has_permissions(ban_members=True)
     @commands.guild_only()
-    async def softban(self, ctx: Context, target: Member, purge: int = 1,
-                      *, reason: str = None):
+    async def softban(
+        self, ctx: Context, target: Member, purge: int = 1, *, reason: str = None
+    ):
         """Softban (kick and purge messages) a member from the server.
         Ban member permission required.
         """
@@ -342,8 +345,9 @@ class Admin(commands.Cog):
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.guild_only()
-    async def ban(self, ctx: Context, target: Member, purge: int = 7,
-                  *, reason: str = None):
+    async def ban(
+        self, ctx: Context, target: Member, purge: int = 7, *, reason: str = None
+    ):
         """Ban a member from the server.
         Ban member permission required.
         """
@@ -371,8 +375,9 @@ class Admin(commands.Cog):
     @commands.command(aliases=["tban"])
     @commands.has_permissions(ban_members=True)
     @commands.guild_only()
-    async def tempban(self, ctx: Context, target: Member, length: int, span: str,
-                      *, reason: str = None):
+    async def tempban(
+        self, ctx: Context, target: Member, length: int, span: str, *, reason: str = None
+    ):
         """Temporarily ban a member from the server.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
         Use "max" as the span for pseudo-permanence (10 years).
@@ -397,7 +402,7 @@ class Admin(commands.Cog):
         self.tempban_db[sid][target.id] = {
             "issued_by": str(ctx.author.id),
             "reason": reason,
-            "expires": str(future.timestamp())
+            "expires": str(future.timestamp()),
         }
 
         update_db(self.sql_db, self.tempban_db, "temp_bans")
@@ -409,8 +414,9 @@ class Admin(commands.Cog):
     @commands.command()
     @commands.has_permissions(kick_members=True)
     @commands.guild_only()
-    async def warn(self, ctx: Context, target: Member, length: int, span: str,
-                   *, reason: str):
+    async def warn(
+        self, ctx: Context, target: Member, length: int, span: str, *, reason: str
+    ):
         """Warn a member.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
         Use "max" as the span for pseudo-permanence (10 years).
@@ -455,7 +461,7 @@ class Admin(commands.Cog):
         warning = {
             "issued_by": str(ctx.author.id),
             "reason": reason,
-            "expires": str(future.timestamp())
+            "expires": str(future.timestamp()),
         }
         self.warn_db[sid][uid][str(warn_count)] = warning
 
@@ -488,23 +494,19 @@ class Admin(commands.Cog):
             return
 
         # This is ugly but it's 4am and I don't care
-        if (target is not ctx.author and not ctx.channel.permissions_for(
-            ctx.author
-        ).kick_members):
+        if (
+            target is not ctx.author
+            and not ctx.channel.permissions_for(ctx.author).kick_members
+        ):
             return
 
         embed = Embed(
-            title=f"{target.name}#{target.discriminator}'s Warns",
-            color=0xff0000
+            title=f"{target.name}#{target.discriminator}'s Warns", color=0xFF0000
         )
 
         warn_count = len(self.warn_db[sid][uid])
 
-        embed.add_field(
-            name="Total warns",
-            value=str(warn_count),
-            inline=False
-        )
+        embed.add_field(name="Total warns", value=str(warn_count), inline=False)
 
         for i, w in self.warn_db[sid][uid].items():
             now = datetime.now(tz=timezone.utc)
@@ -519,7 +521,7 @@ class Admin(commands.Cog):
             embed.add_field(
                 name=i,
                 value=f"By: {name}\nReason: {w['reason']}\nExpires: {expires}",
-                inline=True
+                inline=True,
             )
 
         embed.set_footer(text=pretty_datetime(datetime.now()))
@@ -555,8 +557,9 @@ class Admin(commands.Cog):
     @commands.command()
     @commands.has_permissions(kick_members=True)
     @commands.guild_only()
-    async def mute(self, ctx: Context, target: Member, length: int, span: str,
-                   *, reason: str):
+    async def mute(
+        self, ctx: Context, target: Member, length: int, span: str, *, reason: str
+    ):
         """Set a member to the mute role.
         For timing, plural and non-plural spans are accepted (Day, days, minutes, etc).
         Use "max" as the span for pseudo-permanence (10 years).
@@ -593,7 +596,7 @@ class Admin(commands.Cog):
         mute = {
             "issued_by": str(ctx.author.id),
             "reason": reason,
-            "expires": str(future.timestamp())
+            "expires": str(future.timestamp()),
         }
 
         self.mute_db[sid][uid] = mute
@@ -634,8 +637,10 @@ class Admin(commands.Cog):
 
         update_db(self.sql_db, self.mute_db, "mutes")
 
+
 def setup(bot):
     bot.add_cog(Admin(bot))
+
 
 def teardown(bot):
     bot.cogs["Admin"].sql_db.close()

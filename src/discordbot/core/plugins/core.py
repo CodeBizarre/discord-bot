@@ -15,10 +15,13 @@ VERSION = "1.1b4"
 def is_botmaster():
     async def predicate(ctx: Context):
         return str(ctx.author.id) in ctx.bot.botmasters
+
     return commands.check(predicate)
+
 
 class Core(commands.Cog):
     """Core features."""
+
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "core"
@@ -119,10 +122,10 @@ class Core(commands.Cog):
                     guild = former.guild
                     channel = guild.get_channel(int(self.bot.servers[sid]["log_channel"]))
 
-                    embed = Embed(title="Message Edited", color=0xff0000)
+                    embed = Embed(title="Message Edited", color=0xFF0000)
                     embed.add_field(
                         name=f"By {former.author.name}#{former.author.discriminator}",
-                        value=f"In {former.channel.mention}. UID: {former.author.id}"
+                        value=f"In {former.channel.mention}. UID: {former.author.id}",
                     )
                     embed.add_field(name="Before", value=former.content, inline=False)
                     embed.add_field(name="After", value=latter.content, inline=False)
@@ -170,8 +173,7 @@ class Core(commands.Cog):
                 if self.bot.servers[sid]["log_deletes"]:
                     # Try to get the user who deleted the message, not reliable
                     action = await msg.guild.audit_logs(
-                        limit=1,
-                        action=AuditLogAction.message_delete
+                        limit=1, action=AuditLogAction.message_delete
                     ).flatten()
 
                     who = action[0].user
@@ -179,15 +181,15 @@ class Core(commands.Cog):
                     guild = msg.guild
                     channel = guild.get_channel(int(self.bot.servers[sid]["log_channel"]))
 
-                    embed = Embed(title="Message Deleted", color=0xff0000)
+                    embed = Embed(title="Message Deleted", color=0xFF0000)
                     embed.add_field(
                         name="Last message delete action performed by:",
                         value=f"{who.name}#{who.discriminator} or a bot",
-                        inline=False
+                        inline=False,
                     )
                     embed.add_field(
                         name=f"Author - {msg.author.name}#{msg.author.discriminator}",
-                        value=f"From {msg.channel.mention} - UID: {msg.author.id}"
+                        value=f"From {msg.channel.mention} - UID: {msg.author.id}",
                     )
                     embed.add_field(name="Message", value=msg.content, inline=False)
 
@@ -277,9 +279,7 @@ class Core(commands.Cog):
         embed.add_field(name="Version", value=self.bot.version)
 
         embed.add_field(
-            name="User",
-            value=f"{self.bot.user} ({self.bot.user.id})",
-            inline=False
+            name="User", value=f"{self.bot.user} ({self.bot.user.id})", inline=False
         )
 
         embed.add_field(name="Plugins", value=f"[{', '.join(self.bot.plugins)}]")
@@ -288,8 +288,7 @@ class Core(commands.Cog):
         # Just in case something happened initializing the app info
         if self.bot.app_info is not None:
             embed.set_author(
-                name=self.bot.app_info.name,
-                icon_url=self.bot.app_info.icon_url
+                name=self.bot.app_info.name, icon_url=self.bot.app_info.icon_url
             )
 
         embed.set_footer(text="https://github.com/CodeBizarre/discord-bot")
@@ -298,7 +297,7 @@ class Core(commands.Cog):
 
     @commands.command(aliases=["bl"])
     @is_botmaster()
-    async def block(self, ctx: Context, target: User, block = True):
+    async def block(self, ctx: Context, target: User, block: bool = True):
         """Add or remove a user from the block list.
         Botmaster required.
         """
@@ -311,9 +310,7 @@ class Core(commands.Cog):
             # Unblock a user.
             else:
                 self.bot.blocklist.remove(uid)
-                await ctx.send(
-                    f":white_check_mark: {target.name} unblocked."
-                )
+                await ctx.send(f":white_check_mark: {target.name} unblocked.")
         else:
             # Add a user to the blocklist
             if block:
@@ -343,17 +340,12 @@ class Core(commands.Cog):
                 channel = guild.get_channel(int(self.bot.servers[sid]["log_channel"]))
 
                 embed.add_field(
-                    name="Log Edits",
-                    value=str(self.bot.servers[sid]["log_edits"])
+                    name="Log Edits", value=str(self.bot.servers[sid]["log_edits"])
                 )
                 embed.add_field(
-                    name="Log Deletes",
-                    value=str(self.bot.servers[sid]["log_deletes"])
+                    name="Log Deletes", value=str(self.bot.servers[sid]["log_deletes"])
                 )
-                embed.add_field(
-                    name="Log Channel",
-                    value=channel.mention
-                )
+                embed.add_field(name="Log Channel", value=channel.mention)
             except KeyError:
                 await ctx.send("Server is not set up or channels have been changed.")
                 return
@@ -437,27 +429,17 @@ class Core(commands.Cog):
 
         Running the command without arguments will show information about you.
         """
-        if target is None: target = ctx.author
+        if target is None:
+            target = ctx.author
 
         embed = Embed(title=f"{target.name}#{target.discriminator}", color=0x7289DA)
         embed.set_thumbnail(url=str(target.avatar_url))
 
+        embed.add_field(name="Joined At", value=f"{pretty_datetime(target.joined_at)}")
+        embed.add_field(name="Created At", value=f"{pretty_datetime(target.created_at)}")
+        embed.add_field(name="Nickname", value=f"{target.nick}")
         embed.add_field(
-            name="Joined At",
-            value=f"{pretty_datetime(target.joined_at)}"
-        )
-        embed.add_field(
-            name="Created At",
-            value=f"{pretty_datetime(target.created_at)}"
-        )
-        embed.add_field(
-            name="Nickname",
-            value=f"{target.nick}"
-        )
-        embed.add_field(
-            name="Roles",
-            value=f"{[r.name for r in target.roles[1:]]}",
-            inline=False
+            name="Roles", value=f"{[r.name for r in target.roles[1:]]}", inline=False
         )
 
         await ctx.send(embed=embed)
@@ -468,6 +450,7 @@ class Core(commands.Cog):
         Only useful when MentionCommands is enabled.
         """
         await ctx.send(f"Command prefix is: `{self.bot.config_prefix}`")
+
 
 def setup(bot):
     bot.add_cog(Core(bot))

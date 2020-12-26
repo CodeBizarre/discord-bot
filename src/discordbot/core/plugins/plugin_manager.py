@@ -14,8 +14,10 @@ from discordbot.core.plugins.core import is_botmaster
 
 VERSION = "1.1b3"
 
+
 class PluginManager(Cog):
     """Plugin management system."""
+
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "plugins"
@@ -41,7 +43,7 @@ class PluginManager(Cog):
     def copy_plugin_if_needed(self, name: str):
         # Check if this is running from a pyinstaller executable
         if getattr(sys, "frozen", False):
-            app_dir = getattr(sys, '_MEIPASS', path.abspath(path.dirname(__file__)))
+            app_dir = getattr(sys, "_MEIPASS", path.abspath(path.dirname(__file__)))
         else:
             app_dir = False
 
@@ -68,10 +70,7 @@ class PluginManager(Cog):
             except AttributeError:
                 version = "-"
 
-            embed.add_field(
-                name=str(i + 1),
-                value=f"{plugin} v{version}"
-            )
+            embed.add_field(name=str(i + 1), value=f"{plugin} v{version}")
 
         await ctx.send(embed=embed)
 
@@ -152,9 +151,7 @@ class PluginManager(Cog):
                 )
             except Exception as e:
                 exc = f"{type(e).__name__}, {e}"
-                await ctx.send(
-                    f":anger: Error reloading {name}.py:\n```py\n{exc}\n```"
-                )
+                await ctx.send(f":anger: Error reloading {name}.py:\n```py\n{exc}\n```")
 
     @cmd_plugins.command(name="enable")
     @commands.has_permissions(administrator=True)
@@ -191,6 +188,7 @@ class PluginManager(Cog):
 
             update_db(self.bot.db, self.bot.servers, "servers")
             await ctx.send(f":white_check_mark: Plugin {name} disabled on your server.")
+
 
 def setup(bot):
     bot.add_cog(PluginManager(bot))
