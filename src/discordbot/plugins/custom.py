@@ -14,8 +14,10 @@ from discordbot.core.time_tools import pretty_datetime
 
 VERSION = "1.2b8"
 
+
 class CommandUser:
     """Class to avoid potential abuse from complex command scripting."""
+
     def __init__(self, member: Member):
         self.name = member.name
         self.discriminator = member.discriminator
@@ -26,8 +28,9 @@ class CommandUser:
             "name": self.name,
             "discriminator": self.discriminator,
             "tag": f"{self.name}#{self.discriminator}",
-            "mention": f"<@{self.id}>"
+            "mention": f"<@{self.id}>",
         }
+
 
 class Custom(commands.Cog):
     def __init__(self, bot: DiscordBot):
@@ -57,7 +60,7 @@ class Custom(commands.Cog):
             tablename="custom",
             autocommit=True,
             encode=json.dumps,
-            decode=json.loads
+            decode=json.loads,
         )
 
         if "servers" not in self.sql_db:
@@ -83,8 +86,10 @@ class Custom(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg: Message):
-        if msg.author.id == self.bot.user.id: return
-        if msg.channel.type == ChannelType.private: return
+        if msg.author.id == self.bot.user.id:
+            return
+        if msg.channel.type == ChannelType.private:
+            return
 
         sid = str(msg.guild.id)
 
@@ -175,7 +180,7 @@ class Custom(commands.Cog):
                 items = [(cmd, rsp) for cmd, rsp in self.db[sid]["text"].items()]
 
                 start = (page - 1) * 6 if page > 1 else 0
-                for i in items[start:start + 6]:
+                for i in items[start : start + 6]:
                     embed.add_field(name=i[0], value=i[1])
 
                 remaining = (len(items)) - (start + 6)
@@ -184,7 +189,7 @@ class Custom(commands.Cog):
                     embed.add_field(
                         name=f"And {remaining} more. ",
                         value=f"Use `{prefix}custom text list {page + 1}`",
-                        inline=False
+                        inline=False,
                     )
 
                 if len(embed.fields) > 0:
@@ -194,7 +199,7 @@ class Custom(commands.Cog):
             else:
                 await ctx.send(":anger: This server has no script responses.")
         except Exception as e:
-            await ctx.send(f':anger: Something went wrong: {e}')
+            await ctx.send(f":anger: Something went wrong: {e}")
 
     @text.command(name="create", aliases=["c", "new", "make", "add"])
     @commands.has_permissions(manage_messages=True)
@@ -206,10 +211,7 @@ class Custom(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
-            self.db[sid] = {
-                "prefix": "_",
-                "text": {}
-            }
+            self.db[sid] = {"prefix": "_", "text": {}}
         elif "text" not in self.db[sid]:
             self.db[sid]["text"] = {}
 
@@ -264,7 +266,7 @@ class Custom(commands.Cog):
                 items = [(cmd, rsp) for cmd, rsp in self.db[sid]["complex"].items()]
 
                 start = (page - 1) * 6 if page > 1 else 0
-                for i in items[start:start + 6]:
+                for i in items[start : start + 6]:
                     embed.add_field(name=i[0], value=i[1])
 
                 remaining = (len(items)) - (start + 6)
@@ -273,7 +275,7 @@ class Custom(commands.Cog):
                     embed.add_field(
                         name=f"And {remaining} more. ",
                         value=f"Use `{prefix}custom script list {page + 1}`",
-                        inline=False
+                        inline=False,
                     )
 
                 if len(embed.fields) > 0:
@@ -295,7 +297,7 @@ class Custom(commands.Cog):
         sid = str(ctx.guild.id)
 
         if sid not in self.db:
-            self.db[sid] = { "complex": {} }
+            self.db[sid] = {"complex": {}}
         elif "complex" not in self.db[sid]:
             self.db[sid]["complex"] = {}
 
@@ -325,8 +327,10 @@ class Custom(commands.Cog):
                 "registered on this server."
             )
 
+
 def setup(bot):
     bot.add_cog(Custom(bot))
+
 
 def teardown(bot):
     bot.cogs["Custom"].sql_db.close()

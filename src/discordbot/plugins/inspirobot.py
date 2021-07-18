@@ -7,8 +7,10 @@ from discordbot.core.discord_bot import DiscordBot
 
 VERSION = "1.1b3"
 
+
 class Inspirobot(commands.Cog):
     """Get inspirational images from the Inspirobot."""
+
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "inspirobot"
@@ -22,6 +24,7 @@ class Inspirobot(commands.Cog):
             url = await response.text()
 
         await ctx.send(url)
+
 
 def setup(bot):
     bot.add_cog(Inspirobot(bot))

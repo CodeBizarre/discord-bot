@@ -13,13 +13,15 @@ from discordbot.core.discord_bot import DiscordBot
 from discordbot.core.db_tools import update_db
 from discordbot.core.time_tools import pretty_datetime
 
-VERSION = "2.0b1"
+VERSION = "2.0b2"
+
 
 class Groups(commands.Cog):
     """Dynamic group management plugin.
 
     Allows users to make and invite to temporary dynamic groups.
     """
+
     # Background task to check and remove old groups
     async def group_check(self):
         if len(self.db) <= 0:
@@ -48,6 +50,7 @@ class Groups(commands.Cog):
                 except Exception as e:
                     # No message found, or there was some other error
                     self.bot.log.error(f"[ERROR][GROUPS]\n    - {e}")
+                    last_message = None
 
                 try:
                     last_datetime = last_message.created_at.replace(tzinfo=timezone.utc)
@@ -105,7 +108,7 @@ class Groups(commands.Cog):
             tablename="groups",
             autocommit=True,
             encode=json.dumps,
-            decode=json.loads
+            decode=json.loads,
         )
 
         if "servers" not in self.sql_db:
@@ -138,9 +141,7 @@ class Groups(commands.Cog):
 
                 embed.add_field(name=group, value=info["description"])
 
-            embed.set_footer(
-                text="For more information use the `help groups` command."
-            )
+            embed.set_footer(text="For more information use the `help groups` command.")
 
             await ctx.send(embed=embed)
         else:
@@ -163,28 +164,22 @@ class Groups(commands.Cog):
 
         # Try to make a role, text, and voice channel for the group
         try:
-            role = await ctx.guild.create_role(
-                name=name, reason="Groups plugin"
-            )
+            role = await ctx.guild.create_role(name=name, reason="Groups plugin")
             ow = {
                 ctx.guild.default_role: PermissionOverwrite(read_messages=False),
-                role: PermissionOverwrite(read_messages=True)
+                role: PermissionOverwrite(read_messages=True),
             }
             category = await ctx.guild.create_category(
-                name=name,
-                reason="Groups plugin",
-                overwrites=ow
+                name=name, reason="Groups plugin", overwrites=ow
             )
             text = await ctx.guild.create_text_channel(
                 name=name.lower(),
                 reason="Groups plugin",
                 category=category,
-                topic=description
+                topic=description,
             )
             voice = await ctx.guild.create_voice_channel(
-                name=name,
-                reason="Groups plugin",
-                category=category
+                name=name, reason="Groups plugin", category=category
             )
 
             self.db[sid][name] = {
@@ -194,7 +189,7 @@ class Groups(commands.Cog):
                     "category": str(category.id),
                     "text_channel": str(text.id),
                     "voice_channel": str(voice.id),
-                    "role": str(role.id)
+                    "role": str(role.id),
                 }
             }
 
@@ -284,13 +279,17 @@ class Groups(commands.Cog):
             return
 
         try:
-            await target.remove_roles(role, reason=f"Groups-Plugin Kick [{ctx.author.id}]")
+            await target.remove_roles(
+                role, reason=f"Groups-Plugin Kick [{ctx.author.id}]"
+            )
             await ctx.send(":white_check_mark: Member kicked!")
         except Exception as e:
             await ctx.send(f":anger: Something went wrong: {e}")
 
+
 def setup(bot):
     bot.add_cog(Groups(bot))
+
 
 def teardown(bot):
     bot.cogs["Groups"].sql_db.close()

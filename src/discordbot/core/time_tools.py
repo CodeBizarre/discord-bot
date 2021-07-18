@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+
 def pretty_datetime(dt: datetime, display: str = "FULL") -> str:
     """Format date/timestamps for messages."""
     if display.upper() == "FULL":
@@ -11,22 +12,28 @@ def pretty_datetime(dt: datetime, display: str = "FULL") -> str:
     else:
         return f"Unknown/incorrect display argument for pretty_datetime(): {display}"
 
+
 def pretty_timedelta(td: timedelta) -> str:
     """Format timedeltas for messages."""
     # Expand the timedelta's days and seconds to a full scale
-    years, rem       = divmod(td.days, 365)
-    months, days     = divmod(rem, 30)
-    hours, rem       = divmod(td.seconds, 3600)
+    years, rem = divmod(td.days, 365)
+    months, days = divmod(rem, 30)
+    hours, rem = divmod(td.seconds, 3600)
     minutes, seconds = divmod(rem, 60)
 
     final = {
-        "years": years, "months": months, "days": days,
-        "hours": hours, "minutes": minutes, "seconds": seconds
+        "years": years,
+        "months": months,
+        "days": days,
+        "hours": hours,
+        "minutes": minutes,
+        "seconds": seconds,
     }
 
     return "".join(
-        [f"{int(value)} {key} " if value > 0 else "" for key, value in final.items()]
+        f"{int(value)} {key} " if value > 0 else "" for key, value in final.items()
     ).rstrip()
+
 
 def time_parser(span: str, length: int, dt: datetime) -> datetime:
     """Parser to convert length/span combos into a future datetime object"""
@@ -39,7 +46,7 @@ def time_parser(span: str, length: int, dt: datetime) -> datetime:
         "weeks": lambda: timedelta(weeks=length),
         "months": lambda: timedelta(days=length * 30),
         "years": lambda: timedelta(days=length * 365),
-        "max": lambda: timedelta(days=3650)
+        "max": lambda: timedelta(days=3650),
     }
 
     if span in switcher:

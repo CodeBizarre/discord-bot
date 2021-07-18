@@ -14,6 +14,7 @@ from discordbot.core.db_tools import update_db
 
 app_dir = None
 
+
 def main():
     intents = discord.Intents.default()
     # Requires privileged intent "Members"
@@ -29,7 +30,7 @@ def main():
             global app_dir
 
             if getattr(sys, "frozen", False):
-                app_dir = getattr(sys, '_MEIPASS', path.abspath(path.dirname(__file__)))
+                app_dir = getattr(sys, "_MEIPASS", path.abspath(path.dirname(__file__)))
             else:
                 app_dir = False
 
@@ -89,6 +90,7 @@ def main():
 
         if app_dir and os.path.isdir(app_dir):
             shutil.rmtree(app_dir)
+
 
 if __name__ == "__main__":
     main()

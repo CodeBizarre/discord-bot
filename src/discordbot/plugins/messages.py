@@ -9,13 +9,16 @@ from discordbot.core.time_tools import pretty_datetime
 
 VERSION = "3.3b3"
 
+
 def msg_op_or_permission():
     """
     Check if a user either is the original poster of the message, or has permission.
     """
+
     async def predicate(ctx: Context):
         # Always show the command as available in help
-        if ctx.invoked_with == "help": return True
+        if ctx.invoked_with == "help":
+            return True
 
         # Grab the destination channel by its #mention
         try:
@@ -49,17 +52,17 @@ def msg_op_or_permission():
 
         author = target_message.author
 
-        return (
-            author == ctx.author and author.permissions_in(dest_channel).send_messages
-        )
+        return author == ctx.author and author.permissions_in(dest_channel).send_messages
 
     return commands.check(predicate)
+
 
 class Messages(commands.Cog):
     """Message management plugin.
 
     Allows cross-posting and moving of messages.
     """
+
     def __init__(self, bot: DiscordBot):
         self.bot = bot
         self.name = "messages"
@@ -96,7 +99,7 @@ class Messages(commands.Cog):
 
         embed = Embed(
             title=f"{ctx.author.name}#{ctx.author.discriminator} {ctx.command.name}",
-            color=0xff0000
+            color=0xFF0000,
         )
         embed.set_thumbnail(url=str(ctx.author.avatar_url))
         embed.add_field(name="Action", value=action, inline=False)
@@ -129,7 +132,7 @@ class Messages(commands.Cog):
         embed = Embed(
             title=f"X-Post from #{message.channel.name}",
             url=message.jump_url,
-            color=0x7289DA
+            color=0x7289DA,
         )
         embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
         embed.add_field(name="Posted:", value=content)
@@ -172,7 +175,7 @@ class Messages(commands.Cog):
         embed = Embed(
             title=f"Moved message from #{message.channel.name}",
             url=message.jump_url,
-            color=0x7289DA
+            color=0x7289DA,
         )
         embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
         embed.add_field(name="Posted:", value=content)
@@ -231,8 +234,7 @@ class Messages(commands.Cog):
         """
         result = len(
             await ctx.channel.purge(
-                limit=count,
-                check=lambda m: m.author.id == ctx.bot.user.id
+                limit=count, check=lambda m: m.author.id == ctx.bot.user.id
             )
         )
 
@@ -253,9 +255,7 @@ class Messages(commands.Cog):
 
         await self.log_to_channel(ctx, ctx.author)
 
-        await ctx.send(
-            f":white_check_mark: Purged {result} messages."
-        )
+        await ctx.send(f":white_check_mark: Purged {result} messages.")
 
     @purge.command(name="member", aliases=["user", "target"])
     @commands.has_permissions(administrator=True)
@@ -291,6 +291,7 @@ class Messages(commands.Cog):
         await ctx.send(
             f":white_check_mark: Purged {result} messages from {role.mention} in {count}."
         )
+
 
 def setup(bot):
     bot.add_cog(Messages(bot))
